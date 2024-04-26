@@ -8,6 +8,7 @@ spring:
       hibernate:
         format_sql: true
         show_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
   servlet:
     multipart:
       max-file-size: 100MB
@@ -26,6 +27,11 @@ spring:
 #    redis:
 #      host: ${DATA_REDIS_HOST}
 #      port: ${DATA_REDIS_PORT}
+
+---
+
+server:
+  port: 9000
 
 ---
 
