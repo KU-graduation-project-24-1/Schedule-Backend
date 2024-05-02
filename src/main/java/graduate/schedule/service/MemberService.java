@@ -1,7 +1,7 @@
 package graduate.schedule.service;
 
 import graduate.schedule.common.exception.MemberException;
-import graduate.schedule.domain.Member;
+import graduate.schedule.domain.member.Member;
 import graduate.schedule.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
