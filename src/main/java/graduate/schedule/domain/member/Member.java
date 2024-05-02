@@ -1,4 +1,4 @@
-package graduate.schedule.domain;
+package graduate.schedule.domain.member;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
     private Long id;
 
@@ -19,4 +18,9 @@ public class Member {
 
     @Column(length = 500)
     private String platformId;
+
+    @Column(length = 500)
+    private String imgUrl;
+
+
 }
