@@ -1,8 +1,11 @@
 package graduate.schedule.controller;
 
 import graduate.schedule.common.response.BaseResponse;
+import graduate.schedule.dto.web.request.SearchStoreWithInviteCodeRequestDTO;
+import graduate.schedule.dto.web.request.JoinStoreRequestDTO;
 import graduate.schedule.dto.web.response.CreateStoreRequestDTO;
 import graduate.schedule.dto.web.response.CreateStoreResponseDTO;
+import graduate.schedule.dto.web.response.SearchStoreWithInviteCodeResponseDTO;
 import graduate.schedule.service.StoreService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,15 @@ public class StoreController {
     @PostMapping
     public BaseResponse<CreateStoreResponseDTO> createStore(@RequestBody @Valid CreateStoreRequestDTO storeRequest) {
         CreateStoreResponseDTO response = storeService.createStore(storeRequest);
+        return new BaseResponse<>(response);
+    }
+
+    /**
+     * @apiNote 가게 참가 전 초대 코드 유효 여부 및 가게 조회
+     * */
+    @GetMapping("/inviteCode")
+    public BaseResponse<SearchStoreWithInviteCodeResponseDTO> searchStoreWithInviteCode(@RequestBody @Valid SearchStoreWithInviteCodeRequestDTO storeRequest) {
+        SearchStoreWithInviteCodeResponseDTO response = storeService.searchStoreWithInviteCode(storeRequest.getInviteCode());
         return new BaseResponse<>(response);
     }
 }

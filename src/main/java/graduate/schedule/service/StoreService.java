@@ -1,11 +1,16 @@
 package graduate.schedule.service;
 
 import graduate.schedule.common.exception.MemberException;
+import graduate.schedule.common.exception.StoreException;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.domain.store.Store;
+import graduate.schedule.domain.store.StoreMember;
+import graduate.schedule.dto.web.request.JoinStoreRequestDTO;
 import graduate.schedule.dto.web.response.CreateStoreRequestDTO;
 import graduate.schedule.dto.web.response.CreateStoreResponseDTO;
+import graduate.schedule.dto.web.response.SearchStoreWithInviteCodeResponseDTO;
 import graduate.schedule.repository.MemberRepository;
+import graduate.schedule.repository.StoreMemberRepository;
 import graduate.schedule.repository.StoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
 
-import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER;
+import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
 
 @Slf4j
 @Service
@@ -23,6 +28,7 @@ import static graduate.schedule.common.response.status.BaseExceptionResponseStat
 public class StoreService {
     private final StoreRepository storeRepository;
     private final MemberRepository memberRepository;
+    private final StoreMemberRepository storeMemberRepository;
 
     private final int LEFT_LIMIT = 48;
     private final int RIGHT_LIMIT = 122;
@@ -34,7 +40,8 @@ public class StoreService {
 
     public CreateStoreResponseDTO createStore(CreateStoreRequestDTO storeRequest) {
         String inviteCode = getRandomInviteCode();
-        Member storeCreator = memberRepository.findById(storeRequest.getMemberId()).orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+        Member storeCreator = memberRepository.findById(storeRequest.getMemberId())
+                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
 
         Store newStore = Store.createStore(storeRequest.getStoreName(), inviteCode, storeCreator);
         storeRepository.save(newStore);
@@ -46,10 +53,11 @@ public class StoreService {
         String inviteCode;
         do {
             inviteCode = generateInviteCode();
-        } while(storeRepository.existsInviteCode(inviteCode));
+        } while (storeRepository.existsInviteCode(inviteCode));
 
         return inviteCode;
     }
+
     private String generateInviteCode() {
         Random random = new Random();
 
@@ -58,5 +66,14 @@ public class StoreService {
                 .limit(TARGET_STRING_LENGTH)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
+    }
+
+    public SearchStoreWithInviteCodeResponseDTO searchStoreWithInviteCode(String inviteCode) {
+        Store store = storeRepository.findByInviteCode(inviteCode)
+                .orElseThrow(() -> new StoreException(INVALID_INVITE_CODE));
+        return new SearchStoreWithInviteCodeResponseDTO(
+                store.getId(),
+                store.getName()
+        );
     }
 }
