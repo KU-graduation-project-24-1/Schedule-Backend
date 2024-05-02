@@ -76,4 +76,17 @@ public class StoreService {
                 store.getName()
         );
     }
+
+    public void joinStore(JoinStoreRequestDTO storeRequest) {
+        Store store = storeRepository.findById(storeRequest.getStoreId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        Member member = memberRepository.findById(storeRequest.getMemberId())
+                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+
+        if (storeMemberRepository.existsMember(member, store)) {
+            throw new StoreException(ALREADY_EXIST_STORE_MEMBER);
+        }
+
+        StoreMember.createEmployee(store, member);
+    }
 }

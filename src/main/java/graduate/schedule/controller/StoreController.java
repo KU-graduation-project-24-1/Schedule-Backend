@@ -29,11 +29,19 @@ public class StoreController {
     }
 
     /**
-     * @apiNote 가게 참가 전 초대 코드 유효 여부 및 가게 조회
+     * @apiNote 가게 참가 전 초대 코드 유효 여부 및 가게 조회 api
      * */
     @GetMapping("/inviteCode")
     public BaseResponse<SearchStoreWithInviteCodeResponseDTO> searchStoreWithInviteCode(@RequestBody @Valid SearchStoreWithInviteCodeRequestDTO storeRequest) {
         SearchStoreWithInviteCodeResponseDTO response = storeService.searchStoreWithInviteCode(storeRequest.getInviteCode());
         return new BaseResponse<>(response);
+    }
+    /**
+     * @apiNote 가게 참가 api
+     * */
+    @PostMapping("/join")
+    public BaseResponse<String> joinTeam(@RequestBody @Valid JoinStoreRequestDTO storeRequest) {
+        storeService.joinStore(storeRequest);
+        return new BaseResponse<>("가게 참가에 성공하였습니다.");
     }
 }

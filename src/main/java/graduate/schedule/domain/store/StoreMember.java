@@ -6,9 +6,10 @@ import lombok.Getter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
+import static graduate.schedule.domain.store.StoreMemberGrade.*;
+
 @Entity
 @Getter
-@DynamicInsert
 public class StoreMember {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "store_member_id")
@@ -22,7 +23,6 @@ public class StoreMember {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @ColumnDefault("'EMPLOYEE'")
     @Enumerated(EnumType.STRING)
     private StoreMemberGrade memberGrade;
 
@@ -30,7 +30,7 @@ public class StoreMember {
         StoreMember storeMember = new StoreMember();
         storeMember.member = member;
         storeMember.store = store;
-        storeMember.memberGrade = StoreMemberGrade.EMPLOYER;
+        storeMember.memberGrade = EMPLOYER;
 
         store.addStoreMember(storeMember);
 
@@ -40,6 +40,7 @@ public class StoreMember {
         StoreMember storeMember = new StoreMember();
         storeMember.member = member;
         storeMember.store = store;
+        storeMember.memberGrade = EMPLOYEE;
 
         store.addStoreMember(storeMember);
 

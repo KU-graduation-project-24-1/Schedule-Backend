@@ -17,6 +17,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     URL_NOT_FOUND(2001, HttpStatus.BAD_REQUEST.value(), "유효하지 않은 URL 입니다."),
     METHOD_NOT_ALLOWED(2002, HttpStatus.METHOD_NOT_ALLOWED.value(), "해당 URL에서는 지원하지 않는 HTTP Method 입니다."),
     INAPPROPRIATE_DATA(2003, HttpStatus.BAD_REQUEST.value(), "입력한 정보가 올바르지 않습니다."),
+    INVALID_INVITE_CODE(2004, HttpStatus.BAD_REQUEST.value(), "초대 코드가 유요하지 않습니다."),
 
     /**
      * 3000: Server, Database 오류 (INTERNAL_SERVER_ERROR)
@@ -42,8 +43,14 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     /**
      * 5000: 회원 정보 오류
      */
+    NOT_FOUND_MEMBER(5000, HttpStatus.BAD_REQUEST.value(), "존재하지 않는 사용자입니다."),
     INVALID_PLATFORM(5001, HttpStatus.BAD_REQUEST.value(), "플랫폼 정보가 올바르지 않습니다."),
-    NOT_FOUND_MEMBER(5002, HttpStatus.BAD_REQUEST.value(), "존재하지 않는 사용자입니다.");
+
+    /**
+     * 6000: Store 도메인 오류
+     * */
+    NOT_FOUND_STORE(6000, HttpStatus.BAD_REQUEST.value(), "존재하지 않는 가게입니다."),
+    ALREADY_EXIST_STORE_MEMBER(6001, HttpStatus.BAD_REQUEST.value(), "이미 가게에 존재하는 사용자입니다.");
 
     private final int code;
     private final int status;
