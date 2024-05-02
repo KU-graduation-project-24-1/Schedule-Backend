@@ -36,7 +36,7 @@ public class StoreMember {
 
         return storeMember;
     }
-    public static StoreMember createStoreMember(Store store, Member member) {
+    public static StoreMember createEmployee(Store store, Member member) {
         StoreMember storeMember = new StoreMember();
         storeMember.member = member;
         storeMember.store = store;
