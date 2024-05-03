@@ -48,8 +48,7 @@ public class StoreService {
         Member storeCreator = memberRepository.findById(storeRequest.getMemberId())
                 .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
 
-        // TODO: 5/3/24 사업자 번호 추가
-        Store newStore = Store.createStore(storeRequest.getStoreName(), inviteCode, codeGeneratedTime, storeCreator);
+        Store newStore = Store.createStore(storeRequest.getStoreName(), storeRequest.getBusinessRegistrationNumber(), inviteCode, codeGeneratedTime, storeCreator);
         storeRepository.save(newStore);
 
         return new CreateStoreResponseDTO(newStore);
