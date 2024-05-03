@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("store")
+@RequestMapping("/store")
 public class StoreController {
     private final StoreService storeService;
 
+    // TODO: 5/3/24 사업자 증빙 api
     /**
      * @apiNote 가게 생성 api
      * */
@@ -27,6 +28,8 @@ public class StoreController {
         CreateStoreResponseDTO response = storeService.createStore(storeRequest);
         return new BaseResponse<>(response);
     }
+    // TODO: 5/3/24 초대 코드 재발급 api 
+
 
     /**
      * @apiNote 가게 참가 전 초대 코드 유효 여부 및 가게 조회 api
@@ -44,4 +47,5 @@ public class StoreController {
         storeService.joinStore(storeRequest);
         return new BaseResponse<>("가게 참가에 성공하였습니다.");
     }
+
 }
