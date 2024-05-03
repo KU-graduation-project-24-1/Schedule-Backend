@@ -30,6 +30,6 @@ public class StoreMemberWorkingTime {
     @Column(length = 500)
     private String time;
 
-    @ColumnDefault("boolean default false")
+    @Column(columnDefinition = "boolean default false")
     private boolean requestCover;
 }
