@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Random;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
@@ -43,6 +44,7 @@ public class StoreService {
         Member storeCreator = memberRepository.findById(storeRequest.getMemberId())
                 .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
 
+        // TODO: 5/3/24 사업자 번호 추가
         Store newStore = Store.createStore(storeRequest.getStoreName(), inviteCode, storeCreator);
         storeRepository.save(newStore);
 
@@ -71,10 +73,23 @@ public class StoreService {
     public SearchStoreWithInviteCodeResponseDTO searchStoreWithInviteCode(String inviteCode) {
         Store store = storeRepository.findByInviteCode(inviteCode)
                 .orElseThrow(() -> new StoreException(INVALID_INVITE_CODE));
+
+        //초대 코드 유효 여부 검사
+        compareInviteCodeAndRequestTime(store);
+
         return new SearchStoreWithInviteCodeResponseDTO(
                 store.getId(),
                 store.getName()
         );
+    }
+    private void compareInviteCodeAndRequestTime(Store store) {
+        LocalDateTime joinRequestTime = LocalDateTime.now();
+        LocalDateTime expirationDateTime = store.getCodeGeneratedTime().plusDays(1);
+
+        if (joinRequestTime.isAfter(expirationDateTime)) {
+            log.error("유효 기간 만료: {}", EXPIRED_INVITE_CODE.getMessage());
+            throw new StoreException(EXPIRED_INVITE_CODE);
+        }
     }
 
     public void joinStore(JoinStoreRequestDTO storeRequest) {
