@@ -50,7 +50,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
      * 6000: Store 도메인 오류
      * */
     NOT_FOUND_STORE(6000, HttpStatus.BAD_REQUEST.value(), "존재하지 않는 가게입니다."),
-    ALREADY_EXIST_STORE_MEMBER(6001, HttpStatus.BAD_REQUEST.value(), "이미 가게에 존재하는 사용자입니다.");
+    ALREADY_EXIST_STORE_MEMBER(6001, HttpStatus.BAD_REQUEST.value(), "이미 가게에 존재하는 사용자입니다."),
+    EXPIRED_INVITE_CODE(6002, HttpStatus.BAD_REQUEST.value(), "초대 코드 유효 기간이 만료되었습니다.");
 
     private final int code;
     private final int status;

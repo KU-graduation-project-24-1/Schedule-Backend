@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface StoreRepository extends JpaRepository<Store, Long> {
     @Query("select case " +
-            "when count(s)> 0 then true " +
+            "when count(s) > 0 then true " +
             "else false end " +
             "from Store s where s.inviteCode=:inviteCode")
     boolean existsInviteCode(@Param("inviteCode") String inviteCode);

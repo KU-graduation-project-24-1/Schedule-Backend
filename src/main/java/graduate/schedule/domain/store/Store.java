@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 //import java.time.LocalDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class Store {
     @Column(length = 20)
     private String inviteCode;
 
-//    private LocalDateTime codeGeneratedTime;
+    private LocalDateTime codeGeneratedTime;
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StoreMember> members = new ArrayList<>();
@@ -37,7 +38,7 @@ public class Store {
         store.name = storeName;
         store.inviteCode = inviteCode;
 
-        StoreMember.createEmployer(store, storeCreator);
+        StoreMember.createBoss(store, storeCreator);
 
         return store;
     }

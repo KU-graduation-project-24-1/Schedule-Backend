@@ -3,8 +3,6 @@ package graduate.schedule.domain.store;
 import graduate.schedule.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.DynamicInsert;
 
 import static graduate.schedule.domain.store.StoreMemberGrade.*;
 
@@ -26,11 +24,11 @@ public class StoreMember {
     @Enumerated(EnumType.STRING)
     private StoreMemberGrade memberGrade;
 
-    public static StoreMember createEmployer(Store store, Member member) {
+    public static StoreMember createBoss(Store store, Member member) {
         StoreMember storeMember = new StoreMember();
         storeMember.member = member;
         storeMember.store = store;
-        storeMember.memberGrade = EMPLOYER;
+        storeMember.memberGrade = BOSS;
 
         store.addStoreMember(storeMember);
 
@@ -40,7 +38,7 @@ public class StoreMember {
         StoreMember storeMember = new StoreMember();
         storeMember.member = member;
         storeMember.store = store;
-        storeMember.memberGrade = EMPLOYEE;
+        storeMember.memberGrade = PART_TIME;
 
         store.addStoreMember(storeMember);
 
