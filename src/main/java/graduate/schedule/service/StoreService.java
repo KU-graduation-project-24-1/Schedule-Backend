@@ -6,8 +6,10 @@ import graduate.schedule.domain.member.Member;
 import graduate.schedule.domain.store.Store;
 import graduate.schedule.domain.store.StoreMember;
 import graduate.schedule.dto.web.request.JoinStoreRequestDTO;
+import graduate.schedule.dto.web.request.RegenerateInviteCodeRequestDTO;
 import graduate.schedule.dto.web.response.CreateStoreRequestDTO;
 import graduate.schedule.dto.web.response.CreateStoreResponseDTO;
+import graduate.schedule.dto.web.response.RegenerateInviteCodeResponseDTO;
 import graduate.schedule.dto.web.response.SearchStoreWithInviteCodeResponseDTO;
 import graduate.schedule.repository.MemberRepository;
 import graduate.schedule.repository.StoreMemberRepository;
@@ -41,11 +43,13 @@ public class StoreService {
 
     public CreateStoreResponseDTO createStore(CreateStoreRequestDTO storeRequest) {
         String inviteCode = getRandomInviteCode();
+        LocalDateTime codeGeneratedTime = LocalDateTime.now();
+
         Member storeCreator = memberRepository.findById(storeRequest.getMemberId())
                 .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
 
         // TODO: 5/3/24 사업자 번호 추가
-        Store newStore = Store.createStore(storeRequest.getStoreName(), inviteCode, storeCreator);
+        Store newStore = Store.createStore(storeRequest.getStoreName(), inviteCode, codeGeneratedTime, storeCreator);
         storeRepository.save(newStore);
 
         return new CreateStoreResponseDTO(newStore);
@@ -103,5 +107,22 @@ public class StoreService {
         }
 
         StoreMember.createEmployee(store, member);
+    }
+
+    public RegenerateInviteCodeResponseDTO regenerateInviteCode(RegenerateInviteCodeRequestDTO storeRequest) {
+        Store store = storeRepository.findById(storeRequest.getStoreId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        Member member = memberRepository.findById(storeRequest.getMemberId())
+                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+
+        if (!storeMemberRepository.isExecutive(member, store)) {
+            throw new MemberException(NOT_EXECUTIVE);
+        }
+
+        String newInviteCode = getRandomInviteCode();
+        LocalDateTime codeGeneratedTime = LocalDateTime.now();
+        store.setNewInviteCode(newInviteCode, codeGeneratedTime);
+
+        return new RegenerateInviteCodeResponseDTO(newInviteCode);
     }
 }

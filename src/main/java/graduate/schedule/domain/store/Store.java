@@ -4,7 +4,6 @@ import graduate.schedule.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
 
-//import java.time.LocalDateTime;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,10 +32,11 @@ public class Store {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StoreMemberAvailableTime> memberAvailableTimes = new ArrayList<>();
 
-    public static Store createStore(String storeName, String inviteCode, Member storeCreator) {
+    public static Store createStore(String storeName, String inviteCode, LocalDateTime codeGeneratedTime, Member storeCreator) {
         Store store = new Store();
         store.name = storeName;
         store.inviteCode = inviteCode;
+        store.codeGeneratedTime = codeGeneratedTime;
 
         StoreMember.createBoss(store, storeCreator);
 
@@ -45,5 +45,10 @@ public class Store {
 
     public void addStoreMember(StoreMember storeMember) {
         this.members.add(storeMember);
+    }
+
+    public void setNewInviteCode(String inviteCode, LocalDateTime codeGeneratedTime) {
+        this.inviteCode = inviteCode;
+        this.codeGeneratedTime = codeGeneratedTime;
     }
 }
