@@ -1,4 +1,4 @@
-package com.kuit.conet.common.exception_handler;
+package graduate.schedule.common.exception_handler;
 
 import graduate.schedule.common.exception.BaseException;
 import graduate.schedule.common.response.BaseErrorResponse;
