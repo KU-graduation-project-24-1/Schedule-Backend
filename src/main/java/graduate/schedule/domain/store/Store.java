@@ -38,7 +38,7 @@ public class Store {
         store.name = storeName;
         store.inviteCode = inviteCode;
 
-        StoreMember.createEmployer(store, storeCreator);
+        StoreMember.createBoss(store, storeCreator);
 
         return store;
     }
