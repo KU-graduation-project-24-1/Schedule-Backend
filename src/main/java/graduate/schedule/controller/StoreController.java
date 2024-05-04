@@ -22,6 +22,8 @@ public class StoreController {
     private final StoreService storeService;
 
     // TODO: 5/3/24 사업자 증빙 api
+    // 1. 이미 존재하는 가게인지 검사
+    // 2. 사업자 진위 여부 검사 - 오픈 api
     /**
      * @apiNote 가게 생성 api
      * */
