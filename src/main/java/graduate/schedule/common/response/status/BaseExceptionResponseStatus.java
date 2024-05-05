@@ -9,6 +9,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
      * 1000: 요청 성공 (OK)
      */
     SUCCESS(1000, HttpStatus.OK.value(), "요청에 성공하였습니다."),
+    ENTER_TO_STORE(1001, HttpStatus.OK.value(), "가게 참가에 성공하였습니다."),
+    BUSINESS_CHECKED(1002, HttpStatus.OK.value(), "사업자 정보가 성공적으로 확인되었습니다."),
 
     /**
      * 2000: Request 오류 (BAD_REQUEST)
