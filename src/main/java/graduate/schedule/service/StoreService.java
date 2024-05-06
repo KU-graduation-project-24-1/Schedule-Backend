@@ -1,10 +1,14 @@
 package graduate.schedule.service;
 
+import graduate.schedule.business.BusinessDataDTO;
+import graduate.schedule.business.BusinessValidateRequestDTO;
 import graduate.schedule.common.exception.MemberException;
 import graduate.schedule.common.exception.StoreException;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.domain.store.Store;
 import graduate.schedule.domain.store.StoreMember;
+import graduate.schedule.dto.business.BusinessValidateResponseDTO;
+import graduate.schedule.dto.web.request.BusinessProofRequestDTO;
 import graduate.schedule.dto.web.request.JoinStoreRequestDTO;
 import graduate.schedule.dto.web.request.RegenerateInviteCodeRequestDTO;
 import graduate.schedule.dto.web.response.CreateStoreRequestDTO;
@@ -20,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
@@ -32,6 +38,7 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final MemberRepository memberRepository;
     private final StoreMemberRepository storeMemberRepository;
+    private final BusinessCheckService businessCheckService;
 
     private final int LEFT_LIMIT = 48;
     private final int RIGHT_LIMIT = 122;
@@ -123,5 +130,25 @@ public class StoreService {
         store.setNewInviteCode(newInviteCode, codeGeneratedTime);
 
         return new RegenerateInviteCodeResponseDTO(newInviteCode);
+    }
+
+    public void businessProof(BusinessProofRequestDTO storeRequest) {
+        // 1. 이미 존재하는 가게인지 검사
+        if (storeRepository.findByBusinessRegistrationNumber(storeRequest.getBusinessRegistrationNumber()).isPresent()) {
+            throw new StoreException(ALREADY_EXIST_STORE);
+        }
+
+        // 2. 사업자 진위 여부 검사 - 오픈 api
+        BusinessValidateRequestDTO validateBusinessData = requestToValidateBusinessData(storeRequest);
+        BusinessValidateResponseDTO response = businessCheckService.validateBusiness(validateBusinessData);
+    }
+    private static BusinessValidateRequestDTO requestToValidateBusinessData(BusinessProofRequestDTO storeRequest) {
+        String decodedBusinessNumber = storeRequest.getBusinessRegistrationNumber();
+        BusinessDataDTO businessData = new BusinessDataDTO(decodedBusinessNumber, storeRequest.getOpeningDate(), storeRequest.getCeoName());
+
+        List<BusinessDataDTO> businessDataList = new ArrayList<>();
+        businessDataList.add(businessData);
+
+        return new BusinessValidateRequestDTO(businessDataList);
     }
 }

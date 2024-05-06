@@ -1,6 +1,7 @@
 package graduate.schedule.controller;
 
 import graduate.schedule.common.response.BaseResponse;
+import graduate.schedule.dto.web.request.BusinessProofRequestDTO;
 import graduate.schedule.dto.web.request.RegenerateInviteCodeRequestDTO;
 import graduate.schedule.dto.web.request.SearchStoreWithInviteCodeRequestDTO;
 import graduate.schedule.dto.web.request.JoinStoreRequestDTO;
@@ -14,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -21,9 +24,15 @@ import org.springframework.web.bind.annotation.*;
 public class StoreController {
     private final StoreService storeService;
 
-    // TODO: 5/3/24 사업자 증빙 api
-    // 1. 이미 존재하는 가게인지 검사
-    // 2. 사업자 진위 여부 검사 - 오픈 api
+    /**
+     * @apiNote 가게 존재 여부 검사 및 사업자 증빙 api
+     * */
+    @GetMapping("/business-proof")
+    public BaseResponse<String> businessProof(@RequestBody @Valid BusinessProofRequestDTO storeRequest) {
+        storeService.businessProof(storeRequest);
+        return new BaseResponse<>(BUSINESS_CHECKED.getMessage());
+    }
+
     /**
      * @apiNote 가게 생성 api
      * */
@@ -56,7 +65,7 @@ public class StoreController {
     @PostMapping("/join")
     public BaseResponse<String> joinTeam(@RequestBody @Valid JoinStoreRequestDTO storeRequest) {
         storeService.joinStore(storeRequest);
-        return new BaseResponse<>("가게 참가에 성공하였습니다.");
+        return new BaseResponse<>(ENTER_TO_STORE.getMessage());
     }
 
 }
