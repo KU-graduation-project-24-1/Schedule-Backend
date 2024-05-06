@@ -18,4 +18,6 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
     Optional<Store> findByInviteCode(@Param("inviteCode") String inviteCode);
 
+    Optional<Store> findByBusinessRegistrationNumber(@Param("businessRegistrationNumber") String businessRegistrationNumber);
+
 }

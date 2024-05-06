@@ -24,14 +24,11 @@ import static graduate.schedule.common.response.status.BaseExceptionResponseStat
 public class StoreController {
     private final StoreService storeService;
 
-    // TODO: 5/3/24 가게 존재 여부 검사 및 사업자 증빙 api
     /**
      * @apiNote 가게 존재 여부 검사 및 사업자 증빙 api
      * */
-    @GetMapping
+    @GetMapping("/business-proof")
     public BaseResponse<String> businessProof(@RequestBody @Valid BusinessProofRequestDTO storeRequest) {
-        // 1. 이미 존재하는 가게인지 검사
-        // 2. 사업자 진위 여부 검사 - 오픈 api
         storeService.businessProof(storeRequest);
         return new BaseResponse<>(BUSINESS_CHECKED.getMessage());
     }
