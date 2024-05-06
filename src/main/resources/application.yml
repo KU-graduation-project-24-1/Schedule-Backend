@@ -23,6 +23,14 @@ spring:
   sql:
     init:
       platform: mysql
+
+---
+
+feign:
+  business:
+    url: ${BUSINESS_CHECK_URL}
+    check:
+      service-key: ${BUSINESS_CHECK_SERVICE_KEY}
 #  data:
 #    redis:
 #      host: ${DATA_REDIS_HOST}
