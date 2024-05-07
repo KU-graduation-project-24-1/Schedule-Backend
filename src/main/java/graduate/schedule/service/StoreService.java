@@ -2,12 +2,14 @@ package graduate.schedule.service;
 
 import graduate.schedule.business.BusinessDataDTO;
 import graduate.schedule.business.BusinessValidateRequestDTO;
+import graduate.schedule.common.exception.BusinessException;
 import graduate.schedule.common.exception.MemberException;
 import graduate.schedule.common.exception.StoreException;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.domain.store.Store;
 import graduate.schedule.domain.store.StoreMember;
 import graduate.schedule.dto.business.BusinessValidateResponseDTO;
+import graduate.schedule.dto.business.BusinessValidatedDTO;
 import graduate.schedule.dto.web.request.BusinessProofRequestDTO;
 import graduate.schedule.dto.web.request.JoinStoreRequestDTO;
 import graduate.schedule.dto.web.request.RegenerateInviteCodeRequestDTO;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
@@ -140,8 +143,20 @@ public class StoreService {
 
         // 2. 사업자 진위 여부 검사 - 오픈 api
         BusinessValidateRequestDTO validateBusinessData = requestToValidateBusinessData(storeRequest);
-        BusinessValidateResponseDTO response = businessCheckService.validateBusiness(validateBusinessData);
+        BusinessValidateResponseDTO apiResponse = businessCheckService.callValidateBusinessAPI(validateBusinessData);
+
+        validateBusiness(apiResponse);
     }
+
+    private void validateBusiness(BusinessValidateResponseDTO apiResponse) {
+        String statusCode = apiResponse.getStatus_code();
+        BusinessValidatedDTO validatedData = apiResponse.getData().get(0);
+
+        if (validatedData.getValid().equals("02")) {
+            throw new BusinessException(BUSINESS_CHECK_FAILED);
+        }
+    }
+
     private static BusinessValidateRequestDTO requestToValidateBusinessData(BusinessProofRequestDTO storeRequest) {
         String decodedBusinessNumber = storeRequest.getBusinessRegistrationNumber();
         BusinessDataDTO businessData = new BusinessDataDTO(decodedBusinessNumber, storeRequest.getOpeningDate(), storeRequest.getCeoName());
