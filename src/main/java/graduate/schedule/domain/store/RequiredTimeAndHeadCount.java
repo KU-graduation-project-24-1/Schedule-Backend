@@ -21,7 +21,7 @@ public class RequiredTimeAndHeadCount {
     private DayOfWeek dayOfWeek; //요일
 
     @Column(columnDefinition = "boolean default true")
-    private boolean needEmployee;
+    private boolean isStoreOpen;
 
     private int headCount; //인원수
 
