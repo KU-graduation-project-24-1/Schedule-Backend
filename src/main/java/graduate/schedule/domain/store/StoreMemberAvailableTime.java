@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.sql.Date;
+import java.sql.Time;
 
 @Entity
 @Getter
@@ -24,6 +25,8 @@ public class StoreMemberAvailableTime {
     @Temporal(TemporalType.DATE)
     private Date availableDate;
 
-    @Column(length = 500)
-    private String availableTime;
+    @Temporal(TemporalType.TIME)
+    private Time availableStartTime;
+    @Temporal(TemporalType.TIME)
+    private Time availableEndTime;
 }

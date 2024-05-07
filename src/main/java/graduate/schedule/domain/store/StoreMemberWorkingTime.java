@@ -3,10 +3,10 @@ package graduate.schedule.domain.store;
 import graduate.schedule.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.sql.Date;
+import java.sql.Time;
 
 @Entity
 @Getter
@@ -27,8 +27,10 @@ public class StoreMemberWorkingTime {
     @Temporal(TemporalType.DATE)
     private Date date;
 
-    @Column(length = 500)
-    private String time;
+    @Temporal(TemporalType.TIME)
+    private Time startTime;
+    @Temporal(TemporalType.TIME)
+    private Time endTime;
 
     @Column(columnDefinition = "boolean default false")
     private boolean requestCover;

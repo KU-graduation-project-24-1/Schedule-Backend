@@ -30,6 +30,9 @@ public class Store {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StoreMember> members = new ArrayList<>();
 
+    @OneToOne(mappedBy = "store", fetch = FetchType.LAZY)
+    private RequiredTimeAndHeadCount requiredTimeAndHeadCount;
+
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StoreMemberWorkingTime> memberWorkingTimes = new ArrayList<>();
 
