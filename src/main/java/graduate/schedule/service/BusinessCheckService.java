@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.BUSINESS_CHECK_FAILED;
+import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.INAPPROPRIATE_DATA;
 
 @Slf4j
 @Service
@@ -22,13 +22,14 @@ public class BusinessCheckService {
     @Value("${feign.business.check.service-key}")
     private String serviceKey;
 
-    public BusinessValidateResponseDTO validateBusiness(BusinessValidateRequestDTO validateBusinessData) {
+    public BusinessValidateResponseDTO callValidateBusinessAPI(BusinessValidateRequestDTO validateBusinessData) {
+        BusinessValidateResponseDTO response;
         try {
-            businessCheckClient.validateBusinessNumber(serviceKey, validateBusinessData);
+            response = businessCheckClient.validateBusinessNumber(serviceKey, validateBusinessData);
         } catch (Exception e) {
-            log.error("error in BusinessCheckService");
-            throw new BusinessException(BUSINESS_CHECK_FAILED);
+            log.error(e.getMessage());
+            throw new BusinessException(INAPPROPRIATE_DATA);
         }
-        return businessCheckClient.validateBusinessNumber(serviceKey, validateBusinessData);
+        return response;
     }
 }
