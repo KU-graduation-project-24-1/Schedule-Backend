@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@Repository
 public interface StoreRepository extends JpaRepository<Store, Long> {
     @Query("select case " +
             "when count(s) > 0 then true " +
