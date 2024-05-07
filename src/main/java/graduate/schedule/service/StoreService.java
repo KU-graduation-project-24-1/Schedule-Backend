@@ -5,33 +5,35 @@ import graduate.schedule.business.BusinessValidateRequestDTO;
 import graduate.schedule.common.exception.BusinessException;
 import graduate.schedule.common.exception.MemberException;
 import graduate.schedule.common.exception.StoreException;
+import graduate.schedule.common.exception.StoreMemberException;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.domain.store.Store;
 import graduate.schedule.domain.store.StoreMember;
+import graduate.schedule.domain.store.StoreMemberWorkingTime;
 import graduate.schedule.dto.business.BusinessValidateResponseDTO;
 import graduate.schedule.dto.business.BusinessValidatedDTO;
+import graduate.schedule.dto.store.WorkScheduleOnDayDTO;
+import graduate.schedule.dto.store.WorkerAndTimeDTO;
 import graduate.schedule.dto.web.request.BusinessProofRequestDTO;
 import graduate.schedule.dto.web.request.JoinStoreRequestDTO;
 import graduate.schedule.dto.web.request.RegenerateInviteCodeRequestDTO;
-import graduate.schedule.dto.web.response.CreateStoreRequestDTO;
-import graduate.schedule.dto.web.response.CreateStoreResponseDTO;
-import graduate.schedule.dto.web.response.RegenerateInviteCodeResponseDTO;
-import graduate.schedule.dto.web.response.SearchStoreWithInviteCodeResponseDTO;
-import graduate.schedule.repository.MemberRepository;
-import graduate.schedule.repository.StoreMemberRepository;
-import graduate.schedule.repository.StoreRepository;
+import graduate.schedule.dto.web.request.RequestWithOnlyMemberIdDTO;
+import graduate.schedule.dto.web.response.*;
+import graduate.schedule.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
+import static graduate.schedule.utils.DateAndTimeFormatter.timeDeleteSeconds;
 
 @Slf4j
 @Service
@@ -41,6 +43,8 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final MemberRepository memberRepository;
     private final StoreMemberRepository storeMemberRepository;
+    private final StoreMemberWorkingTimeRepository storeMemberWorkingTimeRepository;
+    private final RequiredTimeAndHeadCountRepository requiredTimeAndHeadCountRepository;
     private final BusinessCheckService businessCheckService;
 
     private final int LEFT_LIMIT = 48;
@@ -95,6 +99,7 @@ public class StoreService {
                 store.getName()
         );
     }
+
     private void compareInviteCodeAndRequestTime(Store store) {
         LocalDateTime joinRequestTime = LocalDateTime.now();
         LocalDateTime expirationDateTime = store.getCodeGeneratedTime().plusDays(1);
@@ -165,5 +170,52 @@ public class StoreService {
         businessDataList.add(businessData);
 
         return new BusinessValidateRequestDTO(businessDataList);
+    }
+
+    public WorkScheduleOnMonthResponseDTO getScheduleInMonth(Long storeId, String searchMonth, RequestWithOnlyMemberIdDTO storeRequest) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        Member member = memberRepository.findById(storeRequest.getMemberId())
+                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+
+        List<Date> scheduleExistingDatesOnMonth = storeMemberWorkingTimeRepository.findDatesByStoreAndMonth(store, searchMonth);
+        List<WorkScheduleOnDayDTO> daySchedules = scheduleExistingDatesOnMonth.stream()
+                .map(date -> getDateSchedule(store, member, date)).toList();
+
+        return new WorkScheduleOnMonthResponseDTO(daySchedules);
+    }
+
+    private WorkScheduleOnDayDTO getDateSchedule(Store store, Member member, Date date) {
+        List<StoreMemberWorkingTime> schedulesIndDay = storeMemberWorkingTimeRepository.findSchedulesByStoreAndDate(store, date);
+
+        /*// TODO: 5/7/24 WorkingHeadCountDTO workingHeadCount;
+        DayOfWeek dayOfWeek = date.toLocalDate().getDayOfWeek();
+        RequiredTimeAndHeadCount requiredTimeAndHeadCount = requiredTimeAndHeadCountRepository.findByStoreAndDayOfWeek(store, dayOfWeek)
+                .orElseThrow(() -> new StoreException(NO_REQUIRED_TIME_AND_HEADCOUNT_DATA));
+        new WorkingHeadCountDTO(
+                requiredTimeAndHeadCount.getHeadCount(),
+                schedulesIndDay.stream()
+                        .map(StoreMemberWorkingTime::getMember)
+                        .distinct())*/
+
+        //List<WorkerAndTimeDTO> workDatas;
+        List<WorkerAndTimeDTO> workDatas = schedulesIndDay.stream()
+                .map(schedule -> new WorkerAndTimeDTO(
+                            schedule.getId(),
+                            schedule.getMember().getId(),
+                            schedule.getMember().getName(),
+                            storeMemberRepository.findByMember(schedule.getMember())
+                                    .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER))
+                                    .getMemberGrade(),
+                            schedule.getMember() == member,
+                            timeDeleteSeconds(schedule.getStartTime()),
+                            timeDeleteSeconds(schedule.getEndTime()),
+                            schedule.isRequestCover()))
+                .sorted(Comparator.comparing(WorkerAndTimeDTO::getStartTime)).toList();
+
+        return new WorkScheduleOnDayDTO(
+                date,
+                workDatas
+        );
     }
 }

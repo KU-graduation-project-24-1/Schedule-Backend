@@ -49,6 +49,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     NOT_FOUND_MEMBER(5000, HttpStatus.BAD_REQUEST.value(), "존재하지 않는 사용자입니다."),
     INVALID_PLATFORM(5001, HttpStatus.BAD_REQUEST.value(), "플랫폼 정보가 올바르지 않습니다."),
     NOT_EXECUTIVE(5003, HttpStatus.BAD_REQUEST.value(), "가게의 사장 또는 매니저가 아닙니다."),
+    NOT_STORE_MEMBER(5003, HttpStatus.BAD_REQUEST.value(), "가게 구성원이 아닙니다."),
 
     /**
      * 6000: Store 도메인 오류
@@ -56,7 +57,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     NOT_FOUND_STORE(6000, HttpStatus.BAD_REQUEST.value(), "존재하지 않는 가게입니다."),
     ALREADY_EXIST_STORE_MEMBER(6001, HttpStatus.BAD_REQUEST.value(), "이미 가게에 존재하는 사용자입니다."),
     EXPIRED_INVITE_CODE(6002, HttpStatus.BAD_REQUEST.value(), "초대 코드 유효 기간이 만료되었습니다."),
-    ALREADY_EXIST_STORE(6003, HttpStatus.BAD_REQUEST.value(), "이미 존재하는 가게입니다.");
+    ALREADY_EXIST_STORE(6003, HttpStatus.BAD_REQUEST.value(), "이미 존재하는 가게입니다."),
+    NO_REQUIRED_TIME_AND_HEADCOUNT_DATA(6004, HttpStatus.BAD_REQUEST.value(), "영업 정보(근무 인원 및 시간 요구사항)가 존재하지 않습니다.");
 
     private final int code;
     private final int status;

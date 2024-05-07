@@ -1,14 +1,8 @@
 package graduate.schedule.controller;
 
 import graduate.schedule.common.response.BaseResponse;
-import graduate.schedule.dto.web.request.BusinessProofRequestDTO;
-import graduate.schedule.dto.web.request.RegenerateInviteCodeRequestDTO;
-import graduate.schedule.dto.web.request.SearchStoreWithInviteCodeRequestDTO;
-import graduate.schedule.dto.web.request.JoinStoreRequestDTO;
-import graduate.schedule.dto.web.response.CreateStoreRequestDTO;
-import graduate.schedule.dto.web.response.CreateStoreResponseDTO;
-import graduate.schedule.dto.web.response.RegenerateInviteCodeResponseDTO;
-import graduate.schedule.dto.web.response.SearchStoreWithInviteCodeResponseDTO;
+import graduate.schedule.dto.web.request.*;
+import graduate.schedule.dto.web.response.*;
 import graduate.schedule.service.StoreService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -68,4 +62,12 @@ public class StoreController {
         return new BaseResponse<>(ENTER_TO_STORE.getMessage());
     }
 
+    /**
+     * @apiNote 특정 달의 모든 근무 일정 조회 api
+     * */
+    @GetMapping("/schedule/{storeId}/{searchMonth}") //yyyy-MM
+    public BaseResponse<WorkScheduleOnMonthResponseDTO> getScheduleInMonth(@PathVariable @Valid Long storeId, @PathVariable @Valid String searchMonth, @RequestBody @Valid RequestWithOnlyMemberIdDTO storeRequest) {
+        WorkScheduleOnMonthResponseDTO response = storeService.getScheduleInMonth(storeId, searchMonth, storeRequest);
+        return new BaseResponse<>(response);
+    }
 }

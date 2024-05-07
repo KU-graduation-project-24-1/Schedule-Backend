@@ -11,8 +11,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
-@Repository
 public interface StoreMemberRepository extends JpaRepository<StoreMember, Long> {
 
     @Query("select case " +
@@ -31,4 +31,6 @@ public interface StoreMemberRepository extends JpaRepository<StoreMember, Long> 
             "else false end " +
             "from StoreMember sm where sm.member=:member and sm.store=:store")
     Boolean isExecutive(@Param("member") Member member, @Param("store") Store store);
+
+    Optional<StoreMember> findByMember(@Param("member") Member member);
 }
