@@ -16,7 +16,7 @@ public interface StoreMemberAvailableTimeRepository extends JpaRepository<StoreM
             "join smat.member m on m=:member " +
             "where FUNCTION('DATE_FORMAT', smat.availableDate, '%Y-%m')=:searchMonth " +
             "order by smat.availableDate")
-    List<Date> findAvailableDatesByStoreAndMemberAndMonth(@Param("store") Store store, @Param("member") Member member, @Param("searchMonth") String searchMonth);
+    List<Date> findAvailableDatesByStoreAndMemberAndMonthOrderByAvailableDate(@Param("store") Store store, @Param("member") Member member, @Param("searchMonth") String searchMonth);
 
-    List<StoreMemberAvailableTime> findAvailableSchedulesByStoreAndAvailableDate(Store store, Date date);
+    List<StoreMemberAvailableTime> findAvailableSchedulesByStoreAndAvailableDateOrderByAvailableStartTime(Store store, Date date);
 }

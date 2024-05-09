@@ -217,7 +217,7 @@ public class StoreService {
                 .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER))
                 .getMemberGrade();
 
-        List<Date> existingAvailableDatesByStoreAndMonth = storeMemberAvailableTimeRepository.findAvailableDatesByStoreAndMemberAndMonth(store, member, searchMonth);
+        List<Date> existingAvailableDatesByStoreAndMonth = storeMemberAvailableTimeRepository.findAvailableDatesByStoreAndMemberAndMonthOrderByAvailableDate(store, member, searchMonth);
         List<AvailableScheduleInDayDTO> dayAvailableSchedules = existingAvailableDatesByStoreAndMonth.stream()
                 .map(date -> getDateAvailableSchedule(store, member, date)).toList();
 
@@ -228,7 +228,7 @@ public class StoreService {
     }
 
     private AvailableScheduleInDayDTO getDateAvailableSchedule(Store store, Member member, Date date) {
-        List<StoreMemberAvailableTime> availableTimesInDay = storeMemberAvailableTimeRepository.findAvailableSchedulesByStoreAndAvailableDate(store, date);
+        List<StoreMemberAvailableTime> availableTimesInDay = storeMemberAvailableTimeRepository.findAvailableSchedulesByStoreAndAvailableDateOrderByAvailableStartTime(store, date);
         List<AvailableTimeInDayDTO> availableTimeDatas = availableTimesInDay.stream()
                 .map(time -> {
                     return new AvailableTimeInDayDTO(
