@@ -7,11 +7,11 @@ import graduate.schedule.common.exception.MemberException;
 import graduate.schedule.common.exception.StoreException;
 import graduate.schedule.common.exception.StoreMemberException;
 import graduate.schedule.domain.member.Member;
-import graduate.schedule.domain.store.Store;
-import graduate.schedule.domain.store.StoreMember;
-import graduate.schedule.domain.store.StoreMemberWorkingTime;
+import graduate.schedule.domain.store.*;
 import graduate.schedule.dto.business.BusinessValidateResponseDTO;
 import graduate.schedule.dto.business.BusinessValidatedDTO;
+import graduate.schedule.dto.store.AvailableScheduleInDayDTO;
+import graduate.schedule.dto.store.AvailableTimeInDayDTO;
 import graduate.schedule.dto.store.WorkScheduleOnDayDTO;
 import graduate.schedule.dto.store.WorkerAndTimeDTO;
 import graduate.schedule.dto.web.request.BusinessProofRequestDTO;
@@ -44,7 +44,7 @@ public class StoreService {
     private final MemberRepository memberRepository;
     private final StoreMemberRepository storeMemberRepository;
     private final StoreMemberWorkingTimeRepository storeMemberWorkingTimeRepository;
-    private final RequiredTimeAndHeadCountRepository requiredTimeAndHeadCountRepository;
+    private final StoreMemberAvailableTimeRepository storeMemberAvailableTimeRepository;
     private final BusinessCheckService businessCheckService;
 
     private final int LEFT_LIMIT = 48;
@@ -172,14 +172,14 @@ public class StoreService {
         return new BusinessValidateRequestDTO(businessDataList);
     }
 
-    public WorkScheduleOnMonthResponseDTO getScheduleInMonth(Long storeId, String searchMonth, RequestWithOnlyMemberIdDTO storeRequest) {
+    public WorkScheduleOnMonthResponseDTO getScheduleOnMonth(Long storeId, String searchMonth, RequestWithOnlyMemberIdDTO storeRequest) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
         Member member = memberRepository.findById(storeRequest.getMemberId())
                 .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
 
-        List<Date> scheduleExistingDatesOnMonth = storeMemberWorkingTimeRepository.findDatesByStoreAndMonth(store, searchMonth);
-        List<WorkScheduleOnDayDTO> daySchedules = scheduleExistingDatesOnMonth.stream()
+        List<Date> existingWorkingDatesOnMonth = storeMemberWorkingTimeRepository.findDatesByStoreAndMonth(store, searchMonth);
+        List<WorkScheduleOnDayDTO> daySchedules = existingWorkingDatesOnMonth.stream()
                 .map(date -> getDateSchedule(store, member, date)).toList();
 
         return new WorkScheduleOnMonthResponseDTO(daySchedules);
@@ -188,29 +188,18 @@ public class StoreService {
     private WorkScheduleOnDayDTO getDateSchedule(Store store, Member member, Date date) {
         List<StoreMemberWorkingTime> schedulesIndDay = storeMemberWorkingTimeRepository.findSchedulesByStoreAndDate(store, date);
 
-        /*// TODO: 5/7/24 WorkingHeadCountDTO workingHeadCount;
-        DayOfWeek dayOfWeek = date.toLocalDate().getDayOfWeek();
-        RequiredTimeAndHeadCount requiredTimeAndHeadCount = requiredTimeAndHeadCountRepository.findByStoreAndDayOfWeek(store, dayOfWeek)
-                .orElseThrow(() -> new StoreException(NO_REQUIRED_TIME_AND_HEADCOUNT_DATA));
-        new WorkingHeadCountDTO(
-                requiredTimeAndHeadCount.getHeadCount(),
-                schedulesIndDay.stream()
-                        .map(StoreMemberWorkingTime::getMember)
-                        .distinct())*/
-
-        //List<WorkerAndTimeDTO> workDatas;
         List<WorkerAndTimeDTO> workDatas = schedulesIndDay.stream()
                 .map(schedule -> new WorkerAndTimeDTO(
-                            schedule.getId(),
-                            schedule.getMember().getId(),
-                            schedule.getMember().getName(),
-                            storeMemberRepository.findByMember(schedule.getMember())
-                                    .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER))
-                                    .getMemberGrade(),
-                            schedule.getMember() == member,
-                            timeDeleteSeconds(schedule.getStartTime()),
-                            timeDeleteSeconds(schedule.getEndTime()),
-                            schedule.isRequestCover()))
+                        schedule.getId(),
+                        schedule.getMember().getId(),
+                        schedule.getMember().getName(),
+                        storeMemberRepository.findByStoreAndMember(store, schedule.getMember())
+                                .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER))
+                                .getMemberGrade(),
+                        schedule.getMember() == member,
+                        timeDeleteSeconds(schedule.getStartTime()),
+                        timeDeleteSeconds(schedule.getEndTime()),
+                        schedule.isRequestCover()))
                 .sorted(Comparator.comparing(WorkerAndTimeDTO::getStartTime)).toList();
 
         return new WorkScheduleOnDayDTO(
@@ -218,4 +207,41 @@ public class StoreService {
                 workDatas
         );
     }
+
+    public AvailableScheduleOnMonthResponseDTO getAvailableScheduleOnMonth(Long storeId, String searchMonth, RequestWithOnlyMemberIdDTO storeRequest) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        Member member = memberRepository.findById(storeRequest.getMemberId())
+                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+        StoreMemberGrade memberGrade = storeMemberRepository.findByStoreAndMember(store, member)
+                .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER))
+                .getMemberGrade();
+
+        List<Date> existingAvailableDatesByStoreAndMonth = storeMemberAvailableTimeRepository.findAvailableDatesByStoreAndMemberAndMonthOrderByAvailableDate(store, member, searchMonth);
+        List<AvailableScheduleInDayDTO> dayAvailableSchedules = existingAvailableDatesByStoreAndMonth.stream()
+                .map(date -> getDateAvailableSchedule(store, member, date)).toList();
+
+        return new AvailableScheduleOnMonthResponseDTO(
+                memberGrade.getGrade(),
+                dayAvailableSchedules
+        );
+    }
+
+    private AvailableScheduleInDayDTO getDateAvailableSchedule(Store store, Member member, Date date) {
+        List<StoreMemberAvailableTime> availableTimesInDay = storeMemberAvailableTimeRepository.findAvailableSchedulesByStoreAndAvailableDateOrderByAvailableStartTime(store, date);
+        List<AvailableTimeInDayDTO> availableTimeDatas = availableTimesInDay.stream()
+                .map(time -> {
+                    return new AvailableTimeInDayDTO(
+                            time.getId(),
+                            timeDeleteSeconds(time.getAvailableStartTime()),
+                            timeDeleteSeconds(time.getAvailableEndTime())
+                    );
+                }).toList();
+
+        return new AvailableScheduleInDayDTO(
+                date,
+                availableTimeDatas
+        );
+    }
+
 }

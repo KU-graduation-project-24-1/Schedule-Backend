@@ -65,9 +65,18 @@ public class StoreController {
     /**
      * @apiNote 특정 달의 모든 근무 일정 조회 api
      * */
-    @GetMapping("/schedule/{storeId}/{searchMonth}") //yyyy-MM
-    public BaseResponse<WorkScheduleOnMonthResponseDTO> getScheduleInMonth(@PathVariable @Valid Long storeId, @PathVariable @Valid String searchMonth, @RequestBody @Valid RequestWithOnlyMemberIdDTO storeRequest) {
-        WorkScheduleOnMonthResponseDTO response = storeService.getScheduleInMonth(storeId, searchMonth, storeRequest);
+    @GetMapping("/{storeId}/schedule/{searchMonth}") //yyyy-MM
+    public BaseResponse<WorkScheduleOnMonthResponseDTO> getScheduleOnMonth(@PathVariable @Valid Long storeId, @PathVariable @Valid String searchMonth, @RequestBody @Valid RequestWithOnlyMemberIdDTO storeRequest) {
+        WorkScheduleOnMonthResponseDTO response = storeService.getScheduleOnMonth(storeId, searchMonth, storeRequest);
+        return new BaseResponse<>(response);
+    }
+
+    /**
+     * @apiNote 특정 달의 근무 가능한 시간 조회 api
+     * */
+    @GetMapping("/{storeId}/available-schedule/{searchMonth}")
+    public BaseResponse<AvailableScheduleOnMonthResponseDTO> getAvailableScheduleOnMonth(@PathVariable @Valid Long storeId, @PathVariable @Valid String searchMonth, @RequestBody @Valid RequestWithOnlyMemberIdDTO storeRequest) {
+        AvailableScheduleOnMonthResponseDTO response = storeService.getAvailableScheduleOnMonth(storeId, searchMonth, storeRequest);
         return new BaseResponse<>(response);
     }
 }

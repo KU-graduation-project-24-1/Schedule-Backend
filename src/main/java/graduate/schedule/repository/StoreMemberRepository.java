@@ -3,12 +3,10 @@ package graduate.schedule.repository;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.domain.store.Store;
 import graduate.schedule.domain.store.StoreMember;
-import graduate.schedule.domain.store.StoreMemberGrade;
 import graduate.schedule.dto.store.MyStoreDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,5 +30,5 @@ public interface StoreMemberRepository extends JpaRepository<StoreMember, Long> 
             "from StoreMember sm where sm.member=:member and sm.store=:store")
     Boolean isExecutive(@Param("member") Member member, @Param("store") Store store);
 
-    Optional<StoreMember> findByMember(@Param("member") Member member);
+    Optional<StoreMember> findByStoreAndMember(@Param("store") Store store, @Param("member") Member member);
 }
