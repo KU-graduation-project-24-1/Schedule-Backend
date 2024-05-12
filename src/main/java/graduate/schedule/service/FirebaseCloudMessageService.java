@@ -41,29 +41,10 @@ public class FirebaseCloudMessageService {
     @Value("${firebase.key.path}")
     private String FCM_PRIVATE_KEY_PATH;
 
-    private FirebaseMessaging firebaseMessaging;
     private String FIREBASE_SCOPE = "https://www.googleapis.com/auth/cloud-platform";
 
     private final String API_URL = "https://fcm.googleapis.com/v1/projects/" + FCM_PROJECT_ID + "/messages:send";
     private final ObjectMapper objectMapper;
-
-
-    //fcm 기본 설정
-    @PostConstruct
-    public void fcmInit() throws IOException {
-        GoogleCredentials googleCredentials = GoogleCredentials
-                .fromStream(new ClassPathResource(FCM_PRIVATE_KEY_PATH).getInputStream())
-                .createScoped((Arrays.asList(FIREBASE_SCOPE)));
-        FirebaseOptions firebaseOptions = FirebaseOptions.builder()
-                .setCredentials(googleCredentials)
-                .build();
-
-        if (FirebaseApp.getApps().isEmpty()) {
-            log.info("Firebase 어플리케이션을 초기화 했습니다.");
-        }
-        FirebaseApp app = FirebaseApp.initializeApp(firebaseOptions);
-        this.firebaseMessaging = FirebaseMessaging.getInstance(app);
-    }
 
     public void sendMessageTo(Long memberId, String title, String body) throws IOException {
         //title을 어떤 알림인지 enum으로?
