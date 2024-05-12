@@ -79,4 +79,13 @@ public class StoreController {
         AvailableScheduleOnMonthResponseDTO response = storeService.getAvailableScheduleOnMonth(storeId, searchMonth, storeRequest);
         return new BaseResponse<>(response);
     }
+
+    /**
+    * @apiNote 일 단위 근무 가능한 시간 추가 api
+    */
+    @PostMapping("/available-schedule")
+    public BaseResponse<AddAvailableScheduleResponseDTO> addAvailableScheduleInDay(@RequestBody @Valid AddAvailableScheduleRequestDTO storeRequest) {
+        AddAvailableScheduleResponseDTO response = storeService.addAvailableScheduleInDay(storeRequest);
+        return new BaseResponse<>(response);
+    }
 }

@@ -51,6 +51,9 @@ public class Store {
     public void addStoreMember(StoreMember storeMember) {
         this.members.add(storeMember);
     }
+    public void addMemberAvailableTime(StoreMemberAvailableTime memberAvailableTime) {
+        this.memberAvailableTimes.add(memberAvailableTime);
+    }
 
     public void setNewInviteCode(String inviteCode, LocalDateTime codeGeneratedTime) {
         this.inviteCode = inviteCode;
