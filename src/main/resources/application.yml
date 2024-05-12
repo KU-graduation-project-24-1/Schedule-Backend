@@ -31,10 +31,14 @@ feign:
     url: ${BUSINESS_CHECK_URL}
     check:
       service-key: ${BUSINESS_CHECK_SERVICE_KEY}
-#  data:
-#    redis:
-#      host: ${DATA_REDIS_HOST}
-#      port: ${DATA_REDIS_PORT}
+
+---
+
+firebase:
+  project:
+    id: ${FIREBASE_PROJECT_ID}
+  key:
+    path: ${FCM_KEY_PATH}
 
 ---
 

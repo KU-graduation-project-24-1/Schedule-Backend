@@ -22,4 +22,6 @@ public class Member {
     @Column(length = 500)
     private String imgUrl;
 
+    private String FcmToken;
+
 }
