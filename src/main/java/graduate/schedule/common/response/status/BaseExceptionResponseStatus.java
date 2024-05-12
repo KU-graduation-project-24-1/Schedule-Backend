@@ -11,6 +11,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     SUCCESS(1000, HttpStatus.OK.value(), "요청에 성공하였습니다."),
     ENTER_TO_STORE(1001, HttpStatus.OK.value(), "가게 참가에 성공하였습니다."),
     BUSINESS_CHECKED(1002, HttpStatus.OK.value(), "사업자 정보가 성공적으로 확인되었습니다."),
+    SUCCESS_ADD_AVAILABLE_SCHEDULE(1003, HttpStatus.OK.value(), "근무 가능한 시간 정보를 등록하였습니다."),
+    SUCCESS_DELETE_AVAILABLE_SCHEDULE(1004, HttpStatus.OK.value(), "근무 가능한 시간 정보를 삭제하였습니다."),
 
     /**
      * 2000: Request 오류 (BAD_REQUEST)
@@ -59,7 +61,14 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     ALREADY_EXIST_STORE_MEMBER(6001, HttpStatus.BAD_REQUEST.value(), "이미 가게에 존재하는 사용자입니다."),
     EXPIRED_INVITE_CODE(6002, HttpStatus.BAD_REQUEST.value(), "초대 코드 유효 기간이 만료되었습니다."),
     ALREADY_EXIST_STORE(6003, HttpStatus.BAD_REQUEST.value(), "이미 존재하는 가게입니다."),
-    NO_REQUIRED_TIME_AND_HEADCOUNT_DATA(6004, HttpStatus.BAD_REQUEST.value(), "영업 정보(근무 인원 및 시간 요구사항)가 존재하지 않습니다.");
+    NO_REQUIRED_TIME_AND_HEADCOUNT_DATA(6004, HttpStatus.BAD_REQUEST.value(), "영업 정보(근무 인원 및 시간 요구사항)가 존재하지 않습니다."),
+
+    /**
+     * 7000: Store Member Time 오류
+     * */
+    INVALID_STORE_MEMBER_AVAILABLE_TIME_ID(7000, HttpStatus.BAD_REQUEST.value(), "가능한 근무 시간 id가 유효하지 않습니다."),
+    NOT_MEMBER_WORKING_DATA(7000, HttpStatus.BAD_REQUEST.value(), "나의 근무 정보가 아닙니다.");
+
 
     private final int code;
     private final int status;

@@ -258,4 +258,21 @@ public class StoreService {
         return new AddAvailableScheduleResponseDTO(newStoreMemberAvailableTime.getId());
 
     }
+
+    public void deleteAvailableScheduleInDay(DeleteAvailableScheduleRequestDTO storeRequest) {
+        Store store = storeRepository.findById(storeRequest.getStoreId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        Member member = memberRepository.findById(storeRequest.getMemberId())
+                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+        if (!storeMemberRepository.existsMember(member, store)) {
+            throw new StoreMemberException(NOT_STORE_MEMBER);
+        }
+
+        StoreMemberAvailableTime availableTime = storeMemberAvailableTimeRepository.findById(storeRequest.getStoreMemberAvailableTimeId())
+                .orElseThrow(() -> new StoreMemberTimeException(INVALID_STORE_MEMBER_AVAILABLE_TIME_ID));
+        if (!availableTime.getMember().equals(member)) {
+            throw new StoreMemberTimeException(NOT_MEMBER_WORKING_DATA);
+        }
+        storeMemberAvailableTimeRepository.delete(availableTime);
+    }
 }

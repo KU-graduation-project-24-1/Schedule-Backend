@@ -88,4 +88,13 @@ public class StoreController {
         AddAvailableScheduleResponseDTO response = storeService.addAvailableScheduleInDay(storeRequest);
         return new BaseResponse<>(response);
     }
+
+    /**
+    * @apiNote 일 단위 근무 가능한 시간 삭제 api
+    */
+    @DeleteMapping("/available-schedule")
+    public BaseResponse<String> deleteAvailableScheduleInDay(@RequestBody @Valid DeleteAvailableScheduleRequestDTO storeRequest) {
+        storeService.deleteAvailableScheduleInDay(storeRequest);
+        return new BaseResponse<>(SUCCESS_DELETE_AVAILABLE_SCHEDULE.getMessage());
+    }
 }
