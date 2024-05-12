@@ -65,7 +65,7 @@ public class FirebaseCloudMessageService {
                 .addHeader(HttpHeaders.CONTENT_TYPE, "application/json; UTF-8")
                 .build();
 
-        Response response = client.newCall(ㄴrequest).execute();
+        Response response = client.newCall(request).execute();
 
         System.out.println(response.body().string());
         return response.body().string();

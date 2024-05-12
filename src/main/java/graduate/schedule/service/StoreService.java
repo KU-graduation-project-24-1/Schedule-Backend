@@ -2,10 +2,7 @@ package graduate.schedule.service;
 
 import graduate.schedule.business.BusinessDataDTO;
 import graduate.schedule.business.BusinessValidateRequestDTO;
-import graduate.schedule.common.exception.BusinessException;
-import graduate.schedule.common.exception.MemberException;
-import graduate.schedule.common.exception.StoreException;
-import graduate.schedule.common.exception.StoreMemberException;
+import graduate.schedule.common.exception.*;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.domain.store.*;
 import graduate.schedule.dto.business.BusinessValidateResponseDTO;
@@ -14,10 +11,7 @@ import graduate.schedule.dto.store.AvailableScheduleInDayDTO;
 import graduate.schedule.dto.store.AvailableTimeInDayDTO;
 import graduate.schedule.dto.store.WorkScheduleOnDayDTO;
 import graduate.schedule.dto.store.WorkerAndTimeDTO;
-import graduate.schedule.dto.web.request.BusinessProofRequestDTO;
-import graduate.schedule.dto.web.request.JoinStoreRequestDTO;
-import graduate.schedule.dto.web.request.RegenerateInviteCodeRequestDTO;
-import graduate.schedule.dto.web.request.RequestWithOnlyMemberIdDTO;
+import graduate.schedule.dto.web.request.*;
 import graduate.schedule.dto.web.response.*;
 import graduate.schedule.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +28,7 @@ import java.util.Random;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
 import static graduate.schedule.utils.DateAndTimeFormatter.timeDeleteSeconds;
+import static graduate.schedule.utils.DateAndTimeFormatter.timeWithSeconds;
 
 @Slf4j
 @Service
@@ -242,4 +237,42 @@ public class StoreService {
         );
     }
 
+    public AddAvailableScheduleResponseDTO addAvailableScheduleInDay(AddAvailableScheduleRequestDTO storeRequest) {
+        Store store = storeRepository.findById(storeRequest.getStoreId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        Member member = memberRepository.findById(storeRequest.getMemberId())
+                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+        if (!storeMemberRepository.existsMember(member, store)) {
+            throw new StoreMemberException(NOT_STORE_MEMBER);
+        }
+
+        StoreMemberAvailableTime newStoreMemberAvailableTime =
+                StoreMemberAvailableTime.createStoreMemberAvailableTime(
+                        store,
+                        member,
+                        storeRequest.getDate(),
+                        timeWithSeconds(storeRequest.getStartTime()),
+                        timeWithSeconds(storeRequest.getEndTime())
+                );
+        storeMemberAvailableTimeRepository.save(newStoreMemberAvailableTime);
+        return new AddAvailableScheduleResponseDTO(newStoreMemberAvailableTime.getId());
+
+    }
+
+    public void deleteAvailableScheduleInDay(DeleteAvailableScheduleRequestDTO storeRequest) {
+        Store store = storeRepository.findById(storeRequest.getStoreId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        Member member = memberRepository.findById(storeRequest.getMemberId())
+                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+        if (!storeMemberRepository.existsMember(member, store)) {
+            throw new StoreMemberException(NOT_STORE_MEMBER);
+        }
+
+        StoreMemberAvailableTime availableTime = storeMemberAvailableTimeRepository.findById(storeRequest.getStoreMemberAvailableTimeId())
+                .orElseThrow(() -> new StoreMemberTimeException(INVALID_STORE_MEMBER_AVAILABLE_TIME_ID));
+        if (!availableTime.getMember().equals(member)) {
+            throw new StoreMemberTimeException(NOT_MEMBER_WORKING_DATA);
+        }
+        storeMemberAvailableTimeRepository.delete(availableTime);
+    }
 }

@@ -29,4 +29,17 @@ public class StoreMemberAvailableTime {
     private Time availableStartTime;
     @Temporal(TemporalType.TIME)
     private Time availableEndTime;
+
+    public static StoreMemberAvailableTime createStoreMemberAvailableTime(Store store, Member member, Date availableDate, Time availableStartTime, Time availableEndTime) {
+        StoreMemberAvailableTime availableTime = new StoreMemberAvailableTime();
+        availableTime.store = store;
+        availableTime.member = member;
+        availableTime.availableDate = availableDate;
+        availableTime.availableStartTime = availableStartTime;
+        availableTime.availableEndTime = availableEndTime;
+
+        store.addMemberAvailableTime(availableTime);
+
+        return availableTime;
+    }
 }
