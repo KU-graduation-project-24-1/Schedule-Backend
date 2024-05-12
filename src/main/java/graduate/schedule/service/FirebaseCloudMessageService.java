@@ -11,6 +11,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import graduate.schedule.common.exception.MemberException;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.dto.fcm.FCMMessage;
+import graduate.schedule.dto.web.request.FcmSendRequestDTO;
 import graduate.schedule.repository.MemberRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -46,13 +47,13 @@ public class FirebaseCloudMessageService {
     private final String API_URL = "https://fcm.googleapis.com/v1/projects/" + FCM_PROJECT_ID + "/messages:send";
     private final ObjectMapper objectMapper;
 
-    public void sendMessageTo(Long memberId, String title, String body) throws IOException {
+    public String sendMessageTo(FcmSendRequestDTO fcmRequest) throws IOException {
         //title을 어떤 알림인지 enum으로?
-        String fcmToken = memberRepository.findById(memberId)
+        String fcmToken = memberRepository.findById(fcmRequest.getMemberId())
                 .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER))
                 .getFcmToken();
 
-        String message = makeMessage(fcmToken, title, body);
+        String message = makeMessage(fcmToken, fcmRequest.getTitle(), fcmRequest.getBody());
 
         OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = RequestBody.create(message,
@@ -64,9 +65,11 @@ public class FirebaseCloudMessageService {
                 .addHeader(HttpHeaders.CONTENT_TYPE, "application/json; UTF-8")
                 .build();
 
-        Response response = client.newCall(request).execute();
+        Response response = client.newCall(ㄴrequest).execute();
 
         System.out.println(response.body().string());
+        return response.body().string();
+
     }
 
     private String makeMessage(String targetToken, String title, String body) throws JsonParseException, JsonProcessingException {
