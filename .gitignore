@@ -5,6 +5,9 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+### Firebase key ###
+firebase_service_key.json
+
 ### MAC OS ###
 .DS_Store
 

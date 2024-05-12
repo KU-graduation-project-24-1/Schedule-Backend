@@ -230,13 +230,11 @@ public class StoreService {
     private AvailableScheduleInDayDTO getDateAvailableSchedule(Store store, Member member, Date date) {
         List<StoreMemberAvailableTime> availableTimesInDay = storeMemberAvailableTimeRepository.findAvailableSchedulesByStoreAndAvailableDateOrderByAvailableStartTime(store, date);
         List<AvailableTimeInDayDTO> availableTimeDatas = availableTimesInDay.stream()
-                .map(time -> {
-                    return new AvailableTimeInDayDTO(
-                            time.getId(),
-                            timeDeleteSeconds(time.getAvailableStartTime()),
-                            timeDeleteSeconds(time.getAvailableEndTime())
-                    );
-                }).toList();
+                .map(time -> new AvailableTimeInDayDTO(
+                        time.getId(),
+                        timeDeleteSeconds(time.getAvailableStartTime()),
+                        timeDeleteSeconds(time.getAvailableEndTime())
+                )).toList();
 
         return new AvailableScheduleInDayDTO(
                 date,
