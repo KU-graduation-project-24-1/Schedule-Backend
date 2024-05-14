@@ -42,7 +42,6 @@ public class AuthService {
         return findMember.map(member -> getLoginResponse(member, clientIp, true))
                 //회원가입이 필요한 멤버
                 .orElseGet(() -> signUp(email, profileImg, platformId, clientIp, fcmToken));
-
     }
 
     private LoginResponseDTO signUp(String email, String profileImg, String platformId, String clientIp, String fcmToken) {
@@ -57,6 +56,7 @@ public class AuthService {
     private LoginResponseDTO getLoginResponse(Member targetMember, String clientIp, boolean isRegisteredBefore) {
         String accessToken = jwtTokenProvider.createAccessToken(targetMember.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken(targetMember.getId());
+
         // Redis 에 refresh token 저장
         redisTemplate.opsForValue().set(refreshToken, clientIp);
         log.info("오늘 알바에 로그인하였습니다.");

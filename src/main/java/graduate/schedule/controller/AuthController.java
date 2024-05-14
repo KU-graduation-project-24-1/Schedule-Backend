@@ -23,7 +23,7 @@ public class AuthController {
     private final AuthService authService;
 
     /**
-     * @apiNote 로그인 api
+     * @apiNote (카카오) 로그인 api
      * */
     @PostMapping("/login")
     public BaseResponse<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO loginRequest, @ClientIp String clientIp) {

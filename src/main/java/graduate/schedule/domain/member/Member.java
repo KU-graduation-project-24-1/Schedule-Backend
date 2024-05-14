@@ -25,9 +25,6 @@ public class Member {
     @Column(length = 500)
     private String platformId;
 
-    @Column(length = 500)
-    private String imgUrl;
-
     private String fcmToken;
 
     public static Member createMember(String email, String profileImg, String platformId, String fcmToken) {
