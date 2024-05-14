@@ -1,7 +1,8 @@
 package graduate.schedule.controller;
 
+import graduate.schedule.annotation.MemberId;
 import graduate.schedule.common.response.BaseResponse;
-import graduate.schedule.dto.web.request.RequestWithOnlyMemberIdDTO;
+import graduate.schedule.domain.member.Member;
 import graduate.schedule.dto.web.response.member.MyStoreResponseDTO;
 import graduate.schedule.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +18,8 @@ public class MemberController {
     private final MemberService memberService;
 
     @GetMapping("/store")
-    public BaseResponse<MyStoreResponseDTO> getMyStores(@RequestBody @Valid RequestWithOnlyMemberIdDTO memberRequest) {
-        MyStoreResponseDTO response = memberService.getMyStores(memberRequest.getMemberId());
+    public BaseResponse<MyStoreResponseDTO> getMyStores(@MemberId @Valid Member member) {
+        MyStoreResponseDTO response = memberService.getMyStores(member);
         return new BaseResponse<>(response);
     }
 }
