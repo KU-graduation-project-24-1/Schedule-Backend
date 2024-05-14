@@ -11,7 +11,6 @@ import graduate.schedule.dto.store.AvailableScheduleInDayDTO;
 import graduate.schedule.dto.store.AvailableTimeInDayDTO;
 import graduate.schedule.dto.store.WorkScheduleOnDayDTO;
 import graduate.schedule.dto.store.WorkerAndTimeDTO;
-import graduate.schedule.dto.web.request.*;
 import graduate.schedule.dto.web.request.store.*;
 import graduate.schedule.dto.web.response.store.*;
 import graduate.schedule.dto.web.request.store.CreateStoreRequestDTO;
@@ -52,12 +51,9 @@ public class StoreService {
     static final int ASCII_LOWERCASE_A = 97;
     private final int TARGET_STRING_LENGTH = 8;
 
-    public CreateStoreResponseDTO createStore(CreateStoreRequestDTO storeRequest) {
+    public CreateStoreResponseDTO createStore(Member storeCreator, CreateStoreRequestDTO storeRequest) {
         String inviteCode = getRandomInviteCode();
         LocalDateTime codeGeneratedTime = LocalDateTime.now();
-
-        Member storeCreator = memberRepository.findById(storeRequest.getMemberId())
-                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
 
         Store newStore = Store.createStore(storeRequest.getStoreName(), storeRequest.getBusinessRegistrationNumber(), inviteCode, codeGeneratedTime, storeCreator);
         storeRepository.save(newStore);
@@ -107,11 +103,9 @@ public class StoreService {
         }
     }
 
-    public void joinStore(JoinStoreRequestDTO storeRequest) {
+    public void joinStore(Member member, RequestWithOnlyStoreIdDTO storeRequest) {
         Store store = storeRepository.findById(storeRequest.getStoreId())
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
-        Member member = memberRepository.findById(storeRequest.getMemberId())
-                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
 
         if (storeMemberRepository.existsMember(member, store)) {
             throw new StoreException(ALREADY_EXIST_STORE_MEMBER);
@@ -120,11 +114,12 @@ public class StoreService {
         StoreMember.createEmployee(store, member);
     }
 
-    public RegenerateInviteCodeResponseDTO regenerateInviteCode(RegenerateInviteCodeRequestDTO storeRequest) {
+    public RegenerateInviteCodeResponseDTO regenerateInviteCode(Member member, RequestWithOnlyStoreIdDTO storeRequest) {
         Store store = storeRepository.findById(storeRequest.getStoreId())
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
-        Member member = memberRepository.findById(storeRequest.getMemberId())
-                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+        if (!storeMemberRepository.existsMember(member, store)) {
+            throw new StoreMemberException(NOT_STORE_MEMBER);
+        }
 
         if (!storeMemberRepository.isExecutive(member, store)) {
             throw new MemberException(NOT_EXECUTIVE);
@@ -169,11 +164,9 @@ public class StoreService {
         return new BusinessValidateRequestDTO(businessDataList);
     }
 
-    public WorkScheduleOnMonthResponseDTO getScheduleOnMonth(Long storeId, String searchMonth, RequestWithOnlyMemberIdDTO storeRequest) {
+    public WorkScheduleOnMonthResponseDTO getScheduleOnMonth(Member member, Long storeId, String searchMonth) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
-        Member member = memberRepository.findById(storeRequest.getMemberId())
-                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
 
         List<Date> existingWorkingDatesOnMonth = storeMemberWorkingTimeRepository.findDatesByStoreAndMonth(store, searchMonth);
         List<WorkScheduleOnDayDTO> daySchedules = existingWorkingDatesOnMonth.stream()
@@ -205,11 +198,9 @@ public class StoreService {
         );
     }
 
-    public AvailableScheduleOnMonthResponseDTO getAvailableScheduleOnMonth(Long storeId, String searchMonth, RequestWithOnlyMemberIdDTO storeRequest) {
+    public AvailableScheduleOnMonthResponseDTO getAvailableScheduleOnMonth(Member member, Long storeId, String searchMonth) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
-        Member member = memberRepository.findById(storeRequest.getMemberId())
-                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
         StoreMemberGrade memberGrade = storeMemberRepository.findByStoreAndMember(store, member)
                 .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER))
                 .getMemberGrade();
@@ -239,11 +230,9 @@ public class StoreService {
         );
     }
 
-    public AddAvailableScheduleResponseDTO addAvailableScheduleInDay(AddAvailableScheduleRequestDTO storeRequest) {
+    public AddAvailableScheduleResponseDTO addAvailableScheduleInDay(Member member, AddAvailableScheduleRequestDTO storeRequest) {
         Store store = storeRepository.findById(storeRequest.getStoreId())
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
-        Member member = memberRepository.findById(storeRequest.getMemberId())
-                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
         if (!storeMemberRepository.existsMember(member, store)) {
             throw new StoreMemberException(NOT_STORE_MEMBER);
         }
@@ -261,11 +250,9 @@ public class StoreService {
 
     }
 
-    public void deleteAvailableScheduleInDay(DeleteAvailableScheduleRequestDTO storeRequest) {
+    public void deleteAvailableScheduleInDay(Member member, DeleteAvailableScheduleRequestDTO storeRequest) {
         Store store = storeRepository.findById(storeRequest.getStoreId())
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
-        Member member = memberRepository.findById(storeRequest.getMemberId())
-                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
         if (!storeMemberRepository.existsMember(member, store)) {
             throw new StoreMemberException(NOT_STORE_MEMBER);
         }

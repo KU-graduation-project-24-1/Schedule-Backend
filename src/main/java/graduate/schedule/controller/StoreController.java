@@ -1,7 +1,8 @@
 package graduate.schedule.controller;
 
+import graduate.schedule.annotation.MemberId;
 import graduate.schedule.common.response.BaseResponse;
-import graduate.schedule.dto.web.request.*;
+import graduate.schedule.domain.member.Member;
 import graduate.schedule.dto.web.request.store.*;
 import graduate.schedule.dto.web.response.store.*;
 import graduate.schedule.dto.web.request.store.CreateStoreRequestDTO;
@@ -33,16 +34,16 @@ public class StoreController {
      * @apiNote 가게 생성 api
      * */
     @PostMapping
-    public BaseResponse<CreateStoreResponseDTO> createStore(@RequestBody @Valid CreateStoreRequestDTO storeRequest) {
-        CreateStoreResponseDTO response = storeService.createStore(storeRequest);
+    public BaseResponse<CreateStoreResponseDTO> createStore(@MemberId @Valid Member member, @RequestBody @Valid CreateStoreRequestDTO storeRequest) {
+        CreateStoreResponseDTO response = storeService.createStore(member, storeRequest);
         return new BaseResponse<>(response);
     }
     /**
      * @apiNote 초대 코드 재발급 api
      * */
     @PostMapping("/invite-code")
-    public BaseResponse<RegenerateInviteCodeResponseDTO> createStore(@RequestBody @Valid RegenerateInviteCodeRequestDTO storeRequest) {
-        RegenerateInviteCodeResponseDTO response = storeService.regenerateInviteCode(storeRequest);
+    public BaseResponse<RegenerateInviteCodeResponseDTO> createStore(@MemberId @Valid Member member, @RequestBody @Valid RequestWithOnlyStoreIdDTO storeRequest) {
+        RegenerateInviteCodeResponseDTO response = storeService.regenerateInviteCode(member, storeRequest);
         return new BaseResponse<>(response);
     }
 
@@ -59,8 +60,8 @@ public class StoreController {
      * @apiNote 가게 참가 api
      * */
     @PostMapping("/join")
-    public BaseResponse<String> joinTeam(@RequestBody @Valid JoinStoreRequestDTO storeRequest) {
-        storeService.joinStore(storeRequest);
+    public BaseResponse<String> joinTeam(@MemberId @Valid Member member, @RequestBody @Valid RequestWithOnlyStoreIdDTO storeRequest) {
+        storeService.joinStore(member, storeRequest);
         return new BaseResponse<>(ENTER_TO_STORE.getMessage());
     }
 
@@ -68,8 +69,8 @@ public class StoreController {
      * @apiNote 특정 달의 모든 근무 일정 조회 api
      * */
     @GetMapping("/{storeId}/schedule/{searchMonth}") //yyyy-MM
-    public BaseResponse<WorkScheduleOnMonthResponseDTO> getScheduleOnMonth(@PathVariable @Valid Long storeId, @PathVariable @Valid String searchMonth, @RequestBody @Valid RequestWithOnlyMemberIdDTO storeRequest) {
-        WorkScheduleOnMonthResponseDTO response = storeService.getScheduleOnMonth(storeId, searchMonth, storeRequest);
+    public BaseResponse<WorkScheduleOnMonthResponseDTO> getScheduleOnMonth(@MemberId @Valid Member member, @PathVariable @Valid Long storeId, @PathVariable @Valid String searchMonth) {
+        WorkScheduleOnMonthResponseDTO response = storeService.getScheduleOnMonth(member, storeId, searchMonth);
         return new BaseResponse<>(response);
     }
 
@@ -77,8 +78,8 @@ public class StoreController {
      * @apiNote 특정 달의 근무 가능한 시간 조회 api
      * */
     @GetMapping("/{storeId}/available-schedule/{searchMonth}")
-    public BaseResponse<AvailableScheduleOnMonthResponseDTO> getAvailableScheduleOnMonth(@PathVariable @Valid Long storeId, @PathVariable @Valid String searchMonth, @RequestBody @Valid RequestWithOnlyMemberIdDTO storeRequest) {
-        AvailableScheduleOnMonthResponseDTO response = storeService.getAvailableScheduleOnMonth(storeId, searchMonth, storeRequest);
+    public BaseResponse<AvailableScheduleOnMonthResponseDTO> getAvailableScheduleOnMonth(@MemberId @Valid Member member, @PathVariable @Valid Long storeId, @PathVariable @Valid String searchMonth) {
+        AvailableScheduleOnMonthResponseDTO response = storeService.getAvailableScheduleOnMonth(member, storeId, searchMonth);
         return new BaseResponse<>(response);
     }
 
@@ -86,8 +87,8 @@ public class StoreController {
     * @apiNote 일 단위 근무 가능한 시간 추가 api
     */
     @PostMapping("/available-schedule")
-    public BaseResponse<AddAvailableScheduleResponseDTO> addAvailableScheduleInDay(@RequestBody @Valid AddAvailableScheduleRequestDTO storeRequest) {
-        AddAvailableScheduleResponseDTO response = storeService.addAvailableScheduleInDay(storeRequest);
+    public BaseResponse<AddAvailableScheduleResponseDTO> addAvailableScheduleInDay(@MemberId @Valid Member member, @RequestBody @Valid AddAvailableScheduleRequestDTO storeRequest) {
+        AddAvailableScheduleResponseDTO response = storeService.addAvailableScheduleInDay(member, storeRequest);
         return new BaseResponse<>(response);
     }
 
@@ -95,8 +96,8 @@ public class StoreController {
     * @apiNote 일 단위 근무 가능한 시간 삭제 api
     */
     @DeleteMapping("/available-schedule")
-    public BaseResponse<String> deleteAvailableScheduleInDay(@RequestBody @Valid DeleteAvailableScheduleRequestDTO storeRequest) {
-        storeService.deleteAvailableScheduleInDay(storeRequest);
+    public BaseResponse<String> deleteAvailableScheduleInDay(@MemberId @Valid Member member, @RequestBody @Valid DeleteAvailableScheduleRequestDTO storeRequest) {
+        storeService.deleteAvailableScheduleInDay(member, storeRequest);
         return new BaseResponse<>(SUCCESS_DELETE_AVAILABLE_SCHEDULE.getMessage());
     }
 }
