@@ -1,6 +1,8 @@
 package graduate.schedule.controller;
 
+import graduate.schedule.annotation.MemberId;
 import graduate.schedule.common.response.BaseResponse;
+import graduate.schedule.domain.member.Member;
 import graduate.schedule.dto.web.request.FcmSendRequestDTO;
 import graduate.schedule.service.FirebaseCloudMessageService;
 import jakarta.validation.Valid;
@@ -16,14 +18,14 @@ import java.io.IOException;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/fcm")
+@RequestMapping("/notification")
 public class FCMController {
     private final FirebaseCloudMessageService fcmService;
 
-    @PostMapping("/send")
-    public BaseResponse<String> pushMessage(@RequestBody @Valid FcmSendRequestDTO fcmSendRequestDTO) throws IOException {
-        String response = fcmService.sendMessageTo(fcmSendRequestDTO);
+    @PostMapping
+    public BaseResponse<String> pushMessage(@MemberId @Valid Member member, @RequestBody @Valid FcmSendRequestDTO fcmSendRequestDTO) throws IOException {
+        fcmService.sendMessageTo(member, fcmSendRequestDTO);
 
-        return new BaseResponse<>(response);
+        return new BaseResponse<>("푸시 알림 전송에 성공하였습니다.");
     }
 }

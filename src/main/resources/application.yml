@@ -48,8 +48,8 @@ feign:
 ---
 
 firebase:
-  project:
-    id: ${FIREBASE_PROJECT_ID}
+  api:
+    url: ${FIREBASE_API_URL}
   key:
     path: ${FCM_KEY_PATH}
 
