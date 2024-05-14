@@ -37,4 +37,8 @@ public class Member {
 
         return member;
     }
+
+    public void setName(String memberName) {
+        this.name = memberName;
+    }
 }

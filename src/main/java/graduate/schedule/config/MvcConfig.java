@@ -28,5 +28,6 @@ public class MvcConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         log.info("Interceptor 등록");
         registry.addInterceptor(bearerAuthInterceptor).addPathPatterns("/auth/regenerate-token");
+        registry.addInterceptor(bearerAuthInterceptor).addPathPatterns("/auth/name");
     }
 }

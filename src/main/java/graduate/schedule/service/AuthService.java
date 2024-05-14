@@ -6,6 +6,7 @@ import graduate.schedule.common.exception.MemberException;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.dto.auth.KakaoMemberDTO;
 import graduate.schedule.dto.web.request.auth.LoginRequestDTO;
+import graduate.schedule.dto.web.request.auth.SetMemberNameRequestDTO;
 import graduate.schedule.dto.web.response.auth.LoginResponseDTO;
 import graduate.schedule.repository.MemberRepository;
 import graduate.schedule.utils.auth.JwtTokenProvider;
@@ -39,7 +40,7 @@ public class AuthService {
         Optional<Member> findMember = memberRepository.findByPlatformId(platformId);
 
         //회원가입이 되어 있는 멤버
-        return findMember.map(member -> getLoginResponse(member, clientIp, true))
+        return findMember.map(member -> getLoginResponse(member, clientIp))
                 //회원가입이 필요한 멤버
                 .orElseGet(() -> signUp(email, profileImg, platformId, clientIp, fcmToken));
     }
@@ -50,10 +51,10 @@ public class AuthService {
         memberRepository.save(signUpMember);
         log.info("오늘 알바 회원 가입");
 
-        return getLoginResponse(signUpMember, clientIp, false);
+        return getLoginResponse(signUpMember, clientIp);
     }
 
-    private LoginResponseDTO getLoginResponse(Member targetMember, String clientIp, boolean isRegisteredBefore) {
+    private LoginResponseDTO getLoginResponse(Member targetMember, String clientIp) {
         String accessToken = jwtTokenProvider.createAccessToken(targetMember.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken(targetMember.getId());
 
@@ -61,10 +62,10 @@ public class AuthService {
         redisTemplate.opsForValue().set(refreshToken, clientIp);
         log.info("오늘 알바에 로그인하였습니다.");
 
-        return new LoginResponseDTO(targetMember.getEmail(), accessToken, refreshToken, targetMember.getProfileImg(), isRegisteredBefore);
+        return new LoginResponseDTO(targetMember.getEmail(), accessToken, refreshToken, targetMember.getProfileImg(), targetMember.getName());
     }
 
-    public LoginResponseDTO regenerateToken(Long memberId, String refreshToken, String clientIp) {
+    public LoginResponseDTO regenerateToken(Member member, String refreshToken, String clientIp) {
         // Redis 에서 해당 refresh token 찾기
         String existingIp = redisTemplate.opsForValue().get(refreshToken);
 
@@ -72,10 +73,7 @@ public class AuthService {
         validateRefreshTokenExisting(existingIp);
         compareClientIpFromRedis(existingIp, clientIp);
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
-
-        return getLoginResponse(member, clientIp, true);
+        return getLoginResponse(member, clientIp);
     }
 
     private void validateRefreshTokenExisting(String existingIp) {
@@ -90,5 +88,9 @@ public class AuthService {
             log.error(IP_MISMATCH.getMessage());
             throw new InvalidTokenException(IP_MISMATCH);
         }
+    }
+
+    public void setMemberName(Member member, SetMemberNameRequestDTO authRequest) {
+        member.setName(authRequest.getMemberName());
     }
 }
