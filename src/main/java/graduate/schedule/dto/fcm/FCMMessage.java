@@ -25,6 +25,5 @@ public class FCMMessage {
     public static class Notification {
         private final String title;
         private final String body;
-        private final String image;
     }
 }
