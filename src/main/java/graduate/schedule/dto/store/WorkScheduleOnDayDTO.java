@@ -10,6 +10,5 @@ import java.util.List;
 @AllArgsConstructor
 public class WorkScheduleOnDayDTO {
     private Date date;
-//    private WorkingHeadCountDTO workingHeadCount;
     private List<WorkerAndTimeDTO> workDatas;
 }
