@@ -1,4 +1,4 @@
-package graduate.schedule.dto.web.response;
+package graduate.schedule.dto.web.request.store;
 
 import lombok.Getter;
 

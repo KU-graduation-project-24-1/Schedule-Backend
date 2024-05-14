@@ -2,9 +2,8 @@ package graduate.schedule.service;
 
 import graduate.schedule.common.exception.MemberException;
 import graduate.schedule.domain.member.Member;
-import graduate.schedule.domain.store.Store;
 import graduate.schedule.dto.store.MyStoreDTO;
-import graduate.schedule.dto.web.response.MyStoreResponseDTO;
+import graduate.schedule.dto.web.response.member.MyStoreResponseDTO;
 import graduate.schedule.repository.MemberRepository;
 import graduate.schedule.repository.StoreMemberRepository;
 import lombok.RequiredArgsConstructor;

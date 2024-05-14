@@ -2,7 +2,9 @@ package graduate.schedule.controller;
 
 import graduate.schedule.common.response.BaseResponse;
 import graduate.schedule.dto.web.request.*;
-import graduate.schedule.dto.web.response.*;
+import graduate.schedule.dto.web.request.store.*;
+import graduate.schedule.dto.web.response.store.*;
+import graduate.schedule.dto.web.request.store.CreateStoreRequestDTO;
 import graduate.schedule.service.StoreService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
