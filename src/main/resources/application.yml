@@ -23,6 +23,19 @@ spring:
   sql:
     init:
       platform: mysql
+  data:
+    redis:
+      host: ${DATA_REDIS_HOST}
+      port: ${DATA_REDIS_PORT}
+  access-token:
+    expired-date: ${ACCESS_TOKEN_EXPIRED_DATE}
+
+---
+
+oauth:
+  kakao:
+    iss: "https://kauth.kakao.com"
+    client-id: ${OAUTH_KAKAO_CLIENT_ID} # Kakao Developers REST API Key
 
 ---
 
@@ -39,6 +52,12 @@ firebase:
     id: ${FIREBASE_PROJECT_ID}
   key:
     path: ${FCM_KEY_PATH}
+
+---
+
+secret:
+  jwt-secret-key: ${JWT_SECRET_KEY}
+  jwt-expired-in: ${JWT_EXPIRED_IN}
 
 ---
 

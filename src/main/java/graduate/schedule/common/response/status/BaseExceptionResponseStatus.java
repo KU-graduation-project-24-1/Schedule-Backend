@@ -13,6 +13,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     BUSINESS_CHECKED(1002, HttpStatus.OK.value(), "사업자 정보가 성공적으로 확인되었습니다."),
     SUCCESS_ADD_AVAILABLE_SCHEDULE(1003, HttpStatus.OK.value(), "근무 가능한 시간 정보를 등록하였습니다."),
     SUCCESS_DELETE_AVAILABLE_SCHEDULE(1004, HttpStatus.OK.value(), "근무 가능한 시간 정보를 삭제하였습니다."),
+    SUCCESS_SAVE_MEMBER_NAME(1005, HttpStatus.OK.value(), "사용자 이름을 설정하였습니다."),
 
     /**
      * 2000: Request 오류 (BAD_REQUEST)

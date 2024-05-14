@@ -1,4 +1,4 @@
-package graduate.schedule.dto.web.response;
+package graduate.schedule.dto.web.response.member;
 
 import graduate.schedule.dto.store.MyStoreDTO;
 import lombok.AllArgsConstructor;

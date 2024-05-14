@@ -16,12 +16,29 @@ public class Member {
     @Column(name = "member_name")
     private String name;
 
+    @Column(name = "member_email")
+    private String email;
+
+    @Column(name = "member_image")
+    private String profileImg;
+
     @Column(length = 500)
     private String platformId;
 
-    @Column(length = 500)
-    private String imgUrl;
+    private String fcmToken;
 
-    private String FcmToken;
+    public static Member createMember(String email, String profileImg, String platformId, String fcmToken) {
+        Member member = new Member();
 
+        member.email = email;
+        member.profileImg = profileImg;
+        member.platformId = platformId;
+        member.fcmToken = fcmToken;
+
+        return member;
+    }
+
+    public void setName(String memberName) {
+        this.name = memberName;
+    }
 }

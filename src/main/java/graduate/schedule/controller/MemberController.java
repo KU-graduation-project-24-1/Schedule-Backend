@@ -2,7 +2,7 @@ package graduate.schedule.controller;
 
 import graduate.schedule.common.response.BaseResponse;
 import graduate.schedule.dto.web.request.RequestWithOnlyMemberIdDTO;
-import graduate.schedule.dto.web.response.MyStoreResponseDTO;
+import graduate.schedule.dto.web.response.member.MyStoreResponseDTO;
 import graduate.schedule.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
