@@ -31,4 +31,13 @@ public class AuthController {
         return new BaseResponse<>(response);
     }
 
+    /**
+     * @apiNote 토큰 재발급 api
+     * */
+    @PostMapping("/regenerate-token")
+    public BaseResponse<LoginResponseDTO> regenerateToken(@MemberId @Valid Long memberId, @RefreshToken @Valid String refreshToken, @ClientIp String clientIp) {
+        LoginResponseDTO response = authService.regenerateToken(memberId, refreshToken, clientIp);
+        return new BaseResponse<>(response);
+    }
+
 }
