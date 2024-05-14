@@ -25,7 +25,7 @@ public class BearerAuthInterceptor implements HandlerInterceptor {
         httpRequest.setAttribute("token", token);
         log.debug("Token: {}", token);
 
-        if (token == null || token.length() == 0) {
+        if (token == null || token.isEmpty()) {
             return true;
         }
 
