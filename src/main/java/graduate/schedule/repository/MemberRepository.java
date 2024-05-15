@@ -7,6 +7,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    Optional<Member> findByPlatformId(String platformId);
+    Optional<Member> findByPlatformId(@Param("platformId") String platformId);
 
-}
+}   
