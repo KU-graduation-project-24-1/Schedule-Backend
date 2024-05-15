@@ -15,7 +15,7 @@ public interface StoreMemberWorkingTimeRepository extends JpaRepository<StoreMem
             "join smwt.store s on s=:store " +
             "where FUNCTION('DATE_FORMAT', smwt.date, '%Y-%m')=:searchMonth " +
             "order by smwt.date")
-    List<Date> findDatesByStoreAndMonth(@Param("store") Store store, @Param("searchMonth") String searchMonth);
+    List<Date> findDatesByStoreAndMonthOrderByDate(@Param("store") Store store, @Param("searchMonth") String searchMonth);
 
     @EntityGraph(attributePaths = {"member"})
     List<StoreMemberWorkingTime> findSchedulesByStoreAndDate(Store store, Date date);

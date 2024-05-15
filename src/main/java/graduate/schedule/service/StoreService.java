@@ -168,7 +168,7 @@ public class StoreService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
 
-        List<Date> existingWorkingDatesOnMonth = storeMemberWorkingTimeRepository.findDatesByStoreAndMonth(store, searchMonth);
+        List<Date> existingWorkingDatesOnMonth = storeMemberWorkingTimeRepository.findDatesByStoreAndMonthOrderByDate(store, searchMonth);
         List<WorkScheduleOnDayDTO> daySchedules = existingWorkingDatesOnMonth.stream()
                 .map(date -> getDateSchedule(store, member, date)).toList();
 
@@ -222,7 +222,8 @@ public class StoreService {
                         time.getId(),
                         timeDeleteSeconds(time.getAvailableStartTime()),
                         timeDeleteSeconds(time.getAvailableEndTime())
-                )).toList();
+                ))
+                .sorted(Comparator.comparing(AvailableTimeInDayDTO::getStartTime)).toList();
 
         return new AvailableScheduleInDayDTO(
                 date,

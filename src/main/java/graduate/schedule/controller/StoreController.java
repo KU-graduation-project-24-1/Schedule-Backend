@@ -75,7 +75,7 @@ public class StoreController {
     }
 
     /**
-     * @apiNote 특정 달의 근무 가능한 시간 조회 api
+     * @apiNote 특정 멤버의 특정 달에 근무 가능한 시간 조회 api
      * */
     @GetMapping("/{storeId}/available-schedule/{searchMonth}")
     public BaseResponse<AvailableScheduleOnMonthResponseDTO> getAvailableScheduleOnMonth(@MemberId @Valid Member member, @PathVariable @Valid Long storeId, @PathVariable @Valid String searchMonth) {
