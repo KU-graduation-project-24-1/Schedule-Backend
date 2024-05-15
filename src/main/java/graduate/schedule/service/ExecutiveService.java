@@ -8,6 +8,7 @@ import graduate.schedule.domain.store.Store;
 import graduate.schedule.domain.store.StoreMember;
 import graduate.schedule.domain.store.StoreMemberGrade;
 import graduate.schedule.dto.store.EmployeeDTO;
+import graduate.schedule.dto.web.request.DeleteStoreMemberRequestDTO;
 import graduate.schedule.dto.web.request.SetMemberGradeRequestDTO;
 import graduate.schedule.dto.web.response.StoreAllEmployeeResponseDTO;
 import graduate.schedule.repository.MemberRepository;
@@ -46,9 +47,21 @@ public class ExecutiveService {
     }
 
     public void setMemberGrade(Member member, SetMemberGradeRequestDTO executiveRequest) {
-        Store store = storeRepository.findById(executiveRequest.getStoreId())
+        StoreMember storeMember = defaultExecutiveValidation(executiveRequest.getStoreId(), executiveRequest.getEmployeeId(), member);
+
+        StoreMemberGrade memberGrade = StoreMemberGrade.findByGrade(executiveRequest.getMemberGrade());
+        storeMember.setMemberGrade(memberGrade);
+    }
+
+    public void deleteStoreMember(Member member, DeleteStoreMemberRequestDTO executiveRequest) {
+        StoreMember storeMember = defaultExecutiveValidation(executiveRequest.getStoreId(), executiveRequest.getEmployeeId(), member);
+        storeMemberRepository.delete(storeMember);
+    }
+
+    private StoreMember defaultExecutiveValidation(Long storeId, Long employeeId, Member member) {
+        Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
-        Member employee = memberRepository.findById(executiveRequest.getEmployeeId())
+        Member employee = memberRepository.findById(employeeId)
                 .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
         StoreMember storeMember = storeMemberRepository.findByStoreAndMember(store, employee)
                 .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER));
@@ -56,7 +69,6 @@ public class ExecutiveService {
             throw new MemberException(NOT_EXECUTIVE);
         }
 
-        StoreMemberGrade memberGrade = StoreMemberGrade.findByGrade(executiveRequest.getMemberGrade());
-        storeMember.setMemberGrade(memberGrade);
+        return storeMember;
     }
 }
