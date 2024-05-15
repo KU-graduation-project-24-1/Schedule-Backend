@@ -120,7 +120,7 @@ public class StoreService {
         if (!storeMemberRepository.existsMember(member, store)) {
             throw new StoreMemberException(NOT_STORE_MEMBER);
         }
-        if (!storeMemberRepository.isExecutive(member, store)) {
+        if (!storeMemberRepository.isExecutive(store, member)) {
             throw new MemberException(NOT_EXECUTIVE);
         }
 

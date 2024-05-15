@@ -4,16 +4,12 @@ import graduate.schedule.common.exception.MemberException;
 import graduate.schedule.common.exception.StoreException;
 import graduate.schedule.common.exception.StoreMemberException;
 import graduate.schedule.domain.member.Member;
-import graduate.schedule.domain.store.Store;
-import graduate.schedule.domain.store.StoreMember;
-import graduate.schedule.domain.store.StoreMemberGrade;
+import graduate.schedule.domain.store.*;
 import graduate.schedule.dto.store.EmployeeDTO;
 import graduate.schedule.dto.web.request.DeleteStoreMemberRequestDTO;
 import graduate.schedule.dto.web.request.SetMemberGradeRequestDTO;
 import graduate.schedule.dto.web.response.StoreAllEmployeeResponseDTO;
-import graduate.schedule.repository.MemberRepository;
-import graduate.schedule.repository.StoreMemberRepository;
-import graduate.schedule.repository.StoreRepository;
+import graduate.schedule.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,6 +27,8 @@ public class ExecutiveService {
     private final StoreRepository storeRepository;
     private final MemberRepository memberRepository;
     private final StoreMemberRepository storeMemberRepository;
+    private final StoreMemberWorkingTimeRepository storeMemberWorkingTimeRepository;
+    private final StoreMemberAvailableTimeRepository storeMemberAvailableTimeRepository;
 
     public StoreAllEmployeeResponseDTO getAllEmployees(Member member, Long storeId) {
         Store store = storeRepository.findById(storeId)
@@ -65,10 +63,23 @@ public class ExecutiveService {
                 .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
         StoreMember storeMember = storeMemberRepository.findByStoreAndMember(store, employee)
                 .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER));
-        if (!storeMemberRepository.isExecutive(member, store)) {
+        if (!storeMemberRepository.isExecutive(store, member)) {
             throw new MemberException(NOT_EXECUTIVE);
         }
 
         return storeMember;
+    }
+
+    public void deleteStore(Member member, Long storeId) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        if (!storeMemberRepository.isExecutive(store, member)) {
+            throw new MemberException(NOT_EXECUTIVE);
+        }
+
+        storeMemberAvailableTimeRepository.deleteAllByStore(store);
+        storeMemberWorkingTimeRepository.deleteAllByStore(store);
+        storeMemberRepository.deleteAllByStore(store);
+        storeRepository.delete(store);
     }
 }

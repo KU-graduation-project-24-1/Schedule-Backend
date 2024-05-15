@@ -12,7 +12,8 @@ import java.util.List;
 @Entity
 @Getter
 public class Store {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "store_id")
     private Long id;
 
@@ -27,13 +28,13 @@ public class Store {
 
     private LocalDateTime codeGeneratedTime;
 
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "store", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     private List<StoreMember> members = new ArrayList<>();
 
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "store", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     private List<StoreMemberWorkingTime> memberWorkingTimes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "store", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     private List<StoreMemberAvailableTime> memberAvailableTimes = new ArrayList<>();
 
     public static Store createStore(String storeName, String businessRegistrationNumber, String inviteCode, LocalDateTime codeGeneratedTime, Member storeCreator) {
@@ -51,6 +52,7 @@ public class Store {
     public void addStoreMember(StoreMember storeMember) {
         this.members.add(storeMember);
     }
+
     public void addMemberAvailableTime(StoreMemberAvailableTime memberAvailableTime) {
         this.memberAvailableTimes.add(memberAvailableTime);
     }
