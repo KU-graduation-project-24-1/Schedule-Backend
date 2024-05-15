@@ -52,7 +52,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
      */
     NOT_FOUND_MEMBER(5000, HttpStatus.BAD_REQUEST.value(), "존재하지 않는 사용자입니다."),
     INVALID_PLATFORM(5001, HttpStatus.BAD_REQUEST.value(), "플랫폼 정보가 올바르지 않습니다."),
-    NOT_EXECUTIVE(5003, HttpStatus.BAD_REQUEST.value(), "가게의 사장 또는 매니저가 아닙니다."),
+    NOT_EXECUTIVE(5003, HttpStatus.BAD_REQUEST.value(), "가게 임원이 아닙니다.(권한 없음)"),
     NOT_STORE_MEMBER(5003, HttpStatus.BAD_REQUEST.value(), "가게 구성원이 아닙니다."),
 
     /**
