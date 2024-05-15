@@ -1,6 +1,5 @@
 package graduate.schedule.domain.store;
 
-import graduate.schedule.common.exception.BaseException;
 import graduate.schedule.common.exception.StoreMemberException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
