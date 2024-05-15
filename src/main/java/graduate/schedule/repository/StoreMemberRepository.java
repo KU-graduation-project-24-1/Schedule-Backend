@@ -4,6 +4,7 @@ import graduate.schedule.domain.member.Member;
 import graduate.schedule.domain.store.Store;
 import graduate.schedule.domain.store.StoreMember;
 import graduate.schedule.dto.store.MyStoreDTO;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,4 +32,7 @@ public interface StoreMemberRepository extends JpaRepository<StoreMember, Long> 
     Boolean isExecutive(@Param("member") Member member, @Param("store") Store store);
 
     Optional<StoreMember> findByStoreAndMember(@Param("store") Store store, @Param("member") Member member);
+
+    @EntityGraph(attributePaths = {"member"})
+    List<StoreMember> findByStore(@Param("store") Store store);
 }
