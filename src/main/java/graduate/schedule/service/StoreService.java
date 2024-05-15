@@ -222,7 +222,8 @@ public class StoreService {
                         time.getId(),
                         timeDeleteSeconds(time.getAvailableStartTime()),
                         timeDeleteSeconds(time.getAvailableEndTime())
-                )).toList();
+                ))
+                .sorted(Comparator.comparing(AvailableTimeInDayDTO::getStartTime)).toList();
 
         return new AvailableScheduleInDayDTO(
                 date,
