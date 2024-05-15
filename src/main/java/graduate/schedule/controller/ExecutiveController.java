@@ -1,19 +1,11 @@
 package graduate.schedule.controller;
 
 import graduate.schedule.annotation.MemberId;
-import graduate.schedule.common.exception.MemberException;
-import graduate.schedule.common.exception.StoreException;
-import graduate.schedule.common.exception.StoreMemberException;
 import graduate.schedule.common.response.BaseResponse;
 import graduate.schedule.domain.member.Member;
-import graduate.schedule.domain.store.Store;
-import graduate.schedule.domain.store.StoreMember;
 import graduate.schedule.dto.web.request.DeleteStoreMemberRequestDTO;
 import graduate.schedule.dto.web.request.SetMemberGradeRequestDTO;
 import graduate.schedule.dto.web.response.StoreAllEmployeeResponseDTO;
-import graduate.schedule.repository.MemberRepository;
-import graduate.schedule.repository.StoreMemberRepository;
-import graduate.schedule.repository.StoreRepository;
 import graduate.schedule.service.ExecutiveService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -54,5 +46,14 @@ public class ExecutiveController {
     public BaseResponse<String> deleteStoreMember(@MemberId @Valid Member member, @RequestBody @Valid DeleteStoreMemberRequestDTO executiveRequest) {
         executiveService.deleteStoreMember(member, executiveRequest);
         return new BaseResponse<>(SUCCESS_DELETE_STORE_MEMBER.getMessage());
+    }
+
+    /**
+     * @apiNote 가게 삭제 api
+     */
+    @DeleteMapping("/store/{storeId}")
+    public BaseResponse<String> deleteStore(@MemberId @Valid Member member, @PathVariable @Valid Long storeId) {
+        executiveService.deleteStore(member, storeId);
+        return new BaseResponse<>(SUCCESS_DELETE_STORE.getMessage());
     }
 }

@@ -6,6 +6,7 @@ import graduate.schedule.domain.store.StoreMember;
 import graduate.schedule.dto.store.MyStoreDTO;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -28,11 +29,16 @@ public interface StoreMemberRepository extends JpaRepository<StoreMember, Long> 
     @Query("select case " +
             "when sm.memberGrade='BOSS' or sm.memberGrade='MANAGER' then true " +
             "else false end " +
-            "from StoreMember sm where sm.member=:member and sm.store=:store")
-    Boolean isExecutive(@Param("member") Member member, @Param("store") Store store);
+            "from StoreMember sm where sm.store=:store and sm.member=:member")
+    Boolean isExecutive(@Param("store") Store store, @Param("member") Member member);
 
     Optional<StoreMember> findByStoreAndMember(@Param("store") Store store, @Param("member") Member member);
 
     @EntityGraph(attributePaths = {"member"})
     List<StoreMember> findByStore(@Param("store") Store store);
+
+    @Modifying
+    @Query("delete from StoreMember sm " +
+            "where sm.store=:store")
+    void deleteAllByStore(@Param("store") Store store);
 }

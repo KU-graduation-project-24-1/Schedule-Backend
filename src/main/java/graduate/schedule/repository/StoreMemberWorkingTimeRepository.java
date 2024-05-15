@@ -4,6 +4,7 @@ import graduate.schedule.domain.store.Store;
 import graduate.schedule.domain.store.StoreMemberWorkingTime;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -19,4 +20,9 @@ public interface StoreMemberWorkingTimeRepository extends JpaRepository<StoreMem
 
     @EntityGraph(attributePaths = {"member"})
     List<StoreMemberWorkingTime> findSchedulesByStoreAndDate(Store store, Date date);
+
+    @Modifying
+    @Query("delete from StoreMemberWorkingTime smwt " +
+            "where smwt.store=:store")
+    void deleteAllByStore(@Param("store") Store store);
 }

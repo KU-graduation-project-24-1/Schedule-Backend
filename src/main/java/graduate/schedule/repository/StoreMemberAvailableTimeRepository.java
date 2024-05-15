@@ -4,6 +4,7 @@ import graduate.schedule.domain.member.Member;
 import graduate.schedule.domain.store.Store;
 import graduate.schedule.domain.store.StoreMemberAvailableTime;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -19,4 +20,9 @@ public interface StoreMemberAvailableTimeRepository extends JpaRepository<StoreM
     List<Date> findAvailableDatesByStoreAndMemberAndMonthOrderByAvailableDate(@Param("store") Store store, @Param("member") Member member, @Param("searchMonth") String searchMonth);
 
     List<StoreMemberAvailableTime> findAvailableSchedulesByStoreAndAvailableDateOrderByAvailableStartTime(Store store, Date date);
+
+    @Modifying
+    @Query("delete from StoreMemberAvailableTime smat " +
+            "where smat.store=:store")
+    void deleteAllByStore(@Param("store") Store store);
 }
