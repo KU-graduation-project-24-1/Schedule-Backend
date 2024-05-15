@@ -1,7 +1,11 @@
 package graduate.schedule.domain.store;
 
+import graduate.schedule.common.exception.BaseException;
+import graduate.schedule.common.exception.StoreMemberException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.INVALID_MEMBER_GRADE;
 
 @Getter
 @RequiredArgsConstructor
@@ -10,5 +14,13 @@ public enum StoreMemberGrade {
 
     private final String grade;
 
+    public static StoreMemberGrade findByGrade(String grade) {
+        for (StoreMemberGrade memberGrade : values()) {
+            if (memberGrade.grade.equals(grade)) {
+                return memberGrade;
+            }
+        }
+        throw new StoreMemberException(INVALID_MEMBER_GRADE);
+    }
 }
 

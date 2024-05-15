@@ -44,4 +44,8 @@ public class StoreMember {
 
         return storeMember;
     }
+
+    public void setMemberGrade(StoreMemberGrade memberGrade) {
+         this.memberGrade = memberGrade;
+    }
 }
