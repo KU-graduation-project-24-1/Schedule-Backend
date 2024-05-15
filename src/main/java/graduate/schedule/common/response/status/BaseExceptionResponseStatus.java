@@ -14,6 +14,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     SUCCESS_ADD_AVAILABLE_SCHEDULE(1003, HttpStatus.OK.value(), "근무 가능한 시간 정보를 등록하였습니다."),
     SUCCESS_DELETE_AVAILABLE_SCHEDULE(1004, HttpStatus.OK.value(), "근무 가능한 시간 정보를 삭제하였습니다."),
     SUCCESS_SAVE_MEMBER_NAME(1005, HttpStatus.OK.value(), "사용자 이름을 설정하였습니다."),
+    SUCCESS_SET_MEMBER_GRADE(1006, HttpStatus.OK.value(), "고용 형태를 변경하였습니다."),
 
     /**
      * 2000: Request 오류 (BAD_REQUEST)
@@ -24,13 +25,13 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     INAPPROPRIATE_DATA(2003, HttpStatus.BAD_REQUEST.value(), "입력한 정보가 올바르지 않습니다."),
     INVALID_INVITE_CODE(2004, HttpStatus.BAD_REQUEST.value(), "초대 코드가 유효하지 않습니다."),
     BUSINESS_CHECK_FAILED(2005, HttpStatus.BAD_REQUEST.value(), "사업자 정보가 올바르지 않습니다."),
+    INVALID_MEMBER_GRADE(2006, HttpStatus.BAD_REQUEST.value(), "고용 형태가 올바르지 않습니다."),
 
     /**
      * 3000: Server, Database 오류 (INTERNAL_SERVER_ERROR)
      */
     SERVER_ERROR(3000, HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버에서 오류가 발생하였습니다."),
     DATABASE_ERROR(3001, HttpStatus.INTERNAL_SERVER_ERROR.value(), "데이터베이스에서 오류가 발생하였습니다."),
-    FIREBASE_ERROR(3002, HttpStatus.INTERNAL_SERVER_ERROR.value(), "파이어베이스 초기화 과정에서 오류가 발생하였습니다."),
 
     /**
      * 4000: Authorization 오류
@@ -51,9 +52,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
      * 5000: 회원 정보 오류
      */
     NOT_FOUND_MEMBER(5000, HttpStatus.BAD_REQUEST.value(), "존재하지 않는 사용자입니다."),
-    INVALID_PLATFORM(5001, HttpStatus.BAD_REQUEST.value(), "플랫폼 정보가 올바르지 않습니다."),
     NOT_EXECUTIVE(5003, HttpStatus.BAD_REQUEST.value(), "가게 임원이 아닙니다.(권한 없음)"),
-    NOT_STORE_MEMBER(5003, HttpStatus.BAD_REQUEST.value(), "가게 구성원이 아닙니다."),
+    NOT_STORE_MEMBER(5004, HttpStatus.BAD_REQUEST.value(), "가게 구성원이 아닙니다."),
 
     /**
      * 6000: Store 도메인 오류
