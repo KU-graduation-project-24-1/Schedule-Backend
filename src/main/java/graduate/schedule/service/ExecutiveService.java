@@ -118,6 +118,18 @@ public class ExecutiveService {
         }
     }
 
+    public void deleteSchedule(Member employer, Long storeId, Long scheduleId) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        StoreSchedule storeSchedule = storeScheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new StoreScheduleException(INVALID_STORE_SCHEDULE_ID));
+        if (!storeMemberRepository.isExecutive(store, employer)) {
+            throw new MemberException(NOT_EXECUTIVE);
+        }
+
+        storeScheduleRepository.delete(storeSchedule);
+    }
+
     private StoreMember defaultExecutiveValidation(Long storeId, Long employeeId, Member employer) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));

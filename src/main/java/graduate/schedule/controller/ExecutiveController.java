@@ -79,4 +79,14 @@ public class ExecutiveController {
         executiveService.changeWorkingTime(employer, executiveRequest);
         return new BaseResponse<>(SUCCESS_CHANGE_WORKING_TIME.getMessage());
     }
+
+    /**
+     * @apiNote 근무 정보 삭제 api
+     * 대타 요청 중 스케줄 변경이(근무자, 근무 시간) 있을 시 대타 요청 사라짐
+     */
+    @DeleteMapping("/{storeId}/schedule/{scheduleId}")
+    public BaseResponse<String> deleteSchedule(@MemberId @Valid Member employer, @PathVariable @Valid Long storeId, @PathVariable @Valid Long scheduleId) {
+        executiveService.deleteSchedule(employer, storeId, scheduleId);
+        return new BaseResponse<>(SUCCESS_DELETE_SCHEDULE.getMessage());
+    }
 }
