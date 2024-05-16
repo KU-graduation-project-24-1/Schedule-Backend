@@ -42,4 +42,8 @@ public class StoreSchedule {
         this.requestCover = requestCover;
     }
 
+    public void setWorkingTime(Time startTime, Time endTime) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
 }

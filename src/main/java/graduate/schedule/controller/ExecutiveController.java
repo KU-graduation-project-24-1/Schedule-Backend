@@ -69,4 +69,14 @@ public class ExecutiveController {
         executiveService.changeWorker(employer, executiveRequest);
         return new BaseResponse<>(SUCCESS_CHANGE_WORKER.getMessage());
     }
+
+    /**
+    * @apiNote 근무 시간 수정 api
+     * 대타 요청 중 스케줄 변경이(근무자, 근무 시간) 있을 시 대타 요청 사라짐
+    */
+    @PostMapping("/schedule/time")
+    public BaseResponse<String> changeWorkingTime(@MemberId @Valid Member employer, @RequestBody @Valid ChangeWorkingTimeRequestDTO executiveRequest) {
+        executiveService.changeWorkingTime(employer, executiveRequest);
+        return new BaseResponse<>(SUCCESS_CHANGE_WORKING_TIME.getMessage());
+    }
 }

@@ -98,6 +98,26 @@ public class ExecutiveService {
         }
     }
 
+    public void changeWorkingTime(Member employer, ChangeWorkingTimeRequestDTO executiveRequest) {
+        StoreSchedule storeSchedule = storeScheduleRepository.findById(executiveRequest.getScheduleId())
+                .orElseThrow(() -> new StoreScheduleException(INVALID_STORE_SCHEDULE_ID));
+        Store store = storeRepository.findById(storeSchedule.getStore().getId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        if (!storeMemberRepository.isExecutive(store, employer)) {
+            throw new MemberException(NOT_EXECUTIVE);
+        }
+
+        storeSchedule.setWorkingTime(
+                timeWithSeconds(executiveRequest.getStartTime()),
+                timeWithSeconds(executiveRequest.getEndTime())
+        );
+        //대타 요청 중 스케줄 변경이(근무자, 근무 시간) 있을 시 대타 요청 사라짐
+        if (storeSchedule.isRequestCover()) {
+            log.info("근무 정보가 수정되어 대체 근무 요청 여부를 false로 설정합니다.");
+            storeSchedule.setRequestCover(false);
+        }
+    }
+
     private StoreMember defaultExecutiveValidation(Long storeId, Long employeeId, Member employer) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
