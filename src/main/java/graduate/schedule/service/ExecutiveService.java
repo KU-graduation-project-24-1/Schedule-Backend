@@ -27,7 +27,7 @@ public class ExecutiveService {
     private final StoreRepository storeRepository;
     private final MemberRepository memberRepository;
     private final StoreMemberRepository storeMemberRepository;
-    private final StoreMemberWorkingTimeRepository storeMemberWorkingTimeRepository;
+    private final StoreScheduleRepository storeScheduleRepository;
     private final StoreMemberAvailableTimeRepository storeMemberAvailableTimeRepository;
 
     public StoreAllEmployeeResponseDTO getAllEmployees(Member member, Long storeId) {
@@ -78,7 +78,7 @@ public class ExecutiveService {
         }
 
         storeMemberAvailableTimeRepository.deleteAllByStore(store);
-        storeMemberWorkingTimeRepository.deleteAllByStore(store);
+        storeScheduleRepository.deleteAllByStore(store);
         storeMemberRepository.deleteAllByStore(store);
         storeRepository.delete(store);
     }

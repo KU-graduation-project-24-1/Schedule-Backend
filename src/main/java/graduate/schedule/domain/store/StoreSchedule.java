@@ -11,9 +11,9 @@ import java.sql.Time;
 @Entity
 @Getter
 @DynamicInsert
-public class StoreMemberWorkingTime {
+public class StoreSchedule {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_working_time_id")
+    @Column(name = "store_schedule_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 public class WorkerAndTimeDTO {
-    private Long memberWorkingTimeId;
+    private Long scheduleId;
     private Long memberId;
     private String memberName;
     private String memberGrade;
@@ -14,8 +14,8 @@ public class WorkerAndTimeDTO {
     private String endTime;
     private boolean isCoverRequested;
 
-    public WorkerAndTimeDTO(Long memberWorkingTimeId, Long memberId, String memberName, StoreMemberGrade memberGrade, boolean isMine, String startTime, String endTime, boolean isCoverRequested) {
-        this.memberWorkingTimeId = memberWorkingTimeId;
+    public WorkerAndTimeDTO(Long scheduleId, Long memberId, String memberName, StoreMemberGrade memberGrade, boolean isMine, String startTime, String endTime, boolean isCoverRequested) {
+        this.scheduleId = scheduleId;
         this.memberId = memberId;
         this.memberName = memberName;
         this.memberGrade = memberGrade.getGrade();
