@@ -32,7 +32,7 @@ public class Store {
     private List<StoreMember> members = new ArrayList<>();
 
     @OneToMany(mappedBy = "store", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    private List<StoreMemberWorkingTime> memberWorkingTimes = new ArrayList<>();
+    private List<StoreSchedule> memberWorkingTimes = new ArrayList<>();
 
     @OneToMany(mappedBy = "store", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     private List<StoreMemberAvailableTime> memberAvailableTimes = new ArrayList<>();

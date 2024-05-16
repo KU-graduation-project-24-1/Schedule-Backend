@@ -39,7 +39,7 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final MemberRepository memberRepository;
     private final StoreMemberRepository storeMemberRepository;
-    private final StoreMemberWorkingTimeRepository storeMemberWorkingTimeRepository;
+    private final StoreScheduleRepository storeScheduleRepository;
     private final StoreMemberAvailableTimeRepository storeMemberAvailableTimeRepository;
     private final BusinessCheckService businessCheckService;
 
@@ -167,7 +167,7 @@ public class StoreService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
 
-        List<Date> existingWorkingDatesOnMonth = storeMemberWorkingTimeRepository.findDatesByStoreAndMonthOrderByDate(store, searchMonth);
+        List<Date> existingWorkingDatesOnMonth = storeScheduleRepository.findDatesByStoreAndMonthOrderByDate(store, searchMonth);
         List<WorkScheduleOnDayDTO> daySchedules = existingWorkingDatesOnMonth.stream()
                 .map(date -> getDateSchedule(store, member, date)).toList();
 
@@ -175,7 +175,7 @@ public class StoreService {
     }
 
     private WorkScheduleOnDayDTO getDateSchedule(Store store, Member member, Date date) {
-        List<StoreMemberWorkingTime> schedulesIndDay = storeMemberWorkingTimeRepository.findSchedulesByStoreAndDate(store, date);
+        List<StoreSchedule> schedulesIndDay = storeScheduleRepository.findSchedulesByStoreAndDate(store, date);
 
         List<WorkerAndTimeDTO> workDatas = schedulesIndDay.stream()
                 .map(schedule -> new WorkerAndTimeDTO(
@@ -258,9 +258,9 @@ public class StoreService {
         }
 
         StoreMemberAvailableTime availableTime = storeMemberAvailableTimeRepository.findById(storeRequest.getStoreMemberAvailableTimeId())
-                .orElseThrow(() -> new StoreMemberTimeException(INVALID_STORE_MEMBER_AVAILABLE_TIME_ID));
+                .orElseThrow(() -> new StoreScheduleException(INVALID_STORE_MEMBER_AVAILABLE_TIME_ID));
         if (!availableTime.getMember().equals(member)) {
-            throw new StoreMemberTimeException(NOT_MEMBER_WORKING_DATA);
+            throw new StoreScheduleException(NOT_MEMBER_WORKING_DATA);
         }
         storeMemberAvailableTimeRepository.delete(availableTime);
     }

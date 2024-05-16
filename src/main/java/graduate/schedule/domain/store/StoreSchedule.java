@@ -11,9 +11,9 @@ import java.sql.Time;
 @Entity
 @Getter
 @DynamicInsert
-public class StoreMemberWorkingTime {
+public class StoreSchedule {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_working_time_id")
+    @Column(name = "store_schedule_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,4 +34,16 @@ public class StoreMemberWorkingTime {
 
     @Column(columnDefinition = "boolean default false")
     private boolean requestCover;
+
+    public void setMember(Member member) {
+        this.member = member;
+    }
+    public void setRequestCover(boolean requestCover) {
+        this.requestCover = requestCover;
+    }
+
+    public void setWorkingTime(Time startTime, Time endTime) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
 }
