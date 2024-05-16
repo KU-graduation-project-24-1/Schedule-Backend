@@ -30,9 +30,12 @@ public class ExecutiveService {
     private final StoreScheduleRepository storeScheduleRepository;
     private final StoreMemberAvailableTimeRepository storeMemberAvailableTimeRepository;
 
-    public StoreAllEmployeeResponseDTO getAllEmployees(Member member, Long storeId) {
+    public StoreAllEmployeeResponseDTO getAllEmployees(Member employer, Long storeId) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        if (!storeMemberRepository.isExecutive(store, employer)) {
+            throw new MemberException(NOT_EXECUTIVE);
+        }
 
         List<StoreMember> storeMembers = storeMemberRepository.findByStore(store);
         List<EmployeeDTO> employees = storeMembers.stream()
@@ -44,36 +47,36 @@ public class ExecutiveService {
         return new StoreAllEmployeeResponseDTO(employees);
     }
 
-    public void setMemberGrade(Member member, SetMemberGradeRequestDTO executiveRequest) {
-        StoreMember storeMember = defaultExecutiveValidation(executiveRequest.getStoreId(), executiveRequest.getEmployeeId(), member);
+    public void setMemberGrade(Member employer, SetMemberGradeRequestDTO executiveRequest) {
+        StoreMember storeMember = defaultExecutiveValidation(executiveRequest.getStoreId(), executiveRequest.getEmployeeId(), employer);
 
         StoreMemberGrade memberGrade = StoreMemberGrade.findByGrade(executiveRequest.getMemberGrade());
         storeMember.setMemberGrade(memberGrade);
     }
 
-    public void deleteStoreMember(Member member, DeleteStoreMemberRequestDTO executiveRequest) {
-        StoreMember storeMember = defaultExecutiveValidation(executiveRequest.getStoreId(), executiveRequest.getEmployeeId(), member);
+    public void deleteStoreMember(Member employer, DeleteStoreMemberRequestDTO executiveRequest) {
+        StoreMember storeMember = defaultExecutiveValidation(executiveRequest.getStoreId(), executiveRequest.getEmployeeId(), employer);
         storeMemberRepository.delete(storeMember);
     }
 
-    private StoreMember defaultExecutiveValidation(Long storeId, Long employeeId, Member member) {
+    private StoreMember defaultExecutiveValidation(Long storeId, Long employeeId, Member employer) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
         Member employee = memberRepository.findById(employeeId)
                 .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
         StoreMember storeMember = storeMemberRepository.findByStoreAndMember(store, employee)
                 .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER));
-        if (!storeMemberRepository.isExecutive(store, member)) {
+        if (!storeMemberRepository.isExecutive(store, employer)) {
             throw new MemberException(NOT_EXECUTIVE);
         }
 
         return storeMember;
     }
 
-    public void deleteStore(Member member, Long storeId) {
+    public void deleteStore(Member employer, Long storeId) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
-        if (!storeMemberRepository.isExecutive(store, member)) {
+        if (!storeMemberRepository.isExecutive(store, employer)) {
             throw new MemberException(NOT_EXECUTIVE);
         }
 

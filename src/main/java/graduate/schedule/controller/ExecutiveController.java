@@ -3,6 +3,7 @@ package graduate.schedule.controller;
 import graduate.schedule.annotation.MemberId;
 import graduate.schedule.common.response.BaseResponse;
 import graduate.schedule.domain.member.Member;
+import graduate.schedule.dto.web.request.ChangeWorkerRequestDTO;
 import graduate.schedule.dto.web.request.DeleteStoreMemberRequestDTO;
 import graduate.schedule.dto.web.request.SetMemberGradeRequestDTO;
 import graduate.schedule.dto.web.response.StoreAllEmployeeResponseDTO;
@@ -25,8 +26,8 @@ public class ExecutiveController {
     * @apiNote 전체 직원 조회 api
     */
     @GetMapping("/{storeId}/employee")
-    public BaseResponse<StoreAllEmployeeResponseDTO> getAllEmployees(@MemberId @Valid Member member, @PathVariable @Valid Long storeId) {
-        StoreAllEmployeeResponseDTO response = executiveService.getAllEmployees(member, storeId);
+    public BaseResponse<StoreAllEmployeeResponseDTO> getAllEmployees(@MemberId @Valid Member employer, @PathVariable @Valid Long storeId) {
+        StoreAllEmployeeResponseDTO response = executiveService.getAllEmployees(employer, storeId);
         return new BaseResponse<>(response);
     }
 
@@ -34,8 +35,8 @@ public class ExecutiveController {
      * @apiNote 고용 형태 수정 api
      */
     @PostMapping("/employee/grade")
-    public BaseResponse<String> setMemberGrade(@MemberId @Valid Member member, @RequestBody @Valid SetMemberGradeRequestDTO executiveRequest) {
-        executiveService.setMemberGrade(member, executiveRequest);
+    public BaseResponse<String> setMemberGrade(@MemberId @Valid Member employer, @RequestBody @Valid SetMemberGradeRequestDTO executiveRequest) {
+        executiveService.setMemberGrade(employer, executiveRequest);
         return new BaseResponse<>(SUCCESS_SET_MEMBER_GRADE.getMessage());
     }
 
@@ -43,8 +44,8 @@ public class ExecutiveController {
      * @apiNote 피고용인 삭제 api
      */
     @DeleteMapping("/employee")
-    public BaseResponse<String> deleteStoreMember(@MemberId @Valid Member member, @RequestBody @Valid DeleteStoreMemberRequestDTO executiveRequest) {
-        executiveService.deleteStoreMember(member, executiveRequest);
+    public BaseResponse<String> deleteStoreMember(@MemberId @Valid Member employer, @RequestBody @Valid DeleteStoreMemberRequestDTO executiveRequest) {
+        executiveService.deleteStoreMember(employer, executiveRequest);
         return new BaseResponse<>(SUCCESS_DELETE_STORE_MEMBER.getMessage());
     }
 
@@ -52,8 +53,8 @@ public class ExecutiveController {
      * @apiNote 가게 삭제 api
      */
     @DeleteMapping("/store/{storeId}")
-    public BaseResponse<String> deleteStore(@MemberId @Valid Member member, @PathVariable @Valid Long storeId) {
-        executiveService.deleteStore(member, storeId);
+    public BaseResponse<String> deleteStore(@MemberId @Valid Member employer, @PathVariable @Valid Long storeId) {
+        executiveService.deleteStore(employer, storeId);
         return new BaseResponse<>(SUCCESS_DELETE_STORE.getMessage());
     }
 }
