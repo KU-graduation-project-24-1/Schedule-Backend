@@ -4,6 +4,7 @@ import graduate.schedule.annotation.MemberId;
 import graduate.schedule.common.response.BaseResponse;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.dto.web.request.ChangeWorkerRequestDTO;
+import graduate.schedule.dto.web.request.ChangeWorkingTimeRequestDTO;
 import graduate.schedule.dto.web.request.DeleteStoreMemberRequestDTO;
 import graduate.schedule.dto.web.request.SetMemberGradeRequestDTO;
 import graduate.schedule.dto.web.response.StoreAllEmployeeResponseDTO;
@@ -56,5 +57,16 @@ public class ExecutiveController {
     public BaseResponse<String> deleteStore(@MemberId @Valid Member employer, @PathVariable @Valid Long storeId) {
         executiveService.deleteStore(employer, storeId);
         return new BaseResponse<>(SUCCESS_DELETE_STORE.getMessage());
+    }
+
+    /**
+     * @apiNote 근무자 수정 api
+     * 대타 요청 중 스케줄 변경이(근무자, 근무 시간) 있을 시 대타 요청 사라짐
+     * 대체 근무자가 사장인 경우 해당 근무 정보 삭제
+     */
+    @PostMapping("/schedule/employee")
+    public BaseResponse<String> changeWorker(@MemberId @Valid Member employer, @RequestBody @Valid ChangeWorkerRequestDTO executiveRequest) {
+        executiveService.changeWorker(employer, executiveRequest);
+        return new BaseResponse<>(SUCCESS_CHANGE_WORKER.getMessage());
     }
 }

@@ -34,4 +34,12 @@ public class StoreSchedule {
 
     @Column(columnDefinition = "boolean default false")
     private boolean requestCover;
+
+    public void setMember(Member member) {
+        this.member = member;
+    }
+    public void setRequestCover(boolean requestCover) {
+        this.requestCover = requestCover;
+    }
+
 }

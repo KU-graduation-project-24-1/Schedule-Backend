@@ -17,6 +17,9 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     SUCCESS_SET_MEMBER_GRADE(1006, HttpStatus.OK.value(), "고용 형태를 변경하였습니다."),
     SUCCESS_DELETE_STORE_MEMBER(1007, HttpStatus.OK.value(), "피고용인을 삭제하였습니다."),
     SUCCESS_DELETE_STORE(1008, HttpStatus.OK.value(), "가게를 삭제하였습니다."),
+    SUCCESS_CHANGE_WORKER(1009, HttpStatus.OK.value(), "근무자를 변경하였습니다."),
+    SUCCESS_CHANGE_WORKING_TIME(1010, HttpStatus.OK.value(), "근무 시간을 변경하였습니다."),
+    SUCCESS_DELETE_SCHEDULE(1011, HttpStatus.OK.value(), "근무 정보를 삭제하였습니다."),
 
     /**
      * 2000: Request 오류 (BAD_REQUEST)
@@ -66,10 +69,11 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     ALREADY_EXIST_STORE(6003, HttpStatus.BAD_REQUEST.value(), "이미 존재하는 가게입니다."),
 
     /**
-     * 7000: Store Member Time 오류
+     * 7000: Store Schedule 오류
      * */
     INVALID_STORE_MEMBER_AVAILABLE_TIME_ID(7000, HttpStatus.BAD_REQUEST.value(), "가능한 근무 시간 id가 유효하지 않습니다."),
-    NOT_MEMBER_WORKING_DATA(7001, HttpStatus.BAD_REQUEST.value(), "나의 근무 정보가 아닙니다.");
+    NOT_MEMBER_WORKING_DATA(7001, HttpStatus.BAD_REQUEST.value(), "나의 근무 정보가 아닙니다."),
+    INVALID_STORE_SCHEDULE_ID(7002, HttpStatus.BAD_REQUEST.value(), "가게 근무 정보 id가 유효하지 않습니다.");
 
 
     private final int code;
