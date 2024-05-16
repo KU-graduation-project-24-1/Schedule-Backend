@@ -4,10 +4,10 @@ import graduate.schedule.common.response.status.ResponseStatus;
 import lombok.Getter;
 
 @Getter
-public class StoreMemberTimeException extends RuntimeException {
+public class StoreScheduleException extends RuntimeException {
     private final ResponseStatus exceptionStatus;
 
-    public StoreMemberTimeException(ResponseStatus exceptionStatus) {
+    public StoreScheduleException(ResponseStatus exceptionStatus) {
         super(exceptionStatus.getMessage());
         this.exceptionStatus = exceptionStatus;
     }

@@ -258,9 +258,9 @@ public class StoreService {
         }
 
         StoreMemberAvailableTime availableTime = storeMemberAvailableTimeRepository.findById(storeRequest.getStoreMemberAvailableTimeId())
-                .orElseThrow(() -> new StoreMemberTimeException(INVALID_STORE_MEMBER_AVAILABLE_TIME_ID));
+                .orElseThrow(() -> new StoreScheduleException(INVALID_STORE_MEMBER_AVAILABLE_TIME_ID));
         if (!availableTime.getMember().equals(member)) {
-            throw new StoreMemberTimeException(NOT_MEMBER_WORKING_DATA);
+            throw new StoreScheduleException(NOT_MEMBER_WORKING_DATA);
         }
         storeMemberAvailableTimeRepository.delete(availableTime);
     }
