@@ -77,7 +77,7 @@ public class StoreSchedule {
         return this.employee.getId();
     }
 
-    public String getEmployessName() {
+    public String getEmployeeName() {
         return this.employee.getName();
     }
 

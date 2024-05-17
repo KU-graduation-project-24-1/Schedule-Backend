@@ -180,7 +180,7 @@ public class StoreService {
                 .map(schedule -> new WorkerAndTimeDTO(
                         schedule.getId(),
                         schedule.getEmployeeId(),
-                        schedule.getEmployessName(),
+                        schedule.getEmployeeName(),
                         storeMemberRepository.findByStoreAndMember(store, schedule.getEmployee())
                                 .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER))
                                 .getMemberGrade(),
