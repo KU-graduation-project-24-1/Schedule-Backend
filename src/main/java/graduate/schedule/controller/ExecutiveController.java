@@ -35,7 +35,7 @@ public class ExecutiveController {
     /**
      * @apiNote 고용 형태 수정 api
      */
-    @PostMapping("/employee/grade")
+    @PatchMapping("/employee/grade")
     public BaseResponse<String> setMemberGrade(@MemberId @Valid Member employer, @RequestBody @Valid SetMemberGradeRequestDTO executiveRequest) {
         executiveService.setMemberGrade(employer, executiveRequest);
         return new BaseResponse<>(SUCCESS_SET_MEMBER_GRADE.getMessage());
@@ -58,7 +58,6 @@ public class ExecutiveController {
         executiveService.deleteStore(employer, storeId);
         return new BaseResponse<>(SUCCESS_DELETE_STORE.getMessage());
     }
-
 
     /**
      * @apiNote 근무 정보 수정 api
