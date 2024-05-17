@@ -179,12 +179,12 @@ public class StoreService {
         List<WorkerAndTimeDTO> workDatas = schedulesIndDay.stream()
                 .map(schedule -> new WorkerAndTimeDTO(
                         schedule.getId(),
-                        schedule.getMemberId(),
-                        schedule.getMemberName(),
-                        storeMemberRepository.findByStoreAndMember(store, schedule.getMember())
+                        schedule.getEmployeeId(),
+                        schedule.getEmployessName(),
+                        storeMemberRepository.findByStoreAndMember(store, schedule.getEmployee())
                                 .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER))
                                 .getMemberGrade(),
-                        schedule.getMember() == member,
+                        schedule.getEmployee() == member,
                         timeDeleteSeconds(schedule.getStartTime()),
                         timeDeleteSeconds(schedule.getEndTime()),
                         schedule.isRequestCover()))

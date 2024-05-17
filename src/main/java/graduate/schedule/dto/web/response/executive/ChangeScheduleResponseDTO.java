@@ -23,7 +23,7 @@ public class ChangeScheduleResponseDTO {
     public ChangeScheduleResponseDTO(StoreSchedule schedule) {
         this.isDeleted = false;
         this.scheduleId = schedule.getId();
-        this.employeeId = schedule.getMemberId();
+        this.employeeId = schedule.getEmployeeId();
         this.date = schedule.getDate();
         this.startTime = timeDeleteSeconds(schedule.getStartTime());
         this.endTime = timeDeleteSeconds(schedule.getEndTime());
