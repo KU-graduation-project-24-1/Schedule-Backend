@@ -5,7 +5,7 @@ import lombok.Getter;
 
 import java.sql.Date;
 
-import static graduate.schedule.utils.DateAndTimeFormatter.timeDeleteSeconds;
+import static graduate.schedule.utils.DateAndTimeFormatter.timeWithoutSeconds;
 
 @Getter
 public class ChangeScheduleResponseDTO {
@@ -25,7 +25,7 @@ public class ChangeScheduleResponseDTO {
         this.scheduleId = schedule.getId();
         this.employeeId = schedule.getEmployeeId();
         this.date = schedule.getDate();
-        this.startTime = timeDeleteSeconds(schedule.getStartTime());
-        this.endTime = timeDeleteSeconds(schedule.getEndTime());
+        this.startTime = timeWithoutSeconds(schedule.getStartTime());
+        this.endTime = timeWithoutSeconds(schedule.getEndTime());
     }
 }

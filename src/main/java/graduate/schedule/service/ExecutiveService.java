@@ -92,8 +92,8 @@ public class ExecutiveService {
                 newStoreSchedule.getId(),
                 newStoreSchedule.getEmployeeId(),
                 newStoreSchedule.getDate(),
-                timeDeleteSeconds(newStoreSchedule.getStartTime()),
-                timeDeleteSeconds(newStoreSchedule.getEndTime())
+                timeWithoutSeconds(newStoreSchedule.getStartTime()),
+                timeWithoutSeconds(newStoreSchedule.getEndTime())
         );
     }
 

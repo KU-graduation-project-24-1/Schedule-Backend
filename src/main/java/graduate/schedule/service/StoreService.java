@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Random;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
-import static graduate.schedule.utils.DateAndTimeFormatter.timeDeleteSeconds;
+import static graduate.schedule.utils.DateAndTimeFormatter.timeWithoutSeconds;
 import static graduate.schedule.utils.DateAndTimeFormatter.timeWithSeconds;
 
 @Slf4j
@@ -185,8 +185,8 @@ public class StoreService {
                                 .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER))
                                 .getMemberGrade(),
                         schedule.getEmployee() == member,
-                        timeDeleteSeconds(schedule.getStartTime()),
-                        timeDeleteSeconds(schedule.getEndTime()),
+                        timeWithoutSeconds(schedule.getStartTime()),
+                        timeWithoutSeconds(schedule.getEndTime()),
                         schedule.isRequestCover()))
                 .sorted(Comparator.comparing(WorkerAndTimeDTO::getStartTime)).toList();
 
@@ -218,8 +218,8 @@ public class StoreService {
         List<AvailableTimeInDayDTO> availableTimeDatas = availableTimesInDay.stream()
                 .map(time -> new AvailableTimeInDayDTO(
                         time.getId(),
-                        timeDeleteSeconds(time.getAvailableStartTime()),
-                        timeDeleteSeconds(time.getAvailableEndTime())
+                        timeWithoutSeconds(time.getAvailableStartTime()),
+                        timeWithoutSeconds(time.getAvailableEndTime())
                 ))
                 .sorted(Comparator.comparing(AvailableTimeInDayDTO::getStartTime)).toList();
 
