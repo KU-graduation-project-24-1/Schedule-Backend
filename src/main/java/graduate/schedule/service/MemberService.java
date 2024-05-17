@@ -17,7 +17,6 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 public class MemberService {
-    private final MemberRepository memberRepository;
     private final StoreMemberRepository storeMemberRepository;
 
     public MyStoreResponseDTO getMyStores(Member member) {
