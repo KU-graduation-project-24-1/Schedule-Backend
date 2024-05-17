@@ -34,6 +34,7 @@ public class StoreMember {
 
         return storeMember;
     }
+
     public static StoreMember createEmployee(Store store, Member member) {
         StoreMember storeMember = new StoreMember();
         storeMember.member = member;
@@ -46,6 +47,14 @@ public class StoreMember {
     }
 
     public void setMemberGrade(StoreMemberGrade memberGrade) {
-         this.memberGrade = memberGrade;
+        this.memberGrade = memberGrade;
+    }
+
+    public Long getMemberId() {
+        return this.member.getId();
+    }
+
+    public String getMemberName() {
+        return this.member.getName();
     }
 }

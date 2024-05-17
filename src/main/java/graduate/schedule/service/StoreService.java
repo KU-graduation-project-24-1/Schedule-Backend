@@ -37,7 +37,6 @@ import static graduate.schedule.utils.DateAndTimeFormatter.timeWithSeconds;
 @RequiredArgsConstructor
 public class StoreService {
     private final StoreRepository storeRepository;
-    private final MemberRepository memberRepository;
     private final StoreMemberRepository storeMemberRepository;
     private final StoreScheduleRepository storeScheduleRepository;
     private final StoreMemberAvailableTimeRepository storeMemberAvailableTimeRepository;
@@ -180,8 +179,8 @@ public class StoreService {
         List<WorkerAndTimeDTO> workDatas = schedulesIndDay.stream()
                 .map(schedule -> new WorkerAndTimeDTO(
                         schedule.getId(),
-                        schedule.getMember().getId(),
-                        schedule.getMember().getName(),
+                        schedule.getMemberId(),
+                        schedule.getMemberName(),
                         storeMemberRepository.findByStoreAndMember(store, schedule.getMember())
                                 .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER))
                                 .getMemberGrade(),

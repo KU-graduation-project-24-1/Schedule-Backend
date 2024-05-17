@@ -62,4 +62,8 @@ public class StoreSchedule {
     public Long getMemberId() {
         return this.member.getId();
     }
+
+    public String getMemberName() {
+        return this.member.getName();
+    }
 }
