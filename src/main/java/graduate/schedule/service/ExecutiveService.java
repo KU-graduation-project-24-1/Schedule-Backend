@@ -7,8 +7,7 @@ import graduate.schedule.common.exception.StoreScheduleException;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.domain.store.*;
 import graduate.schedule.dto.store.EmployeeDTO;
-import graduate.schedule.dto.web.request.ChangeWorkerRequestDTO;
-import graduate.schedule.dto.web.request.ChangeWorkingTimeRequestDTO;
+import graduate.schedule.dto.web.request.ChangeScheduleRequestDTO;
 import graduate.schedule.dto.web.request.DeleteStoreMemberRequestDTO;
 import graduate.schedule.dto.web.request.SetMemberGradeRequestDTO;
 import graduate.schedule.dto.web.response.StoreAllEmployeeResponseDTO;
@@ -76,7 +75,7 @@ public class ExecutiveService {
         storeRepository.delete(store);
     }
 
-    public void changeWorker(Member employer, ChangeWorkerRequestDTO executiveRequest) {
+    public void changeSchedule(Member employer, ChangeScheduleRequestDTO executiveRequest) {
         StoreSchedule storeSchedule = storeScheduleRepository.findById(executiveRequest.getScheduleId())
                 .orElseThrow(() -> new StoreScheduleException(INVALID_STORE_SCHEDULE_ID));
         defaultExecutiveValidation(storeSchedule.getStore().getId(), executiveRequest.getEmployeeId(), employer);
@@ -91,26 +90,11 @@ public class ExecutiveService {
         }
 
         storeSchedule.setMember(employee);
-        //대타 요청 중 스케줄 변경이(근무자, 근무 시간) 있을 시 대타 요청 사라짐
-        if (storeSchedule.isRequestCover()) {
-            log.info("근무 정보가 수정되어 대체 근무 요청 여부를 false로 설정합니다.");
-            storeSchedule.setRequestCover(false);
-        }
-    }
-
-    public void changeWorkingTime(Member employer, ChangeWorkingTimeRequestDTO executiveRequest) {
-        StoreSchedule storeSchedule = storeScheduleRepository.findById(executiveRequest.getScheduleId())
-                .orElseThrow(() -> new StoreScheduleException(INVALID_STORE_SCHEDULE_ID));
-        Store store = storeRepository.findById(storeSchedule.getStore().getId())
-                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
-        if (!storeMemberRepository.isExecutive(store, employer)) {
-            throw new MemberException(NOT_EXECUTIVE);
-        }
-
         storeSchedule.setWorkingTime(
                 timeWithSeconds(executiveRequest.getStartTime()),
                 timeWithSeconds(executiveRequest.getEndTime())
         );
+
         //대타 요청 중 스케줄 변경이(근무자, 근무 시간) 있을 시 대타 요청 사라짐
         if (storeSchedule.isRequestCover()) {
             log.info("근무 정보가 수정되어 대체 근무 요청 여부를 false로 설정합니다.");
