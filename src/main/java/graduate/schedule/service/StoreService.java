@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Random;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
-import static graduate.schedule.utils.DateAndTimeFormatter.timeDeleteSeconds;
+import static graduate.schedule.utils.DateAndTimeFormatter.timeWithoutSeconds;
 import static graduate.schedule.utils.DateAndTimeFormatter.timeWithSeconds;
 
 @Slf4j
@@ -179,14 +179,14 @@ public class StoreService {
         List<WorkerAndTimeDTO> workDatas = schedulesIndDay.stream()
                 .map(schedule -> new WorkerAndTimeDTO(
                         schedule.getId(),
-                        schedule.getMemberId(),
-                        schedule.getMemberName(),
-                        storeMemberRepository.findByStoreAndMember(store, schedule.getMember())
+                        schedule.getEmployeeId(),
+                        schedule.getEmployeeName(),
+                        storeMemberRepository.findByStoreAndMember(store, schedule.getEmployee())
                                 .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER))
                                 .getMemberGrade(),
-                        schedule.getMember() == member,
-                        timeDeleteSeconds(schedule.getStartTime()),
-                        timeDeleteSeconds(schedule.getEndTime()),
+                        schedule.getEmployee() == member,
+                        timeWithoutSeconds(schedule.getStartTime()),
+                        timeWithoutSeconds(schedule.getEndTime()),
                         schedule.isRequestCover()))
                 .sorted(Comparator.comparing(WorkerAndTimeDTO::getStartTime)).toList();
 
@@ -218,8 +218,8 @@ public class StoreService {
         List<AvailableTimeInDayDTO> availableTimeDatas = availableTimesInDay.stream()
                 .map(time -> new AvailableTimeInDayDTO(
                         time.getId(),
-                        timeDeleteSeconds(time.getAvailableStartTime()),
-                        timeDeleteSeconds(time.getAvailableEndTime())
+                        timeWithoutSeconds(time.getAvailableStartTime()),
+                        timeWithoutSeconds(time.getAvailableEndTime())
                 ))
                 .sorted(Comparator.comparing(AvailableTimeInDayDTO::getStartTime)).toList();
 

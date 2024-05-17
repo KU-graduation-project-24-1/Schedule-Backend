@@ -7,11 +7,13 @@ import graduate.schedule.common.exception.StoreScheduleException;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.domain.store.*;
 import graduate.schedule.dto.store.EmployeeDTO;
-import graduate.schedule.dto.web.request.ChangeScheduleRequestDTO;
-import graduate.schedule.dto.web.request.DeleteStoreMemberRequestDTO;
-import graduate.schedule.dto.web.request.SetMemberGradeRequestDTO;
-import graduate.schedule.dto.web.response.ChangeScheduleResponseDTO;
-import graduate.schedule.dto.web.response.StoreAllEmployeeResponseDTO;
+import graduate.schedule.dto.web.request.executive.ChangeScheduleRequestDTO;
+import graduate.schedule.dto.web.request.executive.CreateScheduleRequestDTO;
+import graduate.schedule.dto.web.request.executive.DeleteStoreMemberRequestDTO;
+import graduate.schedule.dto.web.request.executive.SetMemberGradeRequestDTO;
+import graduate.schedule.dto.web.response.executive.ChangeScheduleResponseDTO;
+import graduate.schedule.dto.web.response.executive.CreateScheduleResponseDTO;
+import graduate.schedule.dto.web.response.executive.StoreAllEmployeeResponseDTO;
 import graduate.schedule.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
-import static graduate.schedule.utils.DateAndTimeFormatter.timeWithSeconds;
+import static graduate.schedule.utils.DateAndTimeFormatter.*;
 
 @Slf4j
 @Service
@@ -76,10 +78,29 @@ public class ExecutiveService {
         storeRepository.delete(store);
     }
 
+    public CreateScheduleResponseDTO createSchedule(Member employer, CreateScheduleRequestDTO executiveRequest) {
+        Store store = storeRepository.findById(executiveRequest.getStoreId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        Member employee = memberRepository.findById(executiveRequest.getEmployeeId())
+                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+        defaultExecutiveValidation(executiveRequest.getStoreId(), executiveRequest.getEmployeeId(), employer);
+
+        StoreSchedule newStoreSchedule = StoreSchedule.createStoreSchedule(store, employee, executiveRequest.getDate(), executiveRequest.getStartTime(), executiveRequest.getEndTime());
+        storeScheduleRepository.save(newStoreSchedule);
+
+        return new CreateScheduleResponseDTO(
+                newStoreSchedule.getId(),
+                newStoreSchedule.getEmployeeId(),
+                newStoreSchedule.getDate(),
+                timeWithoutSeconds(newStoreSchedule.getStartTime()),
+                timeWithoutSeconds(newStoreSchedule.getEndTime())
+        );
+    }
+
     public ChangeScheduleResponseDTO changeSchedule(Member employer, ChangeScheduleRequestDTO executiveRequest) {
         StoreSchedule storeSchedule = storeScheduleRepository.findById(executiveRequest.getScheduleId())
                 .orElseThrow(() -> new StoreScheduleException(INVALID_STORE_SCHEDULE_ID));
-        defaultExecutiveValidation(storeSchedule.getStore().getId(), executiveRequest.getEmployeeId(), employer);
+        defaultExecutiveValidation(storeSchedule.getStoreId(), executiveRequest.getEmployeeId(), employer);
         Member employee = memberRepository.findById(executiveRequest.getEmployeeId()).get();
 
 
@@ -90,7 +111,7 @@ public class ExecutiveService {
             return new ChangeScheduleResponseDTO();
         }
 
-        storeSchedule.setMember(employee);
+        storeSchedule.setEmployee(employee);
         storeSchedule.setWorkingTime(
                 timeWithSeconds(executiveRequest.getStartTime()),
                 timeWithSeconds(executiveRequest.getEndTime())

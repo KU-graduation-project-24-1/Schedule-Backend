@@ -3,11 +3,13 @@ package graduate.schedule.controller;
 import graduate.schedule.annotation.MemberId;
 import graduate.schedule.common.response.BaseResponse;
 import graduate.schedule.domain.member.Member;
-import graduate.schedule.dto.web.request.ChangeScheduleRequestDTO;
-import graduate.schedule.dto.web.request.DeleteStoreMemberRequestDTO;
-import graduate.schedule.dto.web.request.SetMemberGradeRequestDTO;
-import graduate.schedule.dto.web.response.ChangeScheduleResponseDTO;
-import graduate.schedule.dto.web.response.StoreAllEmployeeResponseDTO;
+import graduate.schedule.dto.web.request.executive.ChangeScheduleRequestDTO;
+import graduate.schedule.dto.web.request.executive.CreateScheduleRequestDTO;
+import graduate.schedule.dto.web.request.executive.DeleteStoreMemberRequestDTO;
+import graduate.schedule.dto.web.request.executive.SetMemberGradeRequestDTO;
+import graduate.schedule.dto.web.response.executive.ChangeScheduleResponseDTO;
+import graduate.schedule.dto.web.response.executive.CreateScheduleResponseDTO;
+import graduate.schedule.dto.web.response.executive.StoreAllEmployeeResponseDTO;
 import graduate.schedule.service.ExecutiveService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +37,7 @@ public class ExecutiveController {
     /**
      * @apiNote 고용 형태 수정 api
      */
-    @PostMapping("/employee/grade")
+    @PatchMapping("/employee/grade")
     public BaseResponse<String> setMemberGrade(@MemberId @Valid Member employer, @RequestBody @Valid SetMemberGradeRequestDTO executiveRequest) {
         executiveService.setMemberGrade(employer, executiveRequest);
         return new BaseResponse<>(SUCCESS_SET_MEMBER_GRADE.getMessage());
@@ -60,11 +62,20 @@ public class ExecutiveController {
     }
 
     /**
+     * @apiNote 근무 정보 추가 api
+     */
+    @PostMapping("/schedule")
+    public BaseResponse<CreateScheduleResponseDTO> createSchedule(@MemberId @Valid Member employer, @RequestBody @Valid CreateScheduleRequestDTO executiveRequest) {
+        CreateScheduleResponseDTO response = executiveService.createSchedule(employer, executiveRequest);
+        return new BaseResponse<>(response);
+    }
+
+    /**
      * @apiNote 근무 정보 수정 api
      * 대타 요청 중 스케줄 변경이(근무자, 근무 시간) 있을 시 대타 요청 사라짐
      * 대체 근무자가 사장인 경우 해당 근무 정보 삭제
      */
-    @PostMapping("/schedule")
+    @PatchMapping("/schedule")
     public BaseResponse<ChangeScheduleResponseDTO> changeSchedule(@MemberId @Valid Member employer, @RequestBody @Valid ChangeScheduleRequestDTO executiveRequest) {
         ChangeScheduleResponseDTO response = executiveService.changeSchedule(employer, executiveRequest);
         return new BaseResponse<>(response);

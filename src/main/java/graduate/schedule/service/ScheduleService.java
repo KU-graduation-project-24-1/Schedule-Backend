@@ -1,0 +1,15 @@
+package graduate.schedule.service;
+
+import graduate.schedule.repository.StoreScheduleRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Slf4j
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class ScheduleService {
+    private final StoreScheduleRepository storeScheduleRepository;
+}

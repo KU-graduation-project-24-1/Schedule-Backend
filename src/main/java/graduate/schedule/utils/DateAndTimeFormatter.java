@@ -10,7 +10,7 @@ public class DateAndTimeFormatter {
     private static final String SECOND = ":00";
     private static final String TIME_FORMAT = "HH:mm";
 
-    public static String timeDeleteSeconds(Time time) {
+    public static String timeWithoutSeconds(Time time) {
         // HH:mm:ss -> HH:mm
         SimpleDateFormat dateFormat = new SimpleDateFormat(TIME_FORMAT);
         return dateFormat.format(time);
