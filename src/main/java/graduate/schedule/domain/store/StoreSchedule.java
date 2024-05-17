@@ -3,11 +3,13 @@ package graduate.schedule.domain.store;
 import graduate.schedule.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.sql.Date;
 import java.sql.Time;
 
+@Slf4j
 @Entity
 @Getter
 @DynamicInsert
@@ -35,15 +37,33 @@ public class StoreSchedule {
     @Column(columnDefinition = "boolean default false")
     private boolean requestCover;
 
-    public void setMember(Member member) {
-        this.member = member;
-    }
     public void setRequestCover(boolean requestCover) {
         this.requestCover = requestCover;
     }
 
+    public void setMember(Member member) {
+        if (!this.member.equals(member)) {
+            log.info("근무자를 수정합니다.");
+            this.member = member;
+        }
+    }
+
     public void setWorkingTime(Time startTime, Time endTime) {
-        this.startTime = startTime;
-        this.endTime = endTime;
+        if (!this.startTime.equals(startTime)) {
+            log.info("근무자 시작 시간을 수정합니다.");
+            this.startTime = startTime;
+        }
+        if (!this.endTime.equals(endTime)) {
+            log.info("근무자 마감 시간을 수정합니다.");
+            this.endTime = endTime;
+        }
+    }
+
+    public Long getMemberId() {
+        return this.member.getId();
+    }
+
+    public String getMemberName() {
+        return this.member.getName();
     }
 }

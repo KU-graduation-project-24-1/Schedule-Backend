@@ -3,10 +3,10 @@ package graduate.schedule.controller;
 import graduate.schedule.annotation.MemberId;
 import graduate.schedule.common.response.BaseResponse;
 import graduate.schedule.domain.member.Member;
-import graduate.schedule.dto.web.request.ChangeWorkerRequestDTO;
-import graduate.schedule.dto.web.request.ChangeWorkingTimeRequestDTO;
+import graduate.schedule.dto.web.request.ChangeScheduleRequestDTO;
 import graduate.schedule.dto.web.request.DeleteStoreMemberRequestDTO;
 import graduate.schedule.dto.web.request.SetMemberGradeRequestDTO;
+import graduate.schedule.dto.web.response.ChangeScheduleResponseDTO;
 import graduate.schedule.dto.web.response.StoreAllEmployeeResponseDTO;
 import graduate.schedule.service.ExecutiveService;
 import jakarta.validation.Valid;
@@ -60,24 +60,14 @@ public class ExecutiveController {
     }
 
     /**
-     * @apiNote 근무자 수정 api
+     * @apiNote 근무 정보 수정 api
      * 대타 요청 중 스케줄 변경이(근무자, 근무 시간) 있을 시 대타 요청 사라짐
      * 대체 근무자가 사장인 경우 해당 근무 정보 삭제
      */
-    @PostMapping("/schedule/employee")
-    public BaseResponse<String> changeWorker(@MemberId @Valid Member employer, @RequestBody @Valid ChangeWorkerRequestDTO executiveRequest) {
-        executiveService.changeWorker(employer, executiveRequest);
-        return new BaseResponse<>(SUCCESS_CHANGE_WORKER.getMessage());
-    }
-
-    /**
-    * @apiNote 근무 시간 수정 api
-     * 대타 요청 중 스케줄 변경이(근무자, 근무 시간) 있을 시 대타 요청 사라짐
-    */
-    @PostMapping("/schedule/time")
-    public BaseResponse<String> changeWorkingTime(@MemberId @Valid Member employer, @RequestBody @Valid ChangeWorkingTimeRequestDTO executiveRequest) {
-        executiveService.changeWorkingTime(employer, executiveRequest);
-        return new BaseResponse<>(SUCCESS_CHANGE_WORKING_TIME.getMessage());
+    @PostMapping("/schedule")
+    public BaseResponse<ChangeScheduleResponseDTO> changeSchedule(@MemberId @Valid Member employer, @RequestBody @Valid ChangeScheduleRequestDTO executiveRequest) {
+        ChangeScheduleResponseDTO response = executiveService.changeSchedule(employer, executiveRequest);
+        return new BaseResponse<>(response);
     }
 
     /**
