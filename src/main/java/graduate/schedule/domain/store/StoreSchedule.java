@@ -81,4 +81,7 @@ public class StoreSchedule {
         return this.employee.getName();
     }
 
+    public Long getStoreId() {
+        return this.store.getId();
+    }
 }
