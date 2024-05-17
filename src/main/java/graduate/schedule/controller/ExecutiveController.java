@@ -3,11 +3,13 @@ package graduate.schedule.controller;
 import graduate.schedule.annotation.MemberId;
 import graduate.schedule.common.response.BaseResponse;
 import graduate.schedule.domain.member.Member;
-import graduate.schedule.dto.web.request.ChangeScheduleRequestDTO;
-import graduate.schedule.dto.web.request.DeleteStoreMemberRequestDTO;
-import graduate.schedule.dto.web.request.SetMemberGradeRequestDTO;
-import graduate.schedule.dto.web.response.ChangeScheduleResponseDTO;
-import graduate.schedule.dto.web.response.StoreAllEmployeeResponseDTO;
+import graduate.schedule.dto.web.request.executive.ChangeScheduleRequestDTO;
+import graduate.schedule.dto.web.request.executive.CreateScheduleRequestDTO;
+import graduate.schedule.dto.web.request.executive.DeleteStoreMemberRequestDTO;
+import graduate.schedule.dto.web.request.executive.SetMemberGradeRequestDTO;
+import graduate.schedule.dto.web.response.executive.ChangeScheduleResponseDTO;
+import graduate.schedule.dto.web.response.executive.CreateScheduleResponseDTO;
+import graduate.schedule.dto.web.response.executive.StoreAllEmployeeResponseDTO;
 import graduate.schedule.service.ExecutiveService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +59,15 @@ public class ExecutiveController {
     public BaseResponse<String> deleteStore(@MemberId @Valid Member employer, @PathVariable @Valid Long storeId) {
         executiveService.deleteStore(employer, storeId);
         return new BaseResponse<>(SUCCESS_DELETE_STORE.getMessage());
+    }
+
+    /**
+     * @apiNote 근무 정보 추가 api
+     */
+    @PostMapping("/schedule")
+    public BaseResponse<CreateScheduleResponseDTO> createSchedule(@MemberId @Valid Member employer, @RequestBody @Valid CreateScheduleRequestDTO executiveRequest) {
+        CreateScheduleResponseDTO response = executiveService.createSchedule(employer, executiveRequest);
+        return new BaseResponse<>(response);
     }
 
     /**

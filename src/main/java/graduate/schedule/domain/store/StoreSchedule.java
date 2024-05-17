@@ -9,6 +9,8 @@ import org.hibernate.annotations.DynamicInsert;
 import java.sql.Date;
 import java.sql.Time;
 
+import static graduate.schedule.utils.DateAndTimeFormatter.timeWithSeconds;
+
 @Slf4j
 @Entity
 @Getter
@@ -24,7 +26,7 @@ public class StoreSchedule {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    private Member member;
+    private Member employee;
 
     @Temporal(TemporalType.DATE)
     private Date date;
@@ -37,14 +39,26 @@ public class StoreSchedule {
     @Column(columnDefinition = "boolean default false")
     private boolean requestCover;
 
+    public static StoreSchedule createStoreSchedule(Store store, Member employee, Date date, String startTime, String endTime) {
+        StoreSchedule storeSchedule = new StoreSchedule();
+
+        storeSchedule.store = store;
+        storeSchedule.employee = employee;
+        storeSchedule.date = date;
+        storeSchedule.startTime = timeWithSeconds(startTime);
+        storeSchedule.endTime = timeWithSeconds(endTime);
+
+        return storeSchedule;
+    }
+
     public void setRequestCover(boolean requestCover) {
         this.requestCover = requestCover;
     }
 
-    public void setMember(Member member) {
-        if (!this.member.equals(member)) {
+    public void setEmployee(Member member) {
+        if (!this.employee.equals(member)) {
             log.info("근무자를 수정합니다.");
-            this.member = member;
+            this.employee = member;
         }
     }
 
@@ -59,11 +73,12 @@ public class StoreSchedule {
         }
     }
 
-    public Long getMemberId() {
-        return this.member.getId();
+    public Long getEmployeeId() {
+        return this.employee.getId();
     }
 
-    public String getMemberName() {
-        return this.member.getName();
+    public String getEmployessName() {
+        return this.employee.getName();
     }
+
 }
