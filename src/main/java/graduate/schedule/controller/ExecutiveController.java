@@ -6,6 +6,7 @@ import graduate.schedule.domain.member.Member;
 import graduate.schedule.dto.web.request.ChangeScheduleRequestDTO;
 import graduate.schedule.dto.web.request.DeleteStoreMemberRequestDTO;
 import graduate.schedule.dto.web.request.SetMemberGradeRequestDTO;
+import graduate.schedule.dto.web.response.ChangeScheduleResponseDTO;
 import graduate.schedule.dto.web.response.StoreAllEmployeeResponseDTO;
 import graduate.schedule.service.ExecutiveService;
 import jakarta.validation.Valid;
@@ -64,9 +65,9 @@ public class ExecutiveController {
      * 대체 근무자가 사장인 경우 해당 근무 정보 삭제
      */
     @PostMapping("/schedule")
-    public BaseResponse<String> changeSchedule(@MemberId @Valid Member employer, @RequestBody @Valid ChangeScheduleRequestDTO executiveRequest) {
-        executiveService.changeSchedule(employer, executiveRequest);
-        return new BaseResponse<>(SUCCESS_CHANGE_SCHEDULE.getMessage());
+    public BaseResponse<ChangeScheduleResponseDTO> changeSchedule(@MemberId @Valid Member employer, @RequestBody @Valid ChangeScheduleRequestDTO executiveRequest) {
+        ChangeScheduleResponseDTO response = executiveService.changeSchedule(employer, executiveRequest);
+        return new BaseResponse<>(response);
     }
 
     /**

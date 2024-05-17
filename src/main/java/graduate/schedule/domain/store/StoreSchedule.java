@@ -58,4 +58,12 @@ public class StoreSchedule {
             this.endTime = endTime;
         }
     }
+
+    public Long getMemberId() {
+        return this.member.getId();
+    }
+
+    public String getMemberName() {
+        return this.member.getName();
+    }
 }

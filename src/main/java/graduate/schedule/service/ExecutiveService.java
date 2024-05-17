@@ -10,6 +10,7 @@ import graduate.schedule.dto.store.EmployeeDTO;
 import graduate.schedule.dto.web.request.ChangeScheduleRequestDTO;
 import graduate.schedule.dto.web.request.DeleteStoreMemberRequestDTO;
 import graduate.schedule.dto.web.request.SetMemberGradeRequestDTO;
+import graduate.schedule.dto.web.response.ChangeScheduleResponseDTO;
 import graduate.schedule.dto.web.response.StoreAllEmployeeResponseDTO;
 import graduate.schedule.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +44,8 @@ public class ExecutiveService {
         List<StoreMember> storeMembers = storeMemberRepository.findByStore(store);
         List<EmployeeDTO> employees = storeMembers.stream()
                 .map(storeMember -> new EmployeeDTO(
-                        storeMember.getMember().getName(),
-                        storeMember.getMember().getId(),
+                        storeMember.getMemberName(),
+                        storeMember.getMemberId(),
                         storeMember.getMemberGrade().getGrade()
                 )).toList();
         return new StoreAllEmployeeResponseDTO(employees);
@@ -75,7 +76,7 @@ public class ExecutiveService {
         storeRepository.delete(store);
     }
 
-    public void changeSchedule(Member employer, ChangeScheduleRequestDTO executiveRequest) {
+    public ChangeScheduleResponseDTO changeSchedule(Member employer, ChangeScheduleRequestDTO executiveRequest) {
         StoreSchedule storeSchedule = storeScheduleRepository.findById(executiveRequest.getScheduleId())
                 .orElseThrow(() -> new StoreScheduleException(INVALID_STORE_SCHEDULE_ID));
         defaultExecutiveValidation(storeSchedule.getStore().getId(), executiveRequest.getEmployeeId(), employer);
@@ -86,7 +87,7 @@ public class ExecutiveService {
         if (employee.equals(employer)) {
             log.info("대체 근무자가 고용인으로 설정되어 근무 정보를 삭제합니다.");
             storeScheduleRepository.delete(storeSchedule);
-            return;
+            return new ChangeScheduleResponseDTO();
         }
 
         storeSchedule.setMember(employee);
@@ -100,6 +101,8 @@ public class ExecutiveService {
             log.info("근무 정보가 수정되어 대체 근무 요청 여부를 false로 설정합니다.");
             storeSchedule.setRequestCover(false);
         }
+
+        return new ChangeScheduleResponseDTO(storeSchedule);
     }
 
     public void deleteSchedule(Member employer, Long storeId, Long scheduleId) {

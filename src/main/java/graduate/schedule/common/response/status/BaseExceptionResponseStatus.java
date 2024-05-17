@@ -17,8 +17,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     SUCCESS_SET_MEMBER_GRADE(1006, HttpStatus.OK.value(), "고용 형태를 변경하였습니다."),
     SUCCESS_DELETE_STORE_MEMBER(1007, HttpStatus.OK.value(), "피고용인을 삭제하였습니다."),
     SUCCESS_DELETE_STORE(1008, HttpStatus.OK.value(), "가게를 삭제하였습니다."),
-    SUCCESS_CHANGE_SCHEDULE(1009, HttpStatus.OK.value(), "근무 정보를 변경하였습니다."),
-    SUCCESS_DELETE_SCHEDULE(1010, HttpStatus.OK.value(), "근무 정보를 삭제하였습니다."),
+    SUCCESS_DELETE_SCHEDULE(1009, HttpStatus.OK.value(), "근무 정보를 삭제하였습니다."),
 
     /**
      * 2000: Request 오류 (BAD_REQUEST)
