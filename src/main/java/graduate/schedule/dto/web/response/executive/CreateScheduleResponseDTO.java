@@ -1,12 +1,12 @@
-package graduate.schedule.dto.web.request;
+package graduate.schedule.dto.web.response.executive;
 
 import lombok.Getter;
 
 import java.sql.Date;
 
 @Getter
-public class CreateScheduleRequestDTO {
-    private Long storeId;
+public class CreateScheduleResponseDTO {
+    private Long scheduleId;
     private Date date;
     private Long employeeId;
     private String startTime; //HH:mm

@@ -1,13 +1,10 @@
-package graduate.schedule.dto.web.response;
+package graduate.schedule.dto.web.request.executive;
 
 import lombok.Getter;
 
-import java.sql.Date;
-
 @Getter
-public class CreateScheduleResponseDTO {
+public class ChangeScheduleRequestDTO {
     private Long scheduleId;
-    private Date date;
     private Long employeeId;
     private String startTime; //HH:mm
     private String endTime; //HH:mm
