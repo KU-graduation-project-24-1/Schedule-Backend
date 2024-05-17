@@ -63,10 +63,3 @@ secret:
 
 server:
   port: 9000
-
----
-
-#oauth:
-#  kakao:
-#    iss: "https://kauth.kakao.com"
-#    client-id: ${OAUTH_KAKAO_CLIENT_ID}
