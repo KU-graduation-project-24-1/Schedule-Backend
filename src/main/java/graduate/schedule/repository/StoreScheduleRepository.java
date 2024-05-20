@@ -18,7 +18,7 @@ public interface StoreScheduleRepository extends JpaRepository<StoreSchedule, Lo
             "order by ss.date")
     List<Date> findDatesByStoreAndMonthOrderByDate(@Param("store") Store store, @Param("searchMonth") String searchMonth);
 
-    @EntityGraph(attributePaths = {"member"})
+    @EntityGraph(attributePaths = {"employee"})
     List<StoreSchedule> findSchedulesByStoreAndDate(Store store, Date date);
 
     @Modifying
