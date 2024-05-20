@@ -1,14 +1,11 @@
 package graduate.schedule.service;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.net.HttpHeaders;
-import graduate.schedule.common.exception.MemberException;
-import graduate.schedule.domain.member.Member;
+import graduate.schedule.common.exception.FCMException;
 import graduate.schedule.dto.fcm.FCMMessage;
-import graduate.schedule.dto.web.request.FcmSendRequestDTO;
 import graduate.schedule.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.List;
 
-import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.NOT_FOUND_MEMBER;
+import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
 
 @Slf4j
 @Component
@@ -41,45 +38,55 @@ public class FirebaseCloudMessageService {
 
     private final ObjectMapper objectMapper;
 
-    public void sendMessageTo(Member member, FcmSendRequestDTO fcmRequest) throws IOException {
-        //title을 어떤 알림인지 enum으로?
-        String fcmToken = member.getFcmToken();
-        String message = makeMessage(fcmToken, fcmRequest.getTitle(), fcmRequest.getBody());
+    public void sendMessageTo(String fcmToken, String title, String body) {
+        try {
+            String message = makeMessage(fcmToken, title, body);
 
-        OkHttpClient client = new OkHttpClient();
-        RequestBody requestBody = RequestBody.create(message,
-                MediaType.get("application/json; charset=utf-8"));
-        Request request = new Request.Builder()
-                .url(FIREBASE_API_URL)
-                .post(requestBody)
-                .addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken())
-                .addHeader(HttpHeaders.CONTENT_TYPE, "application/json; UTF-8")
-                .build();
+            OkHttpClient client = new OkHttpClient();
+            RequestBody requestBody = RequestBody.create(message,
+                    MediaType.get("application/json; charset=utf-8"));
+            Request request = new Request.Builder()
+                    .url(FIREBASE_API_URL)
+                    .post(requestBody)
+                    .addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken())
+                    .addHeader(HttpHeaders.CONTENT_TYPE, "application/json; UTF-8")
+                    .build();
 
-        Response response = client.newCall(request).execute();
-        log.info("fcm response body: {}", response.body().string());
+            Response response = client.newCall(request).execute();
+            log.info("fcm response body: {}", response.body().string());
+        } catch (IOException e) {
+            throw new FCMException(FCM_SEND_ERROR);
+        }
     }
 
-    private String makeMessage(String targetToken, String title, String body) throws JsonParseException, JsonProcessingException {
-        FCMMessage fcmMessage = FCMMessage.builder()
-                .message(FCMMessage.Message.builder()
-                        .token(targetToken)
-                        .notification(FCMMessage.Notification.builder()
-                                .title(title)
-                                .body(body)
-                                .build()
-                        ).build()).validateOnly(false).build();
+    private String makeMessage(String targetToken, String title, String body) {
+        try {
+            FCMMessage fcmMessage = FCMMessage.builder()
+                    .message(FCMMessage.Message.builder()
+                            .token(targetToken)
+                            .notification(FCMMessage.Notification.builder()
+                                    .title(title)
+                                    .body(body)
+                                    .build()
+                            ).build()).validateOnly(false).build();
 
-        return objectMapper.writeValueAsString(fcmMessage);
+            return objectMapper.writeValueAsString(fcmMessage);
+        } catch (JsonProcessingException e) {
+            throw new FCMException(FCM_MAKE_MESSAGE_ERROR);
+        }
     }
 
-    private String getAccessToken() throws IOException {
-        GoogleCredentials googleCredentials = GoogleCredentials
-                .fromStream(new ClassPathResource(FCM_PRIVATE_KEY_PATH).getInputStream())
-                .createScoped(List.of(FIREBASE_SCOPE));
+    private String getAccessToken() {
+        try {
+            GoogleCredentials googleCredentials = GoogleCredentials
+                    .fromStream(new ClassPathResource(FCM_PRIVATE_KEY_PATH).getInputStream())
+                    .createScoped(List.of(FIREBASE_SCOPE));
 
-        googleCredentials.refreshIfExpired();
-        return googleCredentials.getAccessToken().getTokenValue();
+            googleCredentials.refreshIfExpired();
+            return googleCredentials.getAccessToken().getTokenValue();
+        } catch (IOException e) {
+            throw new FCMException(FCM_GET_ACCESS_TOKEN_ERROR);
+        }
     }
 }
 
