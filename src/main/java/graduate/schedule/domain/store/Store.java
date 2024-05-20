@@ -35,7 +35,7 @@ public class Store {
     private List<StoreSchedule> memberWorkingTimes = new ArrayList<>();
 
     @OneToMany(mappedBy = "store", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    private List<StoreMemberAvailableTime> memberAvailableTimes = new ArrayList<>();
+    private List<StoreAvailableSchedule> memberAvailableTimes = new ArrayList<>();
 
     public static Store createStore(String storeName, String businessRegistrationNumber, String inviteCode, LocalDateTime codeGeneratedTime, Member storeCreator) {
         Store store = new Store();
@@ -53,7 +53,7 @@ public class Store {
         this.members.add(storeMember);
     }
 
-    public void addMemberAvailableTime(StoreMemberAvailableTime memberAvailableTime) {
+    public void addMemberAvailableTime(StoreAvailableSchedule memberAvailableTime) {
         this.memberAvailableTimes.add(memberAvailableTime);
     }
 

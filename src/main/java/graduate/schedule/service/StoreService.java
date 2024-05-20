@@ -39,7 +39,7 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final StoreMemberRepository storeMemberRepository;
     private final StoreScheduleRepository storeScheduleRepository;
-    private final StoreMemberAvailableTimeRepository storeMemberAvailableTimeRepository;
+    private final StoreAvailableScheduleRepository storeAvailableScheduleRepository;
     private final BusinessCheckService businessCheckService;
 
     private final int LEFT_LIMIT = 48;
@@ -165,6 +165,9 @@ public class StoreService {
     public WorkScheduleOnMonthResponseDTO getScheduleOnMonth(Member member, Long storeId, String searchMonth) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        if (!storeMemberRepository.existsMember(member, store)) {
+            throw new StoreMemberException(NOT_STORE_MEMBER);
+        }
 
         List<Date> existingWorkingDatesOnMonth = storeScheduleRepository.findDatesByStoreAndMonthOrderByDate(store, searchMonth);
         List<WorkScheduleOnDayDTO> daySchedules = existingWorkingDatesOnMonth.stream()
@@ -203,7 +206,7 @@ public class StoreService {
                 .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER))
                 .getMemberGrade();
 
-        List<Date> existingAvailableDatesByStoreAndMonth = storeMemberAvailableTimeRepository.findAvailableDatesByStoreAndMemberAndMonthOrderByAvailableDate(store, member, searchMonth);
+        List<Date> existingAvailableDatesByStoreAndMonth = storeAvailableScheduleRepository.findDatesByStoreAndMemberAndMonthOrderByDate(store, member, searchMonth);
         List<AvailableScheduleInDayDTO> dayAvailableSchedules = existingAvailableDatesByStoreAndMonth.stream()
                 .map(date -> getDateAvailableSchedule(store, member, date)).toList();
 
@@ -214,12 +217,12 @@ public class StoreService {
     }
 
     private AvailableScheduleInDayDTO getDateAvailableSchedule(Store store, Member member, Date date) {
-        List<StoreMemberAvailableTime> availableTimesInDay = storeMemberAvailableTimeRepository.findAvailableSchedulesByStoreAndAvailableDateOrderByAvailableStartTime(store, date);
+        List<StoreAvailableSchedule> availableTimesInDay = storeAvailableScheduleRepository.findByStoreAndDateOrderByStartTime(store, date);
         List<AvailableTimeInDayDTO> availableTimeDatas = availableTimesInDay.stream()
                 .map(time -> new AvailableTimeInDayDTO(
                         time.getId(),
-                        timeWithoutSeconds(time.getAvailableStartTime()),
-                        timeWithoutSeconds(time.getAvailableEndTime())
+                        timeWithoutSeconds(time.getStartTime()),
+                        timeWithoutSeconds(time.getEndTime())
                 ))
                 .sorted(Comparator.comparing(AvailableTimeInDayDTO::getStartTime)).toList();
 
@@ -236,16 +239,16 @@ public class StoreService {
             throw new StoreMemberException(NOT_STORE_MEMBER);
         }
 
-        StoreMemberAvailableTime newStoreMemberAvailableTime =
-                StoreMemberAvailableTime.createStoreMemberAvailableTime(
+        StoreAvailableSchedule newStoreAvailableSchedule =
+                StoreAvailableSchedule.createStoreAvailableSchedule(
                         store,
                         member,
                         storeRequest.getDate(),
                         timeWithSeconds(storeRequest.getStartTime()),
                         timeWithSeconds(storeRequest.getEndTime())
                 );
-        storeMemberAvailableTimeRepository.save(newStoreMemberAvailableTime);
-        return new AddAvailableScheduleResponseDTO(newStoreMemberAvailableTime.getId());
+        storeAvailableScheduleRepository.save(newStoreAvailableSchedule);
+        return new AddAvailableScheduleResponseDTO(newStoreAvailableSchedule.getId());
 
     }
 
@@ -256,11 +259,11 @@ public class StoreService {
             throw new StoreMemberException(NOT_STORE_MEMBER);
         }
 
-        StoreMemberAvailableTime availableTime = storeMemberAvailableTimeRepository.findById(storeRequest.getStoreMemberAvailableTimeId())
-                .orElseThrow(() -> new StoreScheduleException(INVALID_STORE_MEMBER_AVAILABLE_TIME_ID));
+        StoreAvailableSchedule availableTime = storeAvailableScheduleRepository.findById(storeRequest.getStoreAvailableScheduleId())
+                .orElseThrow(() -> new StoreScheduleException(NOT_FOUND_STORE_MEMBER_AVAILABLE_TIME));
         if (!availableTime.getMember().equals(member)) {
             throw new StoreScheduleException(NOT_MEMBER_WORKING_DATA);
         }
-        storeMemberAvailableTimeRepository.delete(availableTime);
+        storeAvailableScheduleRepository.delete(availableTime);
     }
 }

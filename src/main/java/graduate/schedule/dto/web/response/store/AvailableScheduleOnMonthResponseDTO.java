@@ -10,5 +10,5 @@ import java.util.List;
 @AllArgsConstructor
 public class AvailableScheduleOnMonthResponseDTO {
     private String memberGrade;
-    private List<AvailableScheduleInDayDTO> dailyAvailableShehdules;
+    private List<AvailableScheduleInDayDTO> dailyAvailableSchehdules;
 }
