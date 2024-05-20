@@ -28,7 +28,7 @@ public class ScheduleService {
     private final StoreScheduleRepository storeScheduleRepository;
     private final StoreMemberRepository storeMemberRepository;
     private final StoreAvailableScheduleRepository storeAvailableScheduleRepository;
-    private final FirebaseCloudMessageService firebaseCloudMessageService;
+    private final FCMService fcmService;
 
     private final String TITLE_CONTENT = "근무 가능한 시간에 대체 근무 요청이 있습니다!";
     private final String BODY_START_CONTENT = "님이 ";
@@ -73,11 +73,11 @@ public class ScheduleService {
                 .orElseThrow(() -> new StoreMemberException(BOSS_NOT_EXIST))
                 .getMember();
         log.info("send message to employer: {}", employer.getName());
-        firebaseCloudMessageService.sendMessageTo(employer.getFcmToken(), TITLE_CONTENT, body);
+        fcmService.sendMessageTo(employer.getFcmToken(), TITLE_CONTENT, body);
 
         availableMemberFcmTokens.forEach(availableMember -> {
             log.info("send message to employee: {}", availableMember.getName());
-            firebaseCloudMessageService.sendMessageTo(availableMember.getFcmToken(), TITLE_CONTENT, body);
+            fcmService.sendMessageTo(availableMember.getFcmToken(), TITLE_CONTENT, body);
         });
     }
 

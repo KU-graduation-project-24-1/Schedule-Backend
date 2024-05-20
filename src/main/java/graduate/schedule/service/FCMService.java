@@ -24,7 +24,7 @@ import static graduate.schedule.common.response.status.BaseExceptionResponseStat
 @Component
 @Transactional
 @RequiredArgsConstructor
-public class FirebaseCloudMessageService {
+public class FCMService {
     // TODO: 5/12/24 FCM 푸시 알림 테스트 필요
     private final MemberRepository memberRepository;
 
