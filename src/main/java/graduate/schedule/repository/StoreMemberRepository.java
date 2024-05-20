@@ -3,6 +3,7 @@ package graduate.schedule.repository;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.domain.store.Store;
 import graduate.schedule.domain.store.StoreMember;
+import graduate.schedule.domain.store.StoreMemberGrade;
 import graduate.schedule.dto.store.MyStoreDTO;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -41,4 +42,7 @@ public interface StoreMemberRepository extends JpaRepository<StoreMember, Long> 
     @Query("delete from StoreMember sm " +
             "where sm.store=:store")
     void deleteAllByStore(@Param("store") Store store);
+
+    @EntityGraph(attributePaths = {"member"})
+    Optional<StoreMember> findByStoreAndMemberGrade(@Param("store") Store store, @Param("memberGrade") StoreMemberGrade memberGrade);
 }

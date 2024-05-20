@@ -18,6 +18,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     SUCCESS_DELETE_STORE_MEMBER(1007, HttpStatus.OK.value(), "피고용인을 삭제하였습니다."),
     SUCCESS_DELETE_STORE(1008, HttpStatus.OK.value(), "가게를 삭제하였습니다."),
     SUCCESS_DELETE_SCHEDULE(1009, HttpStatus.OK.value(), "근무 정보를 삭제하였습니다."),
+    SUCCESS_REQUEST_COVER(1010, HttpStatus.OK.value(), "대체 근무를 요청하였습니다."),
 
     /**
      * 2000: Request 오류 (BAD_REQUEST)
@@ -57,6 +58,7 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     NOT_FOUND_MEMBER(5000, HttpStatus.BAD_REQUEST.value(), "존재하지 않는 사용자입니다."),
     NOT_EXECUTIVE(5003, HttpStatus.BAD_REQUEST.value(), "가게 임원이 아닙니다.(권한 없음)"),
     NOT_STORE_MEMBER(5004, HttpStatus.BAD_REQUEST.value(), "가게 구성원이 아닙니다."),
+    BOSS_NOT_EXIST(5004, HttpStatus.BAD_REQUEST.value(), "가게 사장이 존재하지 않습니다."),
 
     /**
      * 6000: Store 도메인 오류
@@ -69,9 +71,18 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     /**
      * 7000: Store Schedule 오류
      * */
-    INVALID_STORE_MEMBER_AVAILABLE_TIME_ID(7000, HttpStatus.BAD_REQUEST.value(), "가능한 근무 시간 id가 유효하지 않습니다."),
+    NOT_FOUND_STORE_MEMBER_AVAILABLE_TIME(7000, HttpStatus.BAD_REQUEST.value(), "가능한 근무 시간 정보가 존재하지 않습니다."),
     NOT_MEMBER_WORKING_DATA(7001, HttpStatus.BAD_REQUEST.value(), "나의 근무 정보가 아닙니다."),
-    INVALID_STORE_SCHEDULE_ID(7002, HttpStatus.BAD_REQUEST.value(), "가게 근무 정보 id가 유효하지 않습니다.");
+    NOT_FOUND_STORE_SCHEDULE(7002, HttpStatus.BAD_REQUEST.value(), "가게 근무 정보가 존재하지 않습니다."),
+    NOT_SAME_SCHEDULE_EMPLOYEE(7003, HttpStatus.BAD_REQUEST.value(), "기존 근무자와 대체 근무 요청자가 일치하지 않습니다."),
+    ALREADY_COVER_REQUESTED(7004, HttpStatus.BAD_REQUEST.value(), "이미 대체 근무 요청이 되어 있는 근무입니다."),
+
+    /**
+     * 8000: FCM 오류
+     * */
+    FCM_SEND_ERROR(8000, HttpStatus.INTERNAL_SERVER_ERROR.value(), "푸시 알림 전송 과정에서 오류가 발생하였습니다."),
+    FCM_MAKE_MESSAGE_ERROR(8001, HttpStatus.INTERNAL_SERVER_ERROR.value(), "푸시 알림 메시지를 만드는 과정에서 오류가 발생하였습니다(JsonProcessingException)."),
+    FCM_GET_ACCESS_TOKEN_ERROR(8002, HttpStatus.INTERNAL_SERVER_ERROR.value(), "FCM access token을 가져오는 과정에서 오류가 발생하였습니다.");
 
 
     private final int code;

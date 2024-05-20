@@ -28,7 +28,7 @@ public interface StoreAvailableScheduleRepository extends JpaRepository<StoreAva
     void deleteAllByStore(@Param("store") Store store);
 
     @Query("select distinct sas.member from StoreAvailableSchedule sas " +
-            "where sas.store=:store and FUNCTION('DATE_FORMAT', sas.date, '%Y-%m')=:searchMonth " +
+            "where sas.store=:store and sas.date=:searchDate " +
             "and :startTime <= sas.startTime and sas.endTime <= :endTime")
-    List<Member> findMembersByStoreAndDateAndStartTimeGreaterThanEqualAndEndTimeLessThanEqual(Store store, Date searchMonth, Time startTime, Time endTime);
+    List<Member> findMembersByStoreAndDateAndStartTimeGreaterThanEqualAndEndTimeLessThanEqual(Store store, Date searchDate, Time startTime, Time endTime);
 }
