@@ -5,5 +5,5 @@ import lombok.Getter;
 @Getter
 public class DeleteAvailableScheduleRequestDTO {
     private Long storeId;
-    private Long storeMemberAvailableTimeId;
+    private Long storeAvailableScheduleId;
 }

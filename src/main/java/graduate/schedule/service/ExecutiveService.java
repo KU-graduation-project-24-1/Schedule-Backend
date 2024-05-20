@@ -34,7 +34,7 @@ public class ExecutiveService {
     private final MemberRepository memberRepository;
     private final StoreMemberRepository storeMemberRepository;
     private final StoreScheduleRepository storeScheduleRepository;
-    private final StoreMemberAvailableTimeRepository storeMemberAvailableTimeRepository;
+    private final StoreAvailableScheduleRepository storeAvailableScheduleRepository;
 
     public StoreAllEmployeeResponseDTO getAllEmployees(Member employer, Long storeId) {
         Store store = storeRepository.findById(storeId)
@@ -72,7 +72,7 @@ public class ExecutiveService {
             throw new MemberException(NOT_EXECUTIVE);
         }
 
-        storeMemberAvailableTimeRepository.deleteAllByStore(store);
+        storeAvailableScheduleRepository.deleteAllByStore(store);
         storeScheduleRepository.deleteAllByStore(store);
         storeMemberRepository.deleteAllByStore(store);
         storeRepository.delete(store);
@@ -99,7 +99,7 @@ public class ExecutiveService {
 
     public ChangeScheduleResponseDTO changeSchedule(Member employer, ChangeScheduleRequestDTO executiveRequest) {
         StoreSchedule storeSchedule = storeScheduleRepository.findById(executiveRequest.getScheduleId())
-                .orElseThrow(() -> new StoreScheduleException(INVALID_STORE_SCHEDULE_ID));
+                .orElseThrow(() -> new StoreScheduleException(NOT_FOUND_STORE_SCHEDULE));
         defaultExecutiveValidation(storeSchedule.getStoreId(), executiveRequest.getEmployeeId(), employer);
         Member employee = memberRepository.findById(executiveRequest.getEmployeeId()).get();
 
@@ -130,7 +130,7 @@ public class ExecutiveService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
         StoreSchedule storeSchedule = storeScheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new StoreScheduleException(INVALID_STORE_SCHEDULE_ID));
+                .orElseThrow(() -> new StoreScheduleException(NOT_FOUND_STORE_SCHEDULE));
         if (!storeMemberRepository.isExecutive(store, employer)) {
             throw new MemberException(NOT_EXECUTIVE);
         }
