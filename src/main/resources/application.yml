@@ -29,6 +29,12 @@ spring:
       port: ${DATA_REDIS_PORT}
   access-token:
     expired-date: ${ACCESS_TOKEN_EXPIRED_DATE}
+  log:
+    config:
+      path: ./logs
+      filename: app
+      maxHistory: 7 # 7일
+      totalSizeCap: 1GB # 로그 파일 사이즈
 
 ---
 
