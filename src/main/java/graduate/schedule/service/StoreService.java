@@ -165,6 +165,9 @@ public class StoreService {
     public WorkScheduleOnMonthResponseDTO getScheduleOnMonth(Member member, Long storeId, String searchMonth) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        if (!storeMemberRepository.existsMember(member, store)) {
+            throw new StoreMemberException(NOT_STORE_MEMBER);
+        }
 
         List<Date> existingWorkingDatesOnMonth = storeScheduleRepository.findDatesByStoreAndMonthOrderByDate(store, searchMonth);
         List<WorkScheduleOnDayDTO> daySchedules = existingWorkingDatesOnMonth.stream()
