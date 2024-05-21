@@ -231,39 +231,4 @@ public class StoreService {
                 availableTimeDatas
         );
     }
-
-    public AddAvailableScheduleResponseDTO addAvailableScheduleInDay(Member member, AddAvailableScheduleRequestDTO storeRequest) {
-        Store store = storeRepository.findById(storeRequest.getStoreId())
-                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
-        if (!storeMemberRepository.existsMember(member, store)) {
-            throw new StoreMemberException(NOT_STORE_MEMBER);
-        }
-
-        StoreAvailableSchedule newStoreAvailableSchedule =
-                StoreAvailableSchedule.createStoreAvailableSchedule(
-                        store,
-                        member,
-                        storeRequest.getDate(),
-                        timeWithSeconds(storeRequest.getStartTime()),
-                        timeWithSeconds(storeRequest.getEndTime())
-                );
-        storeAvailableScheduleRepository.save(newStoreAvailableSchedule);
-        return new AddAvailableScheduleResponseDTO(newStoreAvailableSchedule.getId());
-
-    }
-
-    public void deleteAvailableScheduleInDay(Member member, DeleteAvailableScheduleRequestDTO storeRequest) {
-        Store store = storeRepository.findById(storeRequest.getStoreId())
-                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
-        if (!storeMemberRepository.existsMember(member, store)) {
-            throw new StoreMemberException(NOT_STORE_MEMBER);
-        }
-
-        StoreAvailableSchedule availableTime = storeAvailableScheduleRepository.findById(storeRequest.getStoreAvailableScheduleId())
-                .orElseThrow(() -> new StoreScheduleException(NOT_FOUND_STORE_MEMBER_AVAILABLE_TIME));
-        if (!availableTime.getMember().equals(member)) {
-            throw new StoreScheduleException(NOT_MEMBER_WORKING_DATA);
-        }
-        storeAvailableScheduleRepository.delete(availableTime);
-    }
 }

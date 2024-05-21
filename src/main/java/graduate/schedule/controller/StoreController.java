@@ -51,7 +51,7 @@ public class StoreController {
     /**
      * @apiNote 가게 참가 전 초대 코드 유효 여부 및 가게 조회 api
      * */
-    @GetMapping("/inviteCode")
+    @GetMapping("/invite-code")
     public BaseResponse<SearchStoreWithInviteCodeResponseDTO> searchStoreWithInviteCode(@RequestBody @Valid SearchStoreWithInviteCodeRequestDTO storeRequest) {
         SearchStoreWithInviteCodeResponseDTO response = storeService.searchStoreWithInviteCode(storeRequest.getInviteCode());
         return new BaseResponse<>(response);
@@ -81,23 +81,5 @@ public class StoreController {
     public BaseResponse<AvailableScheduleOnMonthResponseDTO> getAvailableScheduleOnMonth(@MemberId @Valid Member member, @PathVariable @Valid Long storeId, @PathVariable @Valid String searchMonth) {
         AvailableScheduleOnMonthResponseDTO response = storeService.getAvailableScheduleOnMonth(member, storeId, searchMonth);
         return new BaseResponse<>(response);
-    }
-
-    /**
-    * @apiNote 일 단위 근무 가능한 시간 추가 api
-    */
-    @PostMapping("/available-schedule")
-    public BaseResponse<AddAvailableScheduleResponseDTO> addAvailableScheduleInDay(@MemberId @Valid Member member, @RequestBody @Valid AddAvailableScheduleRequestDTO storeRequest) {
-        AddAvailableScheduleResponseDTO response = storeService.addAvailableScheduleInDay(member, storeRequest);
-        return new BaseResponse<>(response);
-    }
-
-    /**
-    * @apiNote 일 단위 근무 가능한 시간 삭제 api
-    */
-    @DeleteMapping("/available-schedule")
-    public BaseResponse<String> deleteAvailableScheduleInDay(@MemberId @Valid Member member, @RequestBody @Valid DeleteAvailableScheduleRequestDTO storeRequest) {
-        storeService.deleteAvailableScheduleInDay(member, storeRequest);
-        return new BaseResponse<>(SUCCESS_DELETE_AVAILABLE_SCHEDULE.getMessage());
     }
 }
