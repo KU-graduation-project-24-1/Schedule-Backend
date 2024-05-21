@@ -73,7 +73,7 @@ public class ExecutiveController {
     /**
      * @apiNote 근무 정보 수정 api
      * 대타 요청 중 스케줄 변경이(근무자, 근무 시간) 있을 시 대타 요청 사라짐
-     * 대체 근무자가 사장인 경우 해당 근무 정보 삭제
+     * 대체 근무자가 고용인인 경우 해당 근무 정보 삭제
      */
     @PatchMapping("/schedule")
     public BaseResponse<ChangeScheduleResponseDTO> changeSchedule(@MemberId @Valid Member employer, @RequestBody @Valid ChangeScheduleRequestDTO executiveRequest) {
