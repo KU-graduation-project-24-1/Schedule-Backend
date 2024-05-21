@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 PROJECT_ROOT="/home/ubuntu/var/www/Schedule-Backend"
-JAR_FILE="$PROJECT_ROOT/build/libs/*.jar"
+JAR_FILE="$PROJECT_ROOT/build/libs/schedule-0.0.1-SNAPSHOT.jar"
 
 DEPLOY_LOG="$PROJECT_ROOT/deploy.log"
 
