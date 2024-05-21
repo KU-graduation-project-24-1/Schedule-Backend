@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-PROJECT_ROOT="/home/ubuntu/app"
-JAR_FILE="$PROJECT_ROOT/*.jar"
+PROJECT_ROOT="/home/ubuntu/var/www/Schedule-Backend"
+JAR_FILE="$PROJECT_ROOT/build/libs/*.jar"
 
 APP_LOG="$PROJECT_ROOT/application.log"
 ERROR_LOG="$PROJECT_ROOT/error.log"
