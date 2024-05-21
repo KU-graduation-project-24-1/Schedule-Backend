@@ -26,7 +26,7 @@ import static graduate.schedule.utils.DateAndTimeFormatter.timeWithoutSeconds;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class ScheduleService {
+public class StoreScheduleService {
     private final StoreScheduleRepository storeScheduleRepository;
     private final StoreMemberRepository storeMemberRepository;
     private final StoreAvailableScheduleRepository storeAvailableScheduleRepository;
