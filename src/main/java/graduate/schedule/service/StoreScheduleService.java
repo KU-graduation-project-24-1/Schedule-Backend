@@ -1,13 +1,14 @@
 package graduate.schedule.service;
 
+import graduate.schedule.common.exception.StoreException;
 import graduate.schedule.common.exception.StoreMemberException;
 import graduate.schedule.common.exception.StoreScheduleException;
 import graduate.schedule.domain.member.Member;
-import graduate.schedule.domain.store.Store;
-import graduate.schedule.domain.store.StoreMember;
-import graduate.schedule.domain.store.StoreMemberGrade;
-import graduate.schedule.domain.store.StoreSchedule;
+import graduate.schedule.domain.store.*;
+import graduate.schedule.dto.web.request.store.AddAvailableScheduleRequestDTO;
+import graduate.schedule.dto.web.request.store.DeleteAvailableScheduleRequestDTO;
 import graduate.schedule.dto.web.response.executive.ChangeScheduleResponseDTO;
+import graduate.schedule.dto.web.response.store.AddAvailableScheduleResponseDTO;
 import graduate.schedule.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import java.util.List;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.NOT_STORE_MEMBER;
+import static graduate.schedule.utils.DateAndTimeFormatter.timeWithSeconds;
 import static graduate.schedule.utils.DateAndTimeFormatter.timeWithoutSeconds;
 
 @Slf4j
@@ -27,6 +29,7 @@ import static graduate.schedule.utils.DateAndTimeFormatter.timeWithoutSeconds;
 @Transactional
 @RequiredArgsConstructor
 public class StoreScheduleService {
+    private final StoreRepository storeRepository;
     private final StoreScheduleRepository storeScheduleRepository;
     private final StoreMemberRepository storeMemberRepository;
     private final StoreAvailableScheduleRepository storeAvailableScheduleRepository;
@@ -40,6 +43,42 @@ public class StoreScheduleService {
     private final String BODY_WAVE = "~";
     private final String REQUEST_COVER_BODY_END = "에 대체 근무를 요청하였습니다.";
     private final String ACCEPT_COVER_BODY_END = "에 대체 근무를 수락하였습니다.";
+
+
+    public AddAvailableScheduleResponseDTO addAvailableScheduleInDay(Member member, AddAvailableScheduleRequestDTO storeRequest) {
+        Store store = storeRepository.findById(storeRequest.getStoreId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        if (!storeMemberRepository.existsMember(member, store)) {
+            throw new StoreMemberException(NOT_STORE_MEMBER);
+        }
+
+        StoreAvailableSchedule newStoreAvailableSchedule =
+                StoreAvailableSchedule.createStoreAvailableSchedule(
+                        store,
+                        member,
+                        storeRequest.getDate(),
+                        timeWithSeconds(storeRequest.getStartTime()),
+                        timeWithSeconds(storeRequest.getEndTime())
+                );
+        storeAvailableScheduleRepository.save(newStoreAvailableSchedule);
+        return new AddAvailableScheduleResponseDTO(newStoreAvailableSchedule.getId());
+
+    }
+
+    public void deleteAvailableScheduleInDay(Member member, DeleteAvailableScheduleRequestDTO storeRequest) {
+        Store store = storeRepository.findById(storeRequest.getStoreId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        if (!storeMemberRepository.existsMember(member, store)) {
+            throw new StoreMemberException(NOT_STORE_MEMBER);
+        }
+
+        StoreAvailableSchedule availableTime = storeAvailableScheduleRepository.findById(storeRequest.getStoreAvailableScheduleId())
+                .orElseThrow(() -> new StoreScheduleException(NOT_FOUND_STORE_MEMBER_AVAILABLE_TIME));
+        if (!availableTime.getMember().equals(member)) {
+            throw new StoreScheduleException(NOT_MEMBER_WORKING_DATA);
+        }
+        storeAvailableScheduleRepository.delete(availableTime);
+    }
 
     public void requestCover(Member member, Long scheduleId) {
         StoreSchedule storeSchedule = storeScheduleRepository.findById(scheduleId)
