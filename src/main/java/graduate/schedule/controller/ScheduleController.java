@@ -3,6 +3,7 @@ package graduate.schedule.controller;
 import graduate.schedule.annotation.MemberId;
 import graduate.schedule.common.response.BaseResponse;
 import graduate.schedule.domain.member.Member;
+import graduate.schedule.dto.web.response.executive.ChangeScheduleResponseDTO;
 import graduate.schedule.service.ScheduleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,4 +28,12 @@ public class ScheduleController {
         return new BaseResponse<>(SUCCESS_REQUEST_COVER.getMessage());
     }
 
+    /**
+     * @apiNote 대타 수락 api
+     */
+    @PatchMapping("/{scheduleId}/cover")
+    public BaseResponse<ChangeScheduleResponseDTO> acceptCover(@MemberId @Valid Member substitute, @PathVariable @Valid Long scheduleId) {
+        ChangeScheduleResponseDTO response = scheduleService.acceptCover(substitute, scheduleId);
+        return new BaseResponse<>(response);
+    }
 }

@@ -103,8 +103,7 @@ public class ExecutiveService {
         defaultExecutiveValidation(storeSchedule.getStoreId(), executiveRequest.getEmployeeId(), employer);
         Member employee = memberRepository.findById(executiveRequest.getEmployeeId()).get();
 
-
-        //대체 근무자가 사장인 경우 해당 근무 정보 삭제
+        //대체 근무자가 고용인인 경우 해당 근무 정보 삭제
         if (employee.equals(employer)) {
             log.info("대체 근무자가 고용인으로 설정되어 근무 정보를 삭제합니다.");
             storeScheduleRepository.delete(storeSchedule);
