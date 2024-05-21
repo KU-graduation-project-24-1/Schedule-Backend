@@ -9,7 +9,7 @@ import static graduate.schedule.utils.DateAndTimeFormatter.timeWithoutSeconds;
 
 @Getter
 public class ChangeScheduleResponseDTO {
-    private boolean isDeleted;
+    private final boolean isDeleted;
     private Long scheduleId;
     private Long employeeId;
     private Date date;
