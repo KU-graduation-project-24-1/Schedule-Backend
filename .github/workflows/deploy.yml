@@ -1,0 +1,86 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+
+name: CD
+
+on:
+  pull_request:
+    types: [ closed ]
+    branches: [ "main" ]
+env:
+  AWS_REGION: ap-northeast-2
+  S3_BUCKET_NAME: schedule-bucket
+  CODE_DEPLOY_APPLICATION_NAME: schedule
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: schedule-deployment-group
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    # 운영환경에 대한 설정 파일 정보
+    - name: Set Release YML File
+      run: |
+        cd ./src/main/resources
+        touch ./application.yml
+        echo "${{ secrets.RELEASE_YML }}" > ./application-prod.yml
+    
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+
+    - name: Grant Execute Permission for Gradlew
+      run: |
+        chmod +x ./gradlew
+      shell: bash
+    
+    - name: Build with Gradle Wrapper
+      run: ./gradlew clean build --exclude-task test
+    
+    #AWS 인증
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+  
+    #빌드 결과물 S3 버킷에 업로드
+    # - name: Upload to AWS S3
+    #   run: |
+    #     aws deploy push \
+    #       --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
+    #       --ignore-hidden-files \
+    #       --s3-location s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip \
+    #       --source .
+    - name: Upload to S3
+      run: |
+        aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip
+      shell: bash
+
+    
+    #S3 버킷에 있는 파일 CodeDeploy 실행
+    - name: Deploy to AWS EC2 from S3
+      run: |
+        aws deploy create-deployment \
+          --deployment-config-name CodeDeployDefault.AllAtOnce \
+          --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
+          --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
+          --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip
