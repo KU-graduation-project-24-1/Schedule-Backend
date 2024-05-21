@@ -3,6 +3,8 @@
 PROJECT_ROOT="/home/ubuntu/var/www/Schedule-Backend"
 JAR_FILE="$PROJECT_ROOT/build/libs/*.jar"
 
+DEPLOY_LOG="$PROJECT_ROOT/deploy.log"
+
 TIME_NOW=$(date +%c)
 
 # 현재 구동 중인 애플리케이션 pid 확인

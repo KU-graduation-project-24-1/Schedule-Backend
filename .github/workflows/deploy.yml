@@ -35,13 +35,20 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+
+    #파이어베이스 키 데이터 파일 정보
+    - name: Set Firebase Service Key JSON File
+      run: |
+        cd ./src/main/resources/firebase
+        touch ./firebase_service_key.json
+        echo "%{{ secrets.FIREBASE_SERVICE_KEY }}" > ./firebase_service_key.json
     
-    # 운영환경에 대한 설정 파일 정보
+    #운영환경에 대한 설정 파일 정보
     - name: Set Release YML File
       run: |
         cd ./src/main/resources
         touch ./application.yml
-        echo "${{ secrets.RELEASE_YML }}" > ./application-prod.yml
+        echo "${{ secrets.RELEASE_YML }}" > ./application.yml
     
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
