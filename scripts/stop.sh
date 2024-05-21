@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 
-PROJECT_ROOT="/home/ubuntu/app"
-JAR_FILE="$PROJECT_ROOT/*.jar"
-
-DEPLOY_LOG="$PROJECT_ROOT/deploy.log"
+PROJECT_ROOT="/home/ubuntu/var/www/Schedule-Backend"
+JAR_FILE="$PROJECT_ROOT/build/libs/*.jar"
 
 TIME_NOW=$(date +%c)
 
