@@ -3,7 +3,6 @@ package graduate.schedule.service;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.dto.store.MyStoreDTO;
 import graduate.schedule.dto.web.response.member.MyStoreResponseDTO;
-import graduate.schedule.repository.MemberRepository;
 import graduate.schedule.repository.StoreMemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

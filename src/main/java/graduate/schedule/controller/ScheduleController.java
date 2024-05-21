@@ -19,7 +19,6 @@ import static graduate.schedule.common.response.status.BaseExceptionResponseStat
 public class ScheduleController {
     private final ScheduleService scheduleService;
 
-
     /**
      * @apiNote 대타 요청 api
      */

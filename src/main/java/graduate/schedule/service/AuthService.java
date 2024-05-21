@@ -2,7 +2,6 @@ package graduate.schedule.service;
 
 import graduate.schedule.auth.kakao.KakaoMemberProvider;
 import graduate.schedule.common.exception.InvalidTokenException;
-import graduate.schedule.common.exception.MemberException;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.dto.auth.KakaoMemberDTO;
 import graduate.schedule.dto.web.request.auth.LoginRequestDTO;
