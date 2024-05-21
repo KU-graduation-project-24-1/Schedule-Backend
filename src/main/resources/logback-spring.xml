@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!-- 로그 패턴에 색상 적용 %clr(pattern){color}
-        https://logback.qos.ch/manual/layouts.html#coloring
-    -->
+    <!-- 로그 패턴에 색상 적용 %clr(pattern){color} https://logback.qos.ch/manual/layouts.html#coloring-->
     <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
 
     <springProfile>
