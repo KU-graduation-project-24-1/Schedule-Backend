@@ -25,9 +25,6 @@ import static graduate.schedule.common.response.status.BaseExceptionResponseStat
 @Transactional
 @RequiredArgsConstructor
 public class FCMService {
-    // TODO: 5/12/24 FCM 푸시 알림 테스트 필요
-    private final MemberRepository memberRepository;
-
     @Value("${firebase.api.url}")
     private String FIREBASE_API_URL;
 
