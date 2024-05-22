@@ -20,7 +20,7 @@ public class StoreAvailableSchedule {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    private Member member;
+    private Member employee;
 
     @Temporal(TemporalType.DATE)
     private Date date;
@@ -30,10 +30,10 @@ public class StoreAvailableSchedule {
     @Temporal(TemporalType.TIME)
     private Time endTime;
 
-    public static StoreAvailableSchedule createStoreAvailableSchedule(Store store, Member member, Date availableDate, Time availableStartTime, Time availableEndTime) {
+    public static StoreAvailableSchedule createStoreAvailableSchedule(Store store, Member employee, Date availableDate, Time availableStartTime, Time availableEndTime) {
         StoreAvailableSchedule availableSchedule = new StoreAvailableSchedule();
         availableSchedule.store = store;
-        availableSchedule.member = member;
+        availableSchedule.employee = employee;
         availableSchedule.date = availableDate;
         availableSchedule.startTime = availableStartTime;
         availableSchedule.endTime = availableEndTime;

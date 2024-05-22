@@ -74,7 +74,7 @@ public class StoreScheduleService {
 
         StoreAvailableSchedule availableTime = storeAvailableScheduleRepository.findById(storeRequest.getStoreAvailableScheduleId())
                 .orElseThrow(() -> new StoreScheduleException(NOT_FOUND_STORE_MEMBER_AVAILABLE_TIME));
-        if (!availableTime.getMember().equals(member)) {
+        if (!availableTime.getEmployee().equals(member)) {
             throw new StoreScheduleException(NOT_MEMBER_WORKING_DATA);
         }
         storeAvailableScheduleRepository.delete(availableTime);
