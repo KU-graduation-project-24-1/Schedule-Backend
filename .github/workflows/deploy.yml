@@ -39,14 +39,18 @@ jobs:
         distribution: 'temurin'
 
     #firebase 키 데이터 파일 정보
+    - name: make firebase dir
+      run: |
+        cd ./src/main/resources
+        mkdir firebase
     - name: Set Firebase Service Key JSON File
       id: create-json
-      uses: jsdaniell/create-json@v1.2.3
+      uses: jsdaniell/create-json@v1.2.2
       with:
         name: "firebase_service_key.json"
         json: ${{ secrets.FIREBASE_SERVICE_KEY }}
-        dir: 'src/main/resources/firebase'
-
+        dir: './src/main/resources/firebase'
+        
     #운영 환경에 대한 설정 파일 정보
     - name: Set Release YML File
       run: |
