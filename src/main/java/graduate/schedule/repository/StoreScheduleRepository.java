@@ -1,5 +1,6 @@
 package graduate.schedule.repository;
 
+import graduate.schedule.domain.member.Member;
 import graduate.schedule.domain.store.Store;
 import graduate.schedule.domain.store.StoreSchedule;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -25,4 +26,9 @@ public interface StoreScheduleRepository extends JpaRepository<StoreSchedule, Lo
     @Query("delete from StoreSchedule ss " +
             "where ss.store=:store")
     void deleteAllByStore(@Param("store") Store store);
+
+    @Modifying
+    @Query("delete from StoreSchedule ss " +
+            "where ss.employee=:member")
+    void deleteAllByEmployee(@Param("member") Member member);
 }
