@@ -111,14 +111,14 @@ public class StoreController {
 
     // 주 단위 고정 근무시간 가져오기
     @GetMapping("/{storeId}/fixed-schedule")
-    public BaseResponse<List<FixedScheduleResponseDTO>> getFixedSchedule(@MemberId @Valid Member member, @PathVariable @Valid Long storeId) {
-        List<FixedScheduleResponseDTO> response = storeService.getFixedSchedule(member, storeId);
+    public BaseResponse<List<StoreAvailableTimeByDayResponseDTO>> getFixedSchedule(@MemberId @Valid Member member, @PathVariable @Valid Long storeId) {
+        List<StoreAvailableTimeByDayResponseDTO> response = storeService.getFixedSchedule(member, storeId);
         return new BaseResponse<>(response);
     }
 
     // 주 단위 고정 근무시간 수정하기
     @PatchMapping("/{storeId}/fixed-schedule")
-    public BaseResponse<String> updateFixedSchedule(@MemberId @Valid Member member, @PathVariable @Valid Long storeId, @RequestBody @Valid UpdateFixedScheduleRequestDTO request) {
+    public BaseResponse<String> updateFixedSchedule(@MemberId @Valid Member member, @PathVariable @Valid Long storeId, @RequestBody @Valid UpdateStoreAvailableTimeByDayRequestDTO request) {
         storeService.updateFixedSchedule(member, storeId, request);
         return new BaseResponse<>("Fixed schedule updated successfully.");
     }

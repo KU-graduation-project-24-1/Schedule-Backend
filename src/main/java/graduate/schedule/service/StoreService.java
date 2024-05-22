@@ -281,17 +281,17 @@ public class StoreService {
     }
 
     // 주 단위 고정 근무시간 가져오기
-    public List<FixedScheduleResponseDTO> getFixedSchedule(Member member, Long storeId) {
+    public List<StoreAvailableTimeByDayResponseDTO> getFixedSchedule(Member member, Long storeId) {
         Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
         List<StoreAvailableTimeByDay> schedules = storeAvailableTimeByDayRepository.findByStoreAndMember(store, member);
 
         return schedules.stream().map(schedule ->
-                new FixedScheduleResponseDTO(schedule.getDayOfWeek(), schedule.getStartTime().toString(), schedule.getEndTime().toString())
+                new StoreAvailableTimeByDayResponseDTO(schedule.getDayOfWeek(), schedule.getStartTime().toString(), schedule.getEndTime().toString())
         ).collect(Collectors.toList());
     }
 
     // 주 단위 고정 근무시간 수정하기
-    public void updateFixedSchedule(Member member, Long storeId, UpdateFixedScheduleRequestDTO request) {
+    public void updateFixedSchedule(Member member, Long storeId, UpdateStoreAvailableTimeByDayRequestDTO request) {
         Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
         StoreAvailableTimeByDay schedule = storeAvailableTimeByDayRepository.findByStoreAndMemberAndDayOfWeek(store, member, request.getDayOfWeek())
                 .orElseThrow(() -> new StoreException(NOT_MEMBER_WORKING_DATA));

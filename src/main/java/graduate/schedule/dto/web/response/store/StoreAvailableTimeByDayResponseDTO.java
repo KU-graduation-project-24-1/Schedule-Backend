@@ -7,7 +7,7 @@ import java.time.DayOfWeek;
 
 @Getter
 @AllArgsConstructor
-public class FixedScheduleResponseDTO {
+public class StoreAvailableTimeByDayResponseDTO {
     private DayOfWeek dayOfWeek;
     private String startTime;
     private String endTime;

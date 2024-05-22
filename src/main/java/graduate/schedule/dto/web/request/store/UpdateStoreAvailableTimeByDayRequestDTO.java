@@ -7,7 +7,7 @@ import java.time.DayOfWeek;
 
 @Getter
 @Setter
-public class UpdateFixedScheduleRequestDTO {
+public class UpdateStoreAvailableTimeByDayRequestDTO {
     private DayOfWeek dayOfWeek;
     private String startTime;
     private String endTime;
