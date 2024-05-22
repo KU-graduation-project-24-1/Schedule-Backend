@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -281,22 +282,55 @@ public class StoreService {
     }
 
     // 주 단위 고정 근무시간 가져오기
-    public List<StoreAvailableTimeByDayResponseDTO> getFixedSchedule(Member member, Long storeId) {
+    public StoreAvailableTimeByDayResponseDTO getStoreAvailableTimeByDay(Member member, Long storeId) {
         Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
         List<StoreAvailableTimeByDay> schedules = storeAvailableTimeByDayRepository.findByStoreAndMember(store, member);
 
-        return schedules.stream().map(schedule ->
-                new StoreAvailableTimeByDayResponseDTO(schedule.getDayOfWeek(), schedule.getStartTime().toString(), schedule.getEndTime().toString())
-        ).collect(Collectors.toList());
+        List<DayOfWeek> dayOfWeeks = schedules.stream().map(StoreAvailableTimeByDay::getDayOfWeek).toList();
+        List<String> startTimes = schedules.stream().map(schedule -> schedule.getStartTime().toString()).toList();
+        List<String> endTimes = schedules.stream().map(schedule -> schedule.getEndTime().toString()).toList();
+
+        return new StoreAvailableTimeByDayResponseDTO(dayOfWeeks, startTimes, endTimes);
     }
 
     // 주 단위 고정 근무시간 수정하기
-    public void updateFixedSchedule(Member member, Long storeId, UpdateStoreAvailableTimeByDayRequestDTO request) {
+    public void updateStoreAvailableTimeByDay(Member member, Long storeId, UpdateStoreAvailableTimeByDayRequestDTO request) {
         Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
-        StoreAvailableTimeByDay schedule = storeAvailableTimeByDayRepository.findByStoreAndMemberAndDayOfWeek(store, member, request.getDayOfWeek())
-                .orElseThrow(() -> new StoreException(NOT_MEMBER_WORKING_DATA));
+        DayOfWeek dayOfWeek = request.getDayOfWeek();
+        Time newStartTime = timeWithSeconds(request.getStartTime());
+        Time newEndTime = timeWithSeconds(request.getEndTime());
 
-        schedule.updateWorkTime(Time.valueOf(request.getStartTime() + ":00"), Time.valueOf(request.getEndTime() + ":00"));
-        storeAvailableTimeByDayRepository.save(schedule);
+        // 기존 고정 근무시간을 찾아서 업데이트하거나 새로 생성
+        StoreAvailableTimeByDay fixedSchedule = storeAvailableTimeByDayRepository.findByStoreAndMemberAndDayOfWeek(store, member, dayOfWeek)
+                .orElse(new StoreAvailableTimeByDay(member, store, dayOfWeek, newStartTime, newEndTime));
+
+        // 기존 요일에 해당하는 데이터 삭제 또는 수정
+        List<StoreAvailableTimeByDay> existingSchedules = storeAvailableTimeByDayRepository.findByStoreAndMemberAndDayOfWeekOrderByStartTime(store, member, dayOfWeek);
+
+        for (StoreAvailableTimeByDay schedule : existingSchedules) {
+            if (schedule.getStartTime().before(newEndTime) && schedule.getEndTime().after(newStartTime)) {
+                if (schedule.getStartTime().before(newStartTime)) {
+                    schedule.updateWorkTime(schedule.getStartTime(), newStartTime);
+                    storeAvailableTimeByDayRepository.save(schedule);
+                } else if (schedule.getEndTime().after(newEndTime)) {
+                    schedule.updateWorkTime(newEndTime, schedule.getEndTime());
+                    storeAvailableTimeByDayRepository.save(schedule);
+                } else {
+                    storeAvailableTimeByDayRepository.delete(schedule);
+                }
+            }
+        }
+
+        // 새로운 입력 데이터를 추가하거나, 이미 있는 데이터와 경계가 겹치는 경우 병합
+        for (StoreAvailableTimeByDay schedule : existingSchedules) {
+            if (newStartTime.before(schedule.getEndTime()) && newEndTime.after(schedule.getStartTime())) {
+                newStartTime = new Time(Math.min(newStartTime.getTime(), schedule.getStartTime().getTime()));
+                newEndTime = new Time(Math.max(newEndTime.getTime(), schedule.getEndTime().getTime()));
+                storeAvailableTimeByDayRepository.delete(schedule);
+            }
+        }
+
+        fixedSchedule.updateWorkTime(newStartTime, newEndTime);
+        storeAvailableTimeByDayRepository.save(fixedSchedule);
     }
 }

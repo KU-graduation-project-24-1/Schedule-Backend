@@ -12,5 +12,6 @@ import java.util.Optional;
 
 public interface StoreAvailableTimeByDayRepository extends JpaRepository<StoreAvailableTimeByDay, Long> {
     List<StoreAvailableTimeByDay> findByStoreAndMember(Store store, Member member);
-    Optional<StoreAvailableTimeByDay> findByStoreAndMemberAndDayOfWeek(@Param("store") Store store, @Param("member") Member member, @Param("dayOfWeek") DayOfWeek dayOfWeek);
+    Optional<StoreAvailableTimeByDay> findByStoreAndMemberAndDayOfWeek(Store store, Member member, DayOfWeek dayOfWeek);
+    List<StoreAvailableTimeByDay> findByStoreAndMemberAndDayOfWeekOrderByStartTime(Store store, Member member, DayOfWeek dayOfWeek);
 }

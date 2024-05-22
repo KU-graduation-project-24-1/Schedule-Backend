@@ -4,11 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.DayOfWeek;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
 public class StoreAvailableTimeByDayResponseDTO {
-    private DayOfWeek dayOfWeek;
-    private String startTime;
-    private String endTime;
+    private List<DayOfWeek> dayOfWeeks;
+    private List<String> startTimes;
+    private List<String> endTimes;
 }
