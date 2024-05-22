@@ -29,7 +29,6 @@ import java.util.Random;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
 import static graduate.schedule.utils.DateAndTimeFormatter.timeWithoutSeconds;
-import static graduate.schedule.utils.DateAndTimeFormatter.timeWithSeconds;
 
 @Slf4j
 @Service
@@ -206,7 +205,7 @@ public class StoreService {
                 .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER))
                 .getMemberGrade();
 
-        List<Date> existingAvailableDatesByStoreAndMonth = storeAvailableScheduleRepository.findDatesByStoreAndMemberAndMonthOrderByDate(store, member, searchMonth);
+        List<Date> existingAvailableDatesByStoreAndMonth = storeAvailableScheduleRepository.findDatesByStoreAndEmployeeAndMonthOrderByDate(store, member, searchMonth);
         List<AvailableScheduleInDayDTO> dayAvailableSchedules = existingAvailableDatesByStoreAndMonth.stream()
                 .map(date -> getDateAvailableSchedule(store, member, date)).toList();
 

@@ -15,10 +15,10 @@ import java.util.List;
 public interface StoreAvailableScheduleRepository extends JpaRepository<StoreAvailableSchedule, Long> {
     @Query("select distinct sas.date from StoreAvailableSchedule sas " +
             "join sas.store s on s=:store " +
-            "join sas.employee m on m=:employee " +
+            "join sas.employee m on m=:member " +
             "where FUNCTION('DATE_FORMAT', sas.date, '%Y-%m')=:searchMonth " +
             "order by sas.date")
-    List<Date> findDatesByStoreAndMemberAndMonthOrderByDate(@Param("store") Store store, @Param("member") Member member, @Param("searchMonth") String searchMonth);
+    List<Date> findDatesByStoreAndEmployeeAndMonthOrderByDate(@Param("store") Store store, @Param("member") Member member, @Param("searchMonth") String searchMonth);
 
     List<StoreAvailableSchedule> findByStoreAndDateOrderByStartTime(Store store, Date date);
 
@@ -32,5 +32,8 @@ public interface StoreAvailableScheduleRepository extends JpaRepository<StoreAva
             "and :startTime <= sas.startTime and sas.endTime <= :endTime")
     List<Member> findMembersByStoreAndDateAndStartTimeGreaterThanEqualAndEndTimeLessThanEqual(Store store, Date searchDate, Time startTime, Time endTime);
 
-    void deleteAllByEmployee(@Param("employee") Member employee);
+    @Modifying
+    @Query("delete from StoreAvailableSchedule sas " +
+            "where sas.employee=:member")
+    void deleteAllByEmployee(@Param("member") Member member);
 }

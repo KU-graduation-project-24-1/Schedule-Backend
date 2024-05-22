@@ -27,5 +27,8 @@ public interface StoreScheduleRepository extends JpaRepository<StoreSchedule, Lo
             "where ss.store=:store")
     void deleteAllByStore(@Param("store") Store store);
 
-    void deleteAllByEmployee(@Param("employee") Member employee);
+    @Modifying
+    @Query("delete from StoreSchedule ss " +
+            "where ss.employee=:member")
+    void deleteAllByEmployee(@Param("member") Member member);
 }
