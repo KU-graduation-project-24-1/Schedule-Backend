@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.sql.Time;
+import java.util.stream.Collectors;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
 import static graduate.schedule.utils.DateAndTimeFormatter.timeWithoutSeconds;
@@ -41,6 +43,8 @@ public class StoreService {
     private final StoreScheduleRepository storeScheduleRepository;
     private final StoreAvailableScheduleRepository storeAvailableScheduleRepository;
     private final BusinessCheckService businessCheckService;
+    private final StoreAvailableTimeByDayRepository storeAvailableTimeByDayRepository;
+
 
     private final int LEFT_LIMIT = 48;
     private final int RIGHT_LIMIT = 122;
@@ -265,5 +269,34 @@ public class StoreService {
             throw new StoreScheduleException(NOT_MEMBER_WORKING_DATA);
         }
         storeAvailableScheduleRepository.delete(availableTime);
+    }
+
+    // 특정 가게의 내 정보 가져오기
+    public MyStoreInfoResponseDTO getMyStoreInfo(Member member, Long storeId) {
+        Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        StoreMember storeMember = storeMemberRepository.findByStoreAndMember(store, member)
+                .orElseThrow(() -> new StoreException(NOT_STORE_MEMBER));
+
+        return new MyStoreInfoResponseDTO(member.getName(), member.getProfileImg(), storeMember.getMemberGrade().getGrade());
+    }
+
+    // 주 단위 고정 근무시간 가져오기
+    public List<FixedScheduleResponseDTO> getFixedSchedule(Member member, Long storeId) {
+        Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        List<StoreAvailableTimeByDay> schedules = storeAvailableTimeByDayRepository.findByStoreAndMember(store, member);
+
+        return schedules.stream().map(schedule ->
+                new FixedScheduleResponseDTO(schedule.getDayOfWeek(), schedule.getStartTime().toString(), schedule.getEndTime().toString())
+        ).collect(Collectors.toList());
+    }
+
+    // 주 단위 고정 근무시간 수정하기
+    public void updateFixedSchedule(Member member, Long storeId, UpdateFixedScheduleRequestDTO request) {
+        Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        StoreAvailableTimeByDay schedule = storeAvailableTimeByDayRepository.findByStoreAndMemberAndDayOfWeek(store, member, request.getDayOfWeek())
+                .orElseThrow(() -> new StoreException(NOT_MEMBER_WORKING_DATA));
+
+        schedule.updateWorkTime(Time.valueOf(request.getStartTime() + ":00"), Time.valueOf(request.getEndTime() + ":00"));
+        storeAvailableTimeByDayRepository.save(schedule);
     }
 }

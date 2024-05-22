@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
 
@@ -100,4 +101,28 @@ public class StoreController {
         storeService.deleteAvailableScheduleInDay(member, storeRequest);
         return new BaseResponse<>(SUCCESS_DELETE_AVAILABLE_SCHEDULE.getMessage());
     }
+
+    // 특정 가게의 내 정보 가져오기
+    @GetMapping("/{storeId}/my-info")
+    public BaseResponse<MyStoreInfoResponseDTO> getMyStoreInfo(@MemberId @Valid Member member, @PathVariable @Valid Long storeId) {
+        MyStoreInfoResponseDTO response = storeService.getMyStoreInfo(member, storeId);
+        return new BaseResponse<>(response);
+    }
+
+    // 주 단위 고정 근무시간 가져오기
+    @GetMapping("/{storeId}/fixed-schedule")
+    public BaseResponse<List<FixedScheduleResponseDTO>> getFixedSchedule(@MemberId @Valid Member member, @PathVariable @Valid Long storeId) {
+        List<FixedScheduleResponseDTO> response = storeService.getFixedSchedule(member, storeId);
+        return new BaseResponse<>(response);
+    }
+
+    // 주 단위 고정 근무시간 수정하기
+    @PatchMapping("/{storeId}/fixed-schedule")
+    public BaseResponse<String> updateFixedSchedule(@MemberId @Valid Member member, @PathVariable @Valid Long storeId, @RequestBody @Valid UpdateFixedScheduleRequestDTO request) {
+        storeService.updateFixedSchedule(member, storeId, request);
+        return new BaseResponse<>("Fixed schedule updated successfully.");
+    }
+
+
+
 }
