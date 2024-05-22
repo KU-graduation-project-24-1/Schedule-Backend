@@ -62,6 +62,11 @@ public class ExecutiveService {
 
     public void deleteStoreMember(Member employer, DeleteStoreMemberRequestDTO executiveRequest) {
         StoreMember storeMember = defaultExecutiveValidation(executiveRequest.getStoreId(), executiveRequest.getEmployeeId(), employer);
+        Member employee = memberRepository.findById(executiveRequest.getEmployeeId())
+                .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
+
+        storeScheduleRepository.deleteAllByEmployee(employee);
+        storeAvailableScheduleRepository.deleteAllByEmployee(employee);
         storeMemberRepository.delete(storeMember);
     }
 
