@@ -55,7 +55,7 @@ public class FCMService {
             Response response = client.newCall(request).execute();
             log.info("fcm response body: {}", response.body().string());
         } catch (IOException e) {
-            throw new FCMException(FCM_SEND_ERROR);
+            throw new FCMException(FCM_SEND_ERROR, e.getMessage());
         }
     }
 
@@ -72,7 +72,7 @@ public class FCMService {
 
             return objectMapper.writeValueAsString(fcmMessage);
         } catch (JsonProcessingException e) {
-            throw new FCMException(FCM_MAKE_MESSAGE_ERROR);
+            throw new FCMException(FCM_MAKE_MESSAGE_ERROR, e.getMessage());
         }
     }
 
@@ -85,7 +85,7 @@ public class FCMService {
             googleCredentials.refreshIfExpired();
             return googleCredentials.getAccessToken().getTokenValue();
         } catch (IOException e) {
-            throw new FCMException(FCM_GET_ACCESS_TOKEN_ERROR);
+            throw new FCMException(FCM_GET_ACCESS_TOKEN_ERROR, e.getMessage());
         }
     }
 }

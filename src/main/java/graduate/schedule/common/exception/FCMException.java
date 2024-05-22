@@ -11,4 +11,9 @@ public class FCMException extends RuntimeException {
         super(exceptionStatus.getMessage());
         this.exceptionStatus = exceptionStatus;
     }
+
+    public FCMException(ResponseStatus exceptionStatus, String message) {
+        super(message);
+        this.exceptionStatus = exceptionStatus;
+    }
 }
