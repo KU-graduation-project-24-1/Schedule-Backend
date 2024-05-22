@@ -65,8 +65,8 @@ public class ExecutiveService {
         Member employee = memberRepository.findById(executiveRequest.getEmployeeId())
                 .orElseThrow(() -> new MemberException(NOT_FOUND_MEMBER));
 
-        storeScheduleRepository.deleteAllByEmployee(employee);
         storeAvailableScheduleRepository.deleteAllByEmployee(employee);
+        storeScheduleRepository.deleteAllByEmployee(employee);
         storeMemberRepository.delete(storeMember);
     }
 
