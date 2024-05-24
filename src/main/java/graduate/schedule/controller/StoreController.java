@@ -125,6 +125,10 @@ public class StoreController {
         return new BaseResponse<>("여기 아직 못썼어요");
     }
 
-
+    @PatchMapping("/{storeId}/operation-info")
+    public BaseResponse<String> setStoreOperationInfo(@MemberId @Valid Member member, @PathVariable @Valid Long storeId, @RequestBody @Valid StoreOperationInfoRequestDTO request) {
+        storeService.setStoreOperationInfo(member, storeId, request);
+        return new BaseResponse<>("여기도 아직... 작성중입니다.");
+    }
 
 }

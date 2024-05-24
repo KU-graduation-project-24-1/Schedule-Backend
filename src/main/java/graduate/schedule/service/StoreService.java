@@ -28,7 +28,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.sql.Time;
-import java.util.stream.Collectors;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
 import static graduate.schedule.utils.DateAndTimeFormatter.timeWithoutSeconds;
@@ -45,6 +44,7 @@ public class StoreService {
     private final StoreAvailableScheduleRepository storeAvailableScheduleRepository;
     private final BusinessCheckService businessCheckService;
     private final StoreAvailableTimeByDayRepository storeAvailableTimeByDayRepository;
+    private final StoreOperationInfoRepository storeOperationInfoRepository;
 
 
     private final int LEFT_LIMIT = 48;
@@ -332,5 +332,32 @@ public class StoreService {
 
         fixedSchedule.updateWorkTime(newStartTime, newEndTime);
         storeAvailableTimeByDayRepository.save(fixedSchedule);
+    }
+
+    // 가게 근무시간 설정하기
+    public void setStoreOperationInfo(Member member, Long storeId, StoreOperationInfoRequestDTO request) {
+        Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+
+        // 사용자가 고용인인지 확인
+        boolean isEmployee = storeMemberRepository.findByStoreAndMemberGrade(store, StoreMemberGrade.BOSS)
+                .filter(storeMember -> storeMember.getMember().equals(member))
+                .isPresent();
+        if (!isEmployee) {
+            throw new MemberException(NOT_EXECUTIVE);
+        }
+
+        DayOfWeek dayOfWeek = request.getDayOfWeek();
+        int requiredEmployees = request.getRequiredEmployees();
+        Time startTime = Time.valueOf(request.getStartTime());
+        Time endTime = Time.valueOf(request.getEndTime());
+
+        StoreOperationInfo operationInfo = storeOperationInfoRepository.findByStoreAndDayOfWeek(store, dayOfWeek)
+                .orElse(new StoreOperationInfo(store, dayOfWeek, requiredEmployees, startTime, endTime));
+
+        operationInfo.setRequiredEmployees(requiredEmployees);
+        operationInfo.setStartTime(startTime);
+        operationInfo.setEndTime(endTime);
+
+        storeOperationInfoRepository.save(operationInfo);
     }
 }
