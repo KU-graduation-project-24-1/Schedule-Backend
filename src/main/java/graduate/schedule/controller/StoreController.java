@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
 
@@ -82,4 +83,58 @@ public class StoreController {
         AvailableScheduleOnMonthResponseDTO response = storeService.getAvailableScheduleOnMonth(member, storeId, searchMonth);
         return new BaseResponse<>(response);
     }
+
+    /**
+    * @apiNote 일 단위 근무 가능한 시간 추가 api
+    */
+    @PostMapping("/available-schedule")
+    public BaseResponse<AddAvailableScheduleResponseDTO> addAvailableScheduleInDay(@MemberId @Valid Member member, @RequestBody @Valid AddAvailableScheduleRequestDTO storeRequest) {
+        AddAvailableScheduleResponseDTO response = storeService.addAvailableScheduleInDay(member, storeRequest);
+        return new BaseResponse<>(response);
+    }
+
+    /**
+    * @apiNote 일 단위 근무 가능한 시간 삭제 api
+    */
+    @DeleteMapping("/available-schedule")
+    public BaseResponse<String> deleteAvailableScheduleInDay(@MemberId @Valid Member member, @RequestBody @Valid DeleteAvailableScheduleRequestDTO storeRequest) {
+        storeService.deleteAvailableScheduleInDay(member, storeRequest);
+        return new BaseResponse<>(SUCCESS_DELETE_AVAILABLE_SCHEDULE.getMessage());
+    }
+
+    // 특정 가게의 내 정보 가져오기
+    @GetMapping("/{storeId}/my-info")
+    public BaseResponse<MyStoreInfoResponseDTO> getMyStoreInfo(@MemberId @Valid Member member, @PathVariable @Valid Long storeId) {
+        MyStoreInfoResponseDTO response = storeService.getMyStoreInfo(member, storeId);
+        return new BaseResponse<>(response);
+    }
+
+    // 주 단위 고정 근무시간 가져오기
+    @GetMapping("/{storeId}/fixed-schedule")
+    public BaseResponse<StoreAvailableTimeByDayResponseDTO> getStoreAvailableTimeByDay(@MemberId @Valid Member member, @PathVariable @Valid Long storeId) {
+        StoreAvailableTimeByDayResponseDTO response = storeService.getStoreAvailableTimeByDay(member, storeId);
+        return new BaseResponse<>(response);
+    }
+
+    // 주 단위 고정 근무시간 수정하기
+    // TODO
+    // return하는 result 뭐라할지 못정했어요...
+    @PatchMapping("/{storeId}/fixed-schedule")
+    public BaseResponse<String> updateFixedSchedule(@MemberId @Valid Member member, @PathVariable @Valid Long storeId, @RequestBody @Valid UpdateStoreAvailableTimeByDayRequestDTO request) {
+        storeService.updateStoreAvailableTimeByDay(member, storeId, request);
+        return new BaseResponse<>("여기 아직 못썼어요");
+    }
+
+    @PatchMapping("/{storeId}/operation-info")
+    public BaseResponse<String> setStoreOperationInfo(@MemberId @Valid Member member, @PathVariable @Valid Long storeId, @RequestBody @Valid StoreOperationInfoRequestDTO request) {
+        storeService.setStoreOperationInfo(member, storeId, request);
+        return new BaseResponse<>("여기도 아직... 작성중입니다.");
+    }
+
+    @PostMapping("/{storeId}/generate-schedule")
+    public BaseResponse<StoreScheduleResponseDTO> generateSchedule(@PathVariable Long storeId, @RequestBody ScheduleRequestDTO request) {
+        StoreScheduleResponseDTO response = storeService.generateSchedule(storeId, request.getM(), request.getK(), request.getPreferences());
+        return new BaseResponse<>(response);
+    }
+
 }
