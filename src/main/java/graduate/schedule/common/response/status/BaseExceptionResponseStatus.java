@@ -78,6 +78,8 @@ public enum BaseExceptionResponseStatus implements ResponseStatus {
     ALREADY_COVER_REQUESTED(7004, HttpStatus.BAD_REQUEST.value(), "이미 대체 근무 요청이 되어 있는 근무입니다."),
     SUBSTITUTE_SAME_AS_PREVIOUS_EMPLOYEE(7005, HttpStatus.BAD_REQUEST.value(), "대체 근무 요청자와 대체 근무자가 동일합니다."),
     NOT_FOUND_STORE_OPERATION_INFO(7006, HttpStatus.BAD_REQUEST.value(), "가게 영업 정보가 존재하지 않습니다."),
+    NOT_ADDING_SCHEDULE_TERM(7007, HttpStatus.BAD_REQUEST.value(), "해당 일자에 대한 가능한 시간 입력 기간이 아닙니다."),
+
     /**
      * 8000: FCM 오류
      * */

@@ -67,6 +67,12 @@ public class StoreScheduleService {
             throw new StoreMemberException(NOT_STORE_MEMBER);
         }
 
+        LocalDate previousMonthOfRequestDate = storeRequest.getDate().toLocalDate().minusMonths(1);
+        LocalDate previousMonth8thDateOfRequestDate = LocalDate.of(previousMonthOfRequestDate.getYear(), previousMonthOfRequestDate.getMonth(), 8);
+        if (previousMonth8thDateOfRequestDate.isAfter(LocalDate.now())) {
+            throw new StoreScheduleException(NOT_ADDING_SCHEDULE_TERM);
+        }
+
         StoreAvailableSchedule newStoreAvailableSchedule =
                 StoreAvailableSchedule.createStoreAvailableSchedule(
                         store,
