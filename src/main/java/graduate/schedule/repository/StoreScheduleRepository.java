@@ -31,4 +31,8 @@ public interface StoreScheduleRepository extends JpaRepository<StoreSchedule, Lo
     @Query("delete from StoreSchedule ss " +
             "where ss.employee=:member")
     void deleteAllByEmployee(@Param("member") Member member);
+
+
+    @EntityGraph(attributePaths = {"employee", "store"})
+    List<StoreSchedule> findSchedulesByRequestCoverAndDate(@Param("requestCover") boolean requestCover, @Param("date") Date date);
 }
