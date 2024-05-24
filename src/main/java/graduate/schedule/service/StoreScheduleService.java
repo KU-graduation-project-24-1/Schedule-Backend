@@ -9,6 +9,7 @@ import graduate.schedule.domain.store.*;
 import graduate.schedule.dto.web.request.store.*;
 import graduate.schedule.dto.web.response.executive.ChangeScheduleResponseDTO;
 import graduate.schedule.dto.web.response.store.AddAvailableScheduleResponseDTO;
+import graduate.schedule.dto.web.response.store.AddStoreOperationInfoResponseDTO;
 import graduate.schedule.dto.web.response.store.StoreScheduleResponseDTO;
 import graduate.schedule.dto.web.response.store.AddAvailableTimeByDayResponseDTO;
 import graduate.schedule.repository.*;
@@ -261,8 +262,9 @@ public class StoreScheduleService {
 
 
     // 가게 근무시간 설정하기
-    public void setStoreOperationInfo(Member member, Long storeId, StoreOperationInfoRequestDTO request) {
-        Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+    public AddStoreOperationInfoResponseDTO addStoreOperationInfo(Member member, Long storeId, StoreOperationInfoRequestDTO request) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
 
         // 사용자가 고용인인지 확인
         boolean isEmployee = storeMemberRepository.findByStoreAndMemberGrade(store, StoreMemberGrade.BOSS)
@@ -274,8 +276,8 @@ public class StoreScheduleService {
 
         DayOfWeek dayOfWeek = request.getDayOfWeek();
         int requiredEmployees = request.getRequiredEmployees();
-        Time startTime = Time.valueOf(request.getStartTime());
-        Time endTime = Time.valueOf(request.getEndTime());
+        Time startTime = Time.valueOf(request.getStartTime() + ":00");
+        Time endTime = Time.valueOf(request.getEndTime() + ":00");
 
         StoreOperationInfo operationInfo = storeOperationInfoRepository.findByStoreAndDayOfWeek(store, dayOfWeek)
                 .orElse(new StoreOperationInfo(store, dayOfWeek, requiredEmployees, startTime, endTime));
@@ -284,7 +286,9 @@ public class StoreScheduleService {
         operationInfo.setStartTime(startTime);
         operationInfo.setEndTime(endTime);
 
-        storeOperationInfoRepository.save(operationInfo);
+        StoreOperationInfo savedOperationInfo = storeOperationInfoRepository.save(operationInfo);
+
+        return new AddStoreOperationInfoResponseDTO(savedOperationInfo.getId());
     }
 
     public StoreScheduleResponseDTO generateSchedule(Long storeId, List<Integer> m, List<Integer> k, List<List<List<Integer>>> preferences) {

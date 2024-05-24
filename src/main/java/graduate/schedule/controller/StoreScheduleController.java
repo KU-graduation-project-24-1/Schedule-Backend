@@ -7,6 +7,7 @@ import graduate.schedule.dto.web.request.store.*;
 import graduate.schedule.dto.web.response.executive.ChangeScheduleResponseDTO;
 import graduate.schedule.dto.web.response.store.AddAvailableScheduleResponseDTO;
 import graduate.schedule.dto.web.response.store.AddAvailableTimeByDayResponseDTO;
+import graduate.schedule.dto.web.response.store.AddStoreOperationInfoResponseDTO;
 import graduate.schedule.dto.web.response.store.StoreScheduleResponseDTO;
 import graduate.schedule.service.StoreScheduleService;
 import jakarta.validation.Valid;
@@ -85,9 +86,12 @@ public class StoreScheduleController {
 
 
     @PatchMapping("/{storeId}/operation-info")
-    public BaseResponse<String> setStoreOperationInfo(@MemberId @Valid Member member, @PathVariable @Valid Long storeId, @RequestBody @Valid StoreOperationInfoRequestDTO request) {
-        storeScheduleService.setStoreOperationInfo(member, storeId, request);
-        return new BaseResponse<>("여기도 아직... 작성중입니다.");
+    public BaseResponse<AddStoreOperationInfoResponseDTO> addStoreOperationInfo(
+            @PathVariable Long storeId,
+            @RequestBody @Valid StoreOperationInfoRequestDTO request,
+            @MemberId Member member) {
+        AddStoreOperationInfoResponseDTO response = storeScheduleService.addStoreOperationInfo(member, storeId, request);
+        return new BaseResponse<>(response);
     }
 
     @PostMapping("/{storeId}/generate-schedule")
