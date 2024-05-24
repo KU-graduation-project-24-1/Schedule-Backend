@@ -111,29 +111,8 @@ public class StoreController {
 
     // 주 단위 고정 근무시간 가져오기
     @GetMapping("/{storeId}/fixed-schedule")
-    public BaseResponse<StoreAvailableTimeByDayResponseDTO> getStoreAvailableTimeByDay(@MemberId @Valid Member member, @PathVariable @Valid Long storeId) {
+    public BaseResponse<StoreAvailableTimeByDayResponseDTO> getStoreAvailableTimeByDay(@PathVariable Long storeId, @MemberId Member member) {
         StoreAvailableTimeByDayResponseDTO response = storeService.getStoreAvailableTimeByDay(member, storeId);
-        return new BaseResponse<>(response);
-    }
-
-    // 주 단위 고정 근무시간 수정하기
-    // TODO
-    // return하는 result 뭐라할지 못정했어요...
-    @PatchMapping("/{storeId}/fixed-schedule")
-    public BaseResponse<String> updateFixedSchedule(@MemberId @Valid Member member, @PathVariable @Valid Long storeId, @RequestBody @Valid UpdateStoreAvailableTimeByDayRequestDTO request) {
-        storeService.updateStoreAvailableTimeByDay(member, storeId, request);
-        return new BaseResponse<>("여기 아직 못썼어요");
-    }
-
-    @PatchMapping("/{storeId}/operation-info")
-    public BaseResponse<String> setStoreOperationInfo(@MemberId @Valid Member member, @PathVariable @Valid Long storeId, @RequestBody @Valid StoreOperationInfoRequestDTO request) {
-        storeService.setStoreOperationInfo(member, storeId, request);
-        return new BaseResponse<>("여기도 아직... 작성중입니다.");
-    }
-
-    @PostMapping("/{storeId}/generate-schedule")
-    public BaseResponse<StoreScheduleResponseDTO> generateSchedule(@PathVariable Long storeId, @RequestBody ScheduleRequestDTO request) {
-        StoreScheduleResponseDTO response = storeService.generateSchedule(storeId, request.getM(), request.getK(), request.getPreferences());
         return new BaseResponse<>(response);
     }
 
