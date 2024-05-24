@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.BOSS_NOT_EXIST;
@@ -49,9 +48,9 @@ public class NotificationService {
     @Scheduled(cron = "0 0 12 * * ?")
     protected void informNoOneAcceptCover() {
         log.info("informNoOneAcceptCover() 실행; 대체 근무 요청이 있는데, 수락이 없는 경우");
-        LocalDateTime today = LocalDateTime.now();
-        Date dayPlusOne = Date.valueOf(today.plusDays(1).toLocalDate());
-        Date dayPlusTwo = Date.valueOf(today.plusDays(2).toLocalDate());
+        LocalDate today = LocalDate.now();
+        Date dayPlusOne = Date.valueOf(today.plusDays(1));
+        Date dayPlusTwo = Date.valueOf(today.plusDays(2));
 
         List<StoreSchedule> oneDayLeftCoverRequestedSchedules = storeScheduleRepository.findSchedulesByRequestCoverAndDate(true, dayPlusOne);
         oneDayLeftCoverRequestedSchedules.forEach(
