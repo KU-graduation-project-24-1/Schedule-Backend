@@ -45,4 +45,9 @@ public interface StoreMemberRepository extends JpaRepository<StoreMember, Long> 
 
     @EntityGraph(attributePaths = {"member"})
     Optional<StoreMember> findByStoreAndMemberGrade(@Param("store") Store store, @Param("memberGrade") StoreMemberGrade memberGrade);
+
+    @Query("select sm.member " +
+            "from StoreMember sm " +
+            "where sm.store=:store and sm.memberGrade!='BOSS'")
+    List<Member> findEmployees(@Param("store") Store store);
 }

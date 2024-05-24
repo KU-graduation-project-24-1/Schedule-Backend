@@ -1,12 +1,17 @@
 package graduate.schedule.dto.store;
 
-import lombok.AllArgsConstructor;
+import graduate.schedule.domain.store.StoreMemberGrade;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public class EmployeeDTO {
-    private String name;
     private Long memberId;
+    private String name;
     private String memberGrade;
+
+    public EmployeeDTO(Long memberId, String name, StoreMemberGrade memberGrade) {
+        this.memberId = memberId;
+        this.name = name;
+        this.memberGrade = memberGrade.getGrade();
+    }
 }
