@@ -94,6 +94,15 @@ public class StoreScheduleController {
         return new BaseResponse<>(response);
     }
 
+    @DeleteMapping("/{storeId}/operation-info")
+    public BaseResponse<String> deleteStoreOperationInfo(
+            @PathVariable Long storeId,
+            @RequestBody @Valid DeleteStoreOperationInfoRequestDTO request,
+            @MemberId Member member) {
+        storeScheduleService.deleteStoreOperationInfo(member, request);
+        return new BaseResponse<>("운영 정보가 삭제되었습니다.");
+    }
+
     @PostMapping("/{storeId}/generate-schedule")
     public BaseResponse<StoreScheduleResponseDTO> generateSchedule(@PathVariable Long storeId, @RequestBody ScheduleRequestDTO request) {
         StoreScheduleResponseDTO response = storeScheduleService.generateSchedule(storeId, request.getM(), request.getK(), request.getPreferences());

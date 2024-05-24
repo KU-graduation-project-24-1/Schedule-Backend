@@ -279,16 +279,28 @@ public class StoreScheduleService {
         Time startTime = Time.valueOf(request.getStartTime() + ":00");
         Time endTime = Time.valueOf(request.getEndTime() + ":00");
 
-        StoreOperationInfo operationInfo = storeOperationInfoRepository.findByStoreAndDayOfWeek(store, dayOfWeek)
-                .orElse(new StoreOperationInfo(store, dayOfWeek, requiredEmployees, startTime, endTime));
-
-        operationInfo.setRequiredEmployees(requiredEmployees);
-        operationInfo.setStartTime(startTime);
-        operationInfo.setEndTime(endTime);
+        StoreOperationInfo operationInfo = new StoreOperationInfo(store, dayOfWeek, requiredEmployees, startTime, endTime);
 
         StoreOperationInfo savedOperationInfo = storeOperationInfoRepository.save(operationInfo);
 
         return new AddStoreOperationInfoResponseDTO(savedOperationInfo.getId());
+    }
+
+    public void deleteStoreOperationInfo(Member member, DeleteStoreOperationInfoRequestDTO request) {
+        StoreOperationInfo operationInfo = storeOperationInfoRepository.findById(request.getStoreOperationInfoId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE_OPERATION_INFO));
+
+        Store store = operationInfo.getStore();
+
+        // 사용자가 고용인인지 확인
+        boolean isEmployee = storeMemberRepository.findByStoreAndMemberGrade(store, StoreMemberGrade.BOSS)
+                .filter(storeMember -> storeMember.getMember().equals(member))
+                .isPresent();
+        if (!isEmployee) {
+            throw new MemberException(NOT_EXECUTIVE);
+        }
+
+        storeOperationInfoRepository.delete(operationInfo);
     }
 
     public StoreScheduleResponseDTO generateSchedule(Long storeId, List<Integer> m, List<Integer> k, List<List<List<Integer>>> preferences) {
