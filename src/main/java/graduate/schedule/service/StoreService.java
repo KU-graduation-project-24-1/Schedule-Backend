@@ -289,14 +289,7 @@ public class StoreService {
                 .orElseThrow(() -> new StoreMemberException(NOT_STORE_MEMBER))
                 .getMemberGrade();
 
-        // 로그 추가: store와 member 정보
-        log.info("Store ID: {}", storeId);
-        log.info("Member ID: {}", member.getId());
-
         List<StoreAvailableTimeByDay> schedules = storeAvailableTimeByDayRepository.findByStoreAndMember(store, member);
-
-        // 로그 추가: 가져온 스케줄 정보
-        log.info("Schedules: {}", schedules);
 
         List<DayOfWeek> dayOfWeeks = schedules.stream()
                 .map(StoreAvailableTimeByDay::getDayOfWeek)
@@ -307,11 +300,6 @@ public class StoreService {
         List<String> endTimes = schedules.stream()
                 .map(schedule -> schedule.getEndTime().toString())
                 .toList();
-
-        // 로그 추가: 변환된 시간 정보
-        log.info("DayOfWeeks: {}", dayOfWeeks);
-        log.info("StartTimes: {}", startTimes);
-        log.info("EndTimes: {}", endTimes);
 
         return new StoreAvailableTimeByDayResponseDTO(dayOfWeeks, startTimes, endTimes);
     }

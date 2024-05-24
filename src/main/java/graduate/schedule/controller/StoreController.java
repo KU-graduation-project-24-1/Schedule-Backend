@@ -110,7 +110,7 @@ public class StoreController {
     }
 
     // 주 단위 고정 근무시간 가져오기
-    @GetMapping("/fixed-schedule")
+    @GetMapping("/{storeId}/fixed-schedule")
     public BaseResponse<StoreAvailableTimeByDayResponseDTO> getStoreAvailableTimeByDay(@PathVariable Long storeId, @MemberId Member member) {
         StoreAvailableTimeByDayResponseDTO response = storeService.getStoreAvailableTimeByDay(member, storeId);
         return new BaseResponse<>(response);
