@@ -37,6 +37,9 @@ public class Store {
     @OneToMany(mappedBy = "store", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     private List<StoreAvailableSchedule> memberAvailableTimes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "store", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    private List<StoreAvailableTimeByDay> memberAvailableTimeByDay = new ArrayList<>();
+
     public static Store createStore(String storeName, String businessRegistrationNumber, String inviteCode, LocalDateTime codeGeneratedTime, Member storeCreator) {
         Store store = new Store();
         store.name = storeName;
@@ -55,6 +58,10 @@ public class Store {
 
     public void addMemberAvailableTime(StoreAvailableSchedule memberAvailableTime) {
         this.memberAvailableTimes.add(memberAvailableTime);
+    }
+
+    public void addMemberAvailableTimeByDay(StoreAvailableTimeByDay memberAvailableTimeByDay) {
+        this.memberAvailableTimeByDay.add(memberAvailableTimeByDay);
     }
 
     public void setNewInviteCode(String inviteCode, LocalDateTime codeGeneratedTime) {

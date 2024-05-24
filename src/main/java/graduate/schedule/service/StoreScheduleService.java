@@ -1,14 +1,17 @@
 package graduate.schedule.service;
 
+import graduate.schedule.common.exception.MemberException;
 import graduate.schedule.common.exception.StoreException;
 import graduate.schedule.common.exception.StoreMemberException;
 import graduate.schedule.common.exception.StoreScheduleException;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.domain.store.*;
-import graduate.schedule.dto.web.request.store.AddAvailableScheduleRequestDTO;
-import graduate.schedule.dto.web.request.store.DeleteAvailableScheduleRequestDTO;
+import graduate.schedule.dto.web.request.store.*;
 import graduate.schedule.dto.web.response.executive.ChangeScheduleResponseDTO;
 import graduate.schedule.dto.web.response.store.AddAvailableScheduleResponseDTO;
+import graduate.schedule.dto.web.response.store.AddStoreOperationInfoResponseDTO;
+import graduate.schedule.dto.web.response.store.StoreScheduleResponseDTO;
+import graduate.schedule.dto.web.response.store.AddAvailableTimeByDayResponseDTO;
 import graduate.schedule.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +26,9 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.time.DayOfWeek;
+import java.util.ArrayList;
+import java.util.List;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.NOT_STORE_MEMBER;
@@ -41,6 +47,8 @@ public class StoreScheduleService {
     private final StoreMemberRepository storeMemberRepository;
     private final StoreAvailableScheduleRepository storeAvailableScheduleRepository;
     private final StoreAvailableTimeByDayRepository storeAvailableTimeByDayRepository;
+    private final StoreOperationInfoRepository storeOperationInfoRepository;
+    private final MemberRepository memberRepository;
 
     private final String REQUEST_COVER_TITLE = "근무 가능한 시간에 대체 근무 요청이 있습니다!";
     private final String ACCEPT_COVER_TITLE = "대체 근무 요청이 수락되었습니다!";
@@ -172,6 +180,213 @@ public class StoreScheduleService {
         fcmService.sendMessageTo(employer.getFcmToken(), ACCEPT_COVER_TITLE, acceptCoverBody);
 
         return new ChangeScheduleResponseDTO(storeSchedule);
+    }
+
+    // 주 단위 고정 근무시간 수정하기
+    public AddAvailableTimeByDayResponseDTO addStoreAvailableTimeByDay(Member member, AddStoreAvailableTimeByDayRequestDTO request) {
+        Store store = storeRepository.findById(request.getStoreId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        if (!storeMemberRepository.existsMember(member, store)) {
+            throw new StoreMemberException(NOT_STORE_MEMBER);
+        }
+        DayOfWeek dayOfWeek = request.getDayOfWeek();
+        Time newStartTime = Time.valueOf(request.getStartTime());
+        Time newEndTime = Time.valueOf(request.getEndTime());
+
+        // 기존 요일에 해당하는 데이터와 병합
+        List<StoreAvailableTimeByDay> existingSchedules = storeAvailableTimeByDayRepository.findByStoreAndMemberAndDayOfWeekOrderByStartTime(store, member, dayOfWeek);
+
+        for (StoreAvailableTimeByDay schedule : existingSchedules) {
+            if (newStartTime.before(schedule.getEndTime()) && newEndTime.after(schedule.getStartTime())) {
+                newStartTime = new Time(Math.min(newStartTime.getTime(), schedule.getStartTime().getTime()));
+                newEndTime = new Time(Math.max(newEndTime.getTime(), schedule.getEndTime().getTime()));
+                storeAvailableTimeByDayRepository.delete(schedule);
+            }
+        }
+
+        StoreAvailableTimeByDay newStoreAvailableTimeByDay =
+                StoreAvailableTimeByDay.createStoreAvailableTimeByDay(
+                        store,
+                        member,
+                        dayOfWeek,
+                        newStartTime,
+                        newEndTime
+                );
+        storeAvailableTimeByDayRepository.save(newStoreAvailableTimeByDay);
+        return new AddAvailableTimeByDayResponseDTO(newStoreAvailableTimeByDay.getId());
+    }
+
+
+    public void deleteStoreAvailableTimeByDay(Member member, DeleteStoreAvailableTimeByDayRequestDTO request) {
+        Store store = storeRepository.findById(request.getStoreId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        if (!storeMemberRepository.existsMember(member, store)) {
+            throw new StoreMemberException(NOT_STORE_MEMBER);
+        }
+
+        StoreAvailableTimeByDay schedule = storeAvailableTimeByDayRepository.findById(request.getStoreAvailableTimeByDayId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE_MEMBER_AVAILABLE_TIME));
+
+        Time deleteStartTime = schedule.getStartTime();
+        Time deleteEndTime = schedule.getEndTime();
+
+        List<StoreAvailableTimeByDay> existingSchedules = storeAvailableTimeByDayRepository.findByStoreAndMemberAndDayOfWeekOrderByStartTime(store, member, schedule.getDayOfWeek());
+
+        for (StoreAvailableTimeByDay existingSchedule : existingSchedules) {
+            if (existingSchedule.getStartTime().before(deleteEndTime) && existingSchedule.getEndTime().after(deleteStartTime)) {
+                if (existingSchedule.getStartTime().before(deleteStartTime) && existingSchedule.getEndTime().after(deleteEndTime)) {
+                    // 기존 스케줄이 삭제할 시간 범위를 포함하는 경우, 두 개로 나눔
+                    Time originalEndTime = existingSchedule.getEndTime();
+                    existingSchedule.updateWorkTime(existingSchedule.getStartTime(), deleteStartTime);
+                    storeAvailableTimeByDayRepository.save(existingSchedule);
+
+                    StoreAvailableTimeByDay newSchedule = new StoreAvailableTimeByDay(store, member, schedule.getDayOfWeek(), deleteEndTime, originalEndTime);
+                    storeAvailableTimeByDayRepository.save(newSchedule);
+                } else if (existingSchedule.getStartTime().before(deleteStartTime)) {
+                    // 삭제 범위가 기존 스케줄 끝 부분에 걸치는 경우
+                    existingSchedule.updateWorkTime(existingSchedule.getStartTime(), deleteStartTime);
+                    storeAvailableTimeByDayRepository.save(existingSchedule);
+                } else if (existingSchedule.getEndTime().after(deleteEndTime)) {
+                    // 삭제 범위가 기존 스케줄 시작 부분에 걸치는 경우
+                    existingSchedule.updateWorkTime(deleteEndTime, existingSchedule.getEndTime());
+                    storeAvailableTimeByDayRepository.save(existingSchedule);
+                } else {
+                    // 삭제 범위가 기존 스케줄 전체를 포함하는 경우
+                    storeAvailableTimeByDayRepository.delete(existingSchedule);
+                }
+            }
+        }
+    }
+
+
+
+
+    // 가게 근무시간 설정하기
+    public AddStoreOperationInfoResponseDTO addStoreOperationInfo(Member member, Long storeId, StoreOperationInfoRequestDTO request) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+
+        // 사용자가 고용인인지 확인
+        boolean isEmployee = storeMemberRepository.findByStoreAndMemberGrade(store, StoreMemberGrade.BOSS)
+                .filter(storeMember -> storeMember.getMember().equals(member))
+                .isPresent();
+        if (!isEmployee) {
+            throw new MemberException(NOT_EXECUTIVE);
+        }
+
+        DayOfWeek dayOfWeek = request.getDayOfWeek();
+        int requiredEmployees = request.getRequiredEmployees();
+        Time startTime = Time.valueOf(request.getStartTime() + ":00");
+        Time endTime = Time.valueOf(request.getEndTime() + ":00");
+
+        StoreOperationInfo operationInfo = new StoreOperationInfo(store, dayOfWeek, requiredEmployees, startTime, endTime);
+
+        StoreOperationInfo savedOperationInfo = storeOperationInfoRepository.save(operationInfo);
+
+        return new AddStoreOperationInfoResponseDTO(savedOperationInfo.getId());
+    }
+
+    public void deleteStoreOperationInfo(Member member, DeleteStoreOperationInfoRequestDTO request) {
+        StoreOperationInfo operationInfo = storeOperationInfoRepository.findById(request.getStoreOperationInfoId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE_OPERATION_INFO));
+
+        Store store = operationInfo.getStore();
+
+        // 사용자가 고용인인지 확인
+        boolean isEmployee = storeMemberRepository.findByStoreAndMemberGrade(store, StoreMemberGrade.BOSS)
+                .filter(storeMember -> storeMember.getMember().equals(member))
+                .isPresent();
+        if (!isEmployee) {
+            throw new MemberException(NOT_EXECUTIVE);
+        }
+
+        storeOperationInfoRepository.delete(operationInfo);
+    }
+
+    public StoreScheduleResponseDTO generateSchedule(Long storeId, List<Integer> m, List<Integer> k, List<List<List<Integer>>> preferences) {
+        Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        int N = preferences.size();
+        int days = m.size();
+
+        // 결과 저장을 위한 배열 (각 날짜별로 시간대에 배정된 사람들의 리스트)
+        List<List<List<Integer>>> schedules = new ArrayList<>();
+        for (int day = 0; day < days; day++) {
+            List<List<Integer>> schedule = new ArrayList<>();
+            for (int i = 0; i < m.get(day); i++) {
+                schedule.add(new ArrayList<>());
+            }
+            schedules.add(schedule);
+        }
+
+        // 각 사람의 총 근무 시간을 추적하는 배열
+        int[] workHours = new int[N];
+
+        // 각 날짜에 대한 스케줄링
+        for (int day = 0; day < days; day++) {
+            List<List<Integer>> schedule = schedules.get(day);
+            int totalRequired = k.get(day);
+            int numSlots = m.get(day);
+
+            for (int slot = 0; slot < numSlots; slot++) {
+                int needed = totalRequired;
+
+                while (needed > 0) {
+                    int minWorkHours = Integer.MAX_VALUE;
+                    int selectedPerson = -1;
+
+                    for (int person = 0; person < N; person++) {
+                        if (preferences.get(person).get(day).contains(slot) && !schedule.get(slot).contains(person) && workHours[person] < minWorkHours) {
+                            minWorkHours = workHours[person];
+                            selectedPerson = person;
+                        }
+                    }
+
+                    if (selectedPerson != -1) {
+                        schedule.get(slot).add(selectedPerson);
+                        workHours[selectedPerson]++;
+                        needed--;
+                    } else {
+                        break; // 더 이상 배정할 사람이 없으면 종료
+                    }
+                }
+            }
+        }
+
+        // 결과 저장
+        for (int day = 0; day < days; day++) {
+            List<List<Integer>> schedule = schedules.get(day);
+            for (int slot = 0; slot < schedule.size(); slot++) {
+                for (int employeeId : schedule.get(slot)) {
+                    Member employee = memberRepository.findById((long) employeeId).orElseThrow(() -> new StoreException(NOT_STORE_MEMBER));
+
+                    // 시작 시간 설정
+                    int startSlot = slot;
+                    while (slot + 1 < schedule.size() && schedule.get(slot + 1).contains(employeeId)) {
+                        slot++;
+                    }
+                    // 종료 시간 설정
+                    int endSlot = slot + 1;
+
+                    String startTime = String.format("%02d:%02d:00", startSlot / 2, startSlot % 2);
+                    String endTime = String.format("%02d:%02d:00", endSlot / 2, endSlot % 2);
+
+                    StoreSchedule storeSchedule = StoreSchedule.createStoreSchedule(
+                            store,
+                            employee,
+                            new Date(System.currentTimeMillis() + day * 86400000L), // 날짜 계산 부분
+                            startTime, // 시작 시간
+                            endTime // 종료 시간
+                    );
+                    storeScheduleRepository.save(storeSchedule);
+                }
+            }
+        }
+
+        // 결과 DTO 생성
+        StoreScheduleResponseDTO response = new StoreScheduleResponseDTO();
+        response.setDay(days);
+        response.setSchedules(schedules);
+        return response;
     }
 
     /**

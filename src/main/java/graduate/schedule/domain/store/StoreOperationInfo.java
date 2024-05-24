@@ -16,23 +16,26 @@ public class StoreOperationInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "operationInfoId")
+    @Column(name = "operation_info_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "storeId")
+    @ManyToOne
+    @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "day_of_week", nullable = false)
     private DayOfWeek dayOfWeek;
 
+    @Column(name = "required_employees", nullable = false)
     private int requiredEmployees;
 
-    @Temporal(TemporalType.TIME)
+    @Column(name = "start_time", nullable = false)
     private Time startTime;
 
-    @Temporal(TemporalType.TIME)
+    @Column(name = "end_time", nullable = false)
     private Time endTime;
+
 
     public StoreOperationInfo(Store store, DayOfWeek dayOfWeek, int requiredEmployees, Time startTime, Time endTime) {
         this.store = store;
@@ -40,5 +43,10 @@ public class StoreOperationInfo {
         this.requiredEmployees = requiredEmployees;
         this.startTime = startTime;
         this.endTime = endTime;
+    }
+
+    public void updateWorkTime(Time newStartTime, Time newEndTime) {
+        this.startTime = newStartTime;
+        this.endTime = newEndTime;
     }
 }
