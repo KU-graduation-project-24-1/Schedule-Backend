@@ -12,6 +12,7 @@ build/
 dump.rdb
 
 ### Firebase key ###
+!**/src/main/resources/firebase/
 firebase_service_key.json
 
 ### MAC OS ###
