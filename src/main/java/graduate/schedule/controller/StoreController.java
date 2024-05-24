@@ -131,4 +131,10 @@ public class StoreController {
         return new BaseResponse<>("여기도 아직... 작성중입니다.");
     }
 
+    @PostMapping("/{storeId}/generate-schedule")
+    public BaseResponse<StoreScheduleResponseDTO> generateSchedule(@PathVariable Long storeId, @RequestBody ScheduleRequestDTO request) {
+        StoreScheduleResponseDTO response = storeService.generateSchedule(storeId, request.getM(), request.getK(), request.getPreferences());
+        return new BaseResponse<>(response);
+    }
+
 }

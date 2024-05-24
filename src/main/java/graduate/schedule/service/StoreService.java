@@ -45,6 +45,7 @@ public class StoreService {
     private final BusinessCheckService businessCheckService;
     private final StoreAvailableTimeByDayRepository storeAvailableTimeByDayRepository;
     private final StoreOperationInfoRepository storeOperationInfoRepository;
+    private final MemberRepository memberRepository;
 
 
     private final int LEFT_LIMIT = 48;
@@ -359,5 +360,91 @@ public class StoreService {
         operationInfo.setEndTime(endTime);
 
         storeOperationInfoRepository.save(operationInfo);
+    }
+
+    public StoreScheduleResponseDTO generateSchedule(Long storeId, List<Integer> m, List<Integer> k, List<List<List<Integer>>> preferences) {
+        Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        int N = preferences.size();
+        int days = m.size();
+
+        // 결과 저장을 위한 배열 (각 날짜별로 시간대에 배정된 사람들의 리스트)
+        List<List<List<Integer>>> schedules = new ArrayList<>();
+        for (int day = 0; day < days; day++) {
+            List<List<Integer>> schedule = new ArrayList<>();
+            for (int i = 0; i < m.get(day); i++) {
+                schedule.add(new ArrayList<>());
+            }
+            schedules.add(schedule);
+        }
+
+        // 각 사람의 총 근무 시간을 추적하는 배열
+        int[] workHours = new int[N];
+
+        // 각 날짜에 대한 스케줄링
+        for (int day = 0; day < days; day++) {
+            List<List<Integer>> schedule = schedules.get(day);
+            int totalRequired = k.get(day);
+            int numSlots = m.get(day);
+
+            for (int slot = 0; slot < numSlots; slot++) {
+                int needed = totalRequired;
+
+                while (needed > 0) {
+                    int minWorkHours = Integer.MAX_VALUE;
+                    int selectedPerson = -1;
+
+                    for (int person = 0; person < N; person++) {
+                        if (preferences.get(person).get(day).contains(slot) && !schedule.get(slot).contains(person) && workHours[person] < minWorkHours) {
+                            minWorkHours = workHours[person];
+                            selectedPerson = person;
+                        }
+                    }
+
+                    if (selectedPerson != -1) {
+                        schedule.get(slot).add(selectedPerson);
+                        workHours[selectedPerson]++;
+                        needed--;
+                    } else {
+                        break; // 더 이상 배정할 사람이 없으면 종료
+                    }
+                }
+            }
+        }
+
+        // 결과 저장
+        for (int day = 0; day < days; day++) {
+            List<List<Integer>> schedule = schedules.get(day);
+            for (int slot = 0; slot < schedule.size(); slot++) {
+                for (int employeeId : schedule.get(slot)) {
+                    Member employee = memberRepository.findById((long) employeeId).orElseThrow(() -> new StoreException(NOT_STORE_MEMBER));
+
+                    // 시작 시간 설정
+                    int startSlot = slot;
+                    while (slot + 1 < schedule.size() && schedule.get(slot + 1).contains(employeeId)) {
+                        slot++;
+                    }
+                    // 종료 시간 설정
+                    int endSlot = slot + 1;
+
+                    String startTime = String.format("%02d:%02d:00", startSlot / 2, startSlot % 2);
+                    String endTime = String.format("%02d:%02d:00", endSlot / 2, endSlot % 2);
+
+                    StoreSchedule storeSchedule = StoreSchedule.createStoreSchedule(
+                            store,
+                            employee,
+                            new Date(System.currentTimeMillis() + day * 86400000L), // 날짜 계산 부분
+                            startTime, // 시작 시간
+                            endTime // 종료 시간
+                    );
+                    storeScheduleRepository.save(storeSchedule);
+                }
+            }
+        }
+
+        // 결과 DTO 생성
+        StoreScheduleResponseDTO response = new StoreScheduleResponseDTO();
+        response.setDay(days);
+        response.setSchedules(schedules);
+        return response;
     }
 }
