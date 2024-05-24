@@ -27,13 +27,10 @@ public class StoreAvailableTimeByDay {
     private Store store;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "day_of_week")
     private DayOfWeek dayOfWeek;
 
-    @Temporal(TemporalType.TIME)
     private Time startTime;
 
-    @Temporal(TemporalType.TIME)
     private Time endTime;
 
     public static StoreAvailableTimeByDay createStoreAvailableTimeByDay(Store store, Member member, DayOfWeek dayOfWeek, Time startTime, Time endTime) {

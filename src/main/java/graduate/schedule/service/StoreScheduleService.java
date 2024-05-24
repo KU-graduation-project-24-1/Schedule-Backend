@@ -14,11 +14,17 @@ import graduate.schedule.dto.web.response.store.AddAvailableTimeByDayResponseDTO
 import graduate.schedule.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,11 +39,12 @@ import static graduate.schedule.utils.DateAndTimeFormatter.timeWithoutSeconds;
 @Transactional
 @RequiredArgsConstructor
 public class StoreScheduleService {
+    private final FCMService fcmService;
+
     private final StoreRepository storeRepository;
     private final StoreScheduleRepository storeScheduleRepository;
     private final StoreMemberRepository storeMemberRepository;
     private final StoreAvailableScheduleRepository storeAvailableScheduleRepository;
-    private final FCMService fcmService;
     private final StoreAvailableTimeByDayRepository storeAvailableTimeByDayRepository;
     private final StoreOperationInfoRepository storeOperationInfoRepository;
     private final MemberRepository memberRepository;
@@ -364,5 +371,80 @@ public class StoreScheduleService {
         response.setDay(days);
         response.setSchedules(schedules);
         return response;
+    }
+
+    /**
+     * 가능한 고정 시간 데이터 저장 - 매월 8일 00시
+     */
+    @Scheduled(cron = "0 0 8 * * ?")
+    protected void saveAvailableSchedule() {
+        log.info("saveAvailableSchedule() 실행; 가능한 고정 시간 데이터 저장");
+        List<Store> allStore = storeRepository.findAll();
+        allStore.forEach(store -> saveStoreAvailableSchedule(store));
+    }
+
+    private void saveStoreAvailableSchedule(Store store) {
+        log.info("store {}의 가능한 고정 시간 데이터 저장", store.getId());
+
+        //StoreMember 에서 BOSS가 아닌 멤버 찾기
+        List<Member> storeEmployees = storeMemberRepository.findEmployees(store);
+
+        //특정 달, 특정 요일의 모든 날짜 구하기
+        Map<DayOfWeek, List<Date>> datesOnMonthByDayOfWeek = getDatesOnMonthByDayOfWeek();
+
+        storeEmployees.forEach(employee ->
+                Arrays.stream(DayOfWeek.values()).forEach(
+                        dayOfWeek -> saveStoreAvailableScheduleAboutDayOfWeek(store, employee, dayOfWeek, datesOnMonthByDayOfWeek.get(dayOfWeek))
+                )
+        );
+    }
+
+    private Map<DayOfWeek, List<Date>> getDatesOnMonthByDayOfWeek() {
+        Map<DayOfWeek, List<Date>> datesOnMonthByDayOfWeek = new HashMap<>();
+
+        DayOfWeek[] dayOfWeeks = DayOfWeek.values();
+        for (DayOfWeek dayOfWeek : dayOfWeeks) {
+            List<Date> datesOfDay = new ArrayList<>();
+
+            LocalDate nextMonth = LocalDate.now().plusMonths(1);
+            YearMonth yearMonth = YearMonth.of(nextMonth.getYear(), nextMonth.getMonth());
+
+            LocalDate date = yearMonth.atDay(1).with(TemporalAdjusters.firstInMonth(dayOfWeek));
+            LocalDate lastDateOfMonth = yearMonth.atEndOfMonth();
+            while (!date.isAfter(lastDateOfMonth)) {
+                datesOfDay.add(Date.valueOf(date));
+                date = date.plusWeeks(1);
+            }
+
+            datesOnMonthByDayOfWeek.put(dayOfWeek, datesOfDay);
+        }
+
+        return datesOnMonthByDayOfWeek;
+    }
+
+    private void saveStoreAvailableScheduleAboutDayOfWeek(Store store, Member employee, DayOfWeek dayOfWeek, List<Date> datesOnMonthByDayOfWeek) {
+        log.info("가게 {}/ {}의 {}에 가능한 고정 시간 데이터 저장", store.getId(), employee.getName(), dayOfWeek);
+        //해당 멤버의 요일별 가능한 시간 찾기
+        List<StoreAvailableTimeByDay> availableTimesByDays = storeAvailableTimeByDayRepository.findByStoreAndMemberAndDayOfWeekOrderByStartTime(store, employee, dayOfWeek);
+
+        //요일별 모든 가능한 시간에 대하여
+        availableTimesByDays.forEach(availableTime ->
+                //해당 요일의 모든 날짜 별 StoreAvailableSchedule 생성
+                datesOnMonthByDayOfWeek.forEach(date -> {
+                    log.info("가게 {}/ {}의 {}에 가능한 고정 시간 데이터 저장:  {}, {}~{}", store.getId(), employee.getName(), dayOfWeek, date, availableTime.getStartTime(), availableTime.getEndTime());
+                    saveStoreAvailableScheduleInDay(store, employee, date, availableTime);
+                })
+        );
+    }
+
+    private void saveStoreAvailableScheduleInDay(Store store, Member employee, Date date, StoreAvailableTimeByDay availableTime) {
+        StoreAvailableSchedule storeAvailableSchedule = StoreAvailableSchedule.createStoreAvailableSchedule(
+                store,
+                employee,
+                date,
+                availableTime.getStartTime(),
+                availableTime.getEndTime()
+        );
+        storeAvailableScheduleRepository.save(storeAvailableSchedule);
     }
 }

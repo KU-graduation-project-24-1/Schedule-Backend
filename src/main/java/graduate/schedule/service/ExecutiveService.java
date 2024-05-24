@@ -46,9 +46,9 @@ public class ExecutiveService {
         List<StoreMember> storeMembers = storeMemberRepository.findByStore(store);
         List<EmployeeDTO> employees = storeMembers.stream()
                 .map(storeMember -> new EmployeeDTO(
-                        storeMember.getMemberName(),
                         storeMember.getMemberId(),
-                        storeMember.getMemberGrade().getGrade()
+                        storeMember.getMemberName(),
+                        storeMember.getMemberGrade()
                 )).toList();
         return new StoreAllEmployeeResponseDTO(employees);
     }
