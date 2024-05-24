@@ -28,7 +28,6 @@ public class StoreScheduleController {
     /**
      * @apiNote 일 단위 근무 가능한 시간 추가 api
      */
-    // TODO: 5/25/24 (추가) 전 달 8일이 이전인 경우 입력 기간 아니라고 오류 반환하기
     @PostMapping("/available")
     public BaseResponse<AddAvailableScheduleResponseDTO> addAvailableScheduleInDay(@MemberId @Valid Member member, @RequestBody @Valid AddAvailableScheduleRequestDTO storeRequest) {
         AddAvailableScheduleResponseDTO response = storeScheduleService.addAvailableScheduleInDay(member, storeRequest);
