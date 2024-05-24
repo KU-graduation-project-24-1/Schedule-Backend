@@ -15,7 +15,7 @@ public class StoreAvailableTimeByDay {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "work_time_id")
+    @Column(name = "available_time_by_day_id")
     private Long id;
 
     @ManyToOne
@@ -30,15 +30,28 @@ public class StoreAvailableTimeByDay {
     @Column(name = "day_of_week")
     private DayOfWeek dayOfWeek;
 
-    @Column(name = "start_time")
+    @Temporal(TemporalType.TIME)
     private Time startTime;
 
-    @Column(name = "end_time")
+    @Temporal(TemporalType.TIME)
     private Time endTime;
 
-    public StoreAvailableTimeByDay(Member member, Store store, DayOfWeek dayOfWeek, Time startTime, Time endTime) {
-        this.member = member;
+    public static StoreAvailableTimeByDay createStoreAvailableTimeByDay(Store store, Member member, DayOfWeek dayOfWeek, Time startTime, Time endTime) {
+        StoreAvailableTimeByDay availableTimeByDay = new StoreAvailableTimeByDay();
+        availableTimeByDay.member = member;
+        availableTimeByDay.store = store;
+        availableTimeByDay.dayOfWeek = dayOfWeek;
+        availableTimeByDay.startTime = startTime;
+        availableTimeByDay.endTime = endTime;
+
+        store.addMemberAvailableTimeByDay(availableTimeByDay);
+
+        return availableTimeByDay;
+    }
+
+    public StoreAvailableTimeByDay(Store store, Member member, DayOfWeek dayOfWeek, Time startTime, Time endTime) {
         this.store = store;
+        this.member = member;
         this.dayOfWeek = dayOfWeek;
         this.startTime = startTime;
         this.endTime = endTime;
