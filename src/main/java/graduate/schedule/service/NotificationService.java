@@ -125,7 +125,7 @@ public class NotificationService {
 
         storeEmployees.forEach(employee ->
             Arrays.stream(DayOfWeek.values()).forEach(
-                    dayOfWeek -> saveStoreAvailableScheduleAboutDayOfWeek(store, employee dayOfWeek, datesOnMonthByDayOfWeek.get(dayOfWeek))
+                    dayOfWeek -> saveStoreAvailableScheduleAboutDayOfWeek(store, employee, dayOfWeek, datesOnMonthByDayOfWeek.get(dayOfWeek))
             )
         );
     }
