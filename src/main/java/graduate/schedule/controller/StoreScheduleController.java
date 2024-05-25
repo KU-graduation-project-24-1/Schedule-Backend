@@ -86,7 +86,7 @@ public class StoreScheduleController {
 
 
 
-    @PatchMapping("/{storeId}/operation-info")
+    @PostMapping("/{storeId}/operation-info")
     public BaseResponse<AddStoreOperationInfoResponseDTO> addStoreOperationInfo(
             @PathVariable Long storeId,
             @RequestBody @Valid StoreOperationInfoRequestDTO request,
@@ -101,6 +101,12 @@ public class StoreScheduleController {
             @MemberId Member member) {
         storeScheduleService.deleteStoreOperationInfo(member, request);
         return new BaseResponse<>("운영 정보가 삭제되었습니다.");
+    }
+
+    @PatchMapping("/operation-info/required-employees")
+    public BaseResponse<String> updateRequiredEmployees(@RequestBody UpdateRequiredEmployeesRequestDTO request) {
+        storeScheduleService.updateRequiredEmployees(request);
+        return new BaseResponse<>("필요인원 설정이 변경되었습니다.");
     }
 
     @PostMapping("/{storeId}/generate-schedule")
