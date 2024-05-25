@@ -122,7 +122,7 @@ public class StoreController {
     @GetMapping("/{storeId}/operation-info")
     public BaseResponse<List<StoreOperationInfoResponseDTO>> getStoreOperationInfoByDay(
             @PathVariable Long storeId,
-            @RequestParam DayOfWeek dayOfWeek) {
+            @RequestParam("dayOfWeek") DayOfWeek dayOfWeek) {
         List<StoreOperationInfoResponseDTO> response = storeService.getStoreOperationInfoByDay(storeId, dayOfWeek);
         return new BaseResponse<>(response);
     }
