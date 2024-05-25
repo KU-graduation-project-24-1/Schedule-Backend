@@ -9,7 +9,6 @@ import java.time.DayOfWeek;
 @Setter
 public class StoreOperationInfoRequestDTO {
     private DayOfWeek dayOfWeek;
-    private int requiredEmployees;
     private String startTime; // HH:mm 형식의 문자열
     private String endTime; // HH:mm 형식의 문자열
 }
