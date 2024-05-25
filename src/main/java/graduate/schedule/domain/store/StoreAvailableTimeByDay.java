@@ -27,10 +27,13 @@ public class StoreAvailableTimeByDay {
     private Store store;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "day_of_week", nullable = false)
     private DayOfWeek dayOfWeek;
 
+    @Column(name = "start_time", nullable = false)
     private Time startTime;
 
+    @Column(name = "end_time", nullable = false)
     private Time endTime;
 
     public static StoreAvailableTimeByDay createStoreAvailableTimeByDay(Store store, Member member, DayOfWeek dayOfWeek, Time startTime, Time endTime) {
@@ -44,14 +47,6 @@ public class StoreAvailableTimeByDay {
         store.addMemberAvailableTimeByDay(availableTimeByDay);
 
         return availableTimeByDay;
-    }
-
-    public StoreAvailableTimeByDay(Store store, Member member, DayOfWeek dayOfWeek, Time startTime, Time endTime) {
-        this.store = store;
-        this.member = member;
-        this.dayOfWeek = dayOfWeek;
-        this.startTime = startTime;
-        this.endTime = endTime;
     }
 
     public void updateWorkTime(Time startTime, Time endTime) {
