@@ -44,6 +44,7 @@ public class StoreService {
     private final StoreAvailableScheduleRepository storeAvailableScheduleRepository;
     private final BusinessCheckService businessCheckService;
     private final StoreAvailableTimeByDayRepository storeAvailableTimeByDayRepository;
+    private final StoreOperationInfoRepository storeOperationInfoRepository;
 
 
 
@@ -304,5 +305,18 @@ public class StoreService {
         return new StoreAvailableTimeByDayResponseDTO(dayOfWeeks, startTimes, endTimes);
     }
 
+    public List<StoreOperationInfoResponseDTO> getStoreOperationInfoByDay(Long storeId, DayOfWeek dayOfWeek) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
 
+        List<StoreOperationInfo> operationInfos = storeOperationInfoRepository.findByStoreAndDayOfWeek(store, dayOfWeek);
+
+        return operationInfos.stream()
+                .map(info -> new StoreOperationInfoResponseDTO(
+                        info.getDayOfWeek(),
+                        info.getStartTime(),
+                        info.getEndTime(),
+                        info.getRequiredEmployees()))
+                .toList();
+    }
 }
