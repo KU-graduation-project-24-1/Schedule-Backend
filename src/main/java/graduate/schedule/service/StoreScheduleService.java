@@ -218,9 +218,10 @@ public class StoreScheduleService {
         if (!storeMemberRepository.existsMember(member, store)) {
             throw new StoreMemberException(NOT_STORE_MEMBER);
         }
+
         StoreAvailableTimeByDay schedule = storeAvailableTimeByDayRepository.findById(request.getStoreAvailableTimeByDayId())
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE_MEMBER_AVAILABLE_TIME));
-        if (request.getStoreAvailableTimeByDayId() == null) {
+        if (schedule.getEmployee().equals(member)) {
             throw new StoreScheduleException(NOT_MEMBER_WORKING_DATA);
         }
 

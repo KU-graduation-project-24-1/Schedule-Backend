@@ -14,11 +14,11 @@ import java.util.Optional;
 
 public interface StoreAvailableTimeByDayRepository extends JpaRepository<StoreAvailableTimeByDay, Long> {
 
-    @Query("select sat from StoreAvailableTimeByDay sat where sat.store = :store and sat.member = :member")
+    @Query("select sat from StoreAvailableTimeByDay sat where sat.store = :store and sat.employee = :member")
     List<StoreAvailableTimeByDay> findByStoreAndMember(@Param("store") Store store, @Param("member") Member member);
 
     @Query("select sat from StoreAvailableTimeByDay sat " +
-            "where sat.store = :store and sat.member = :member and sat.dayOfWeek = :dayOfWeek " +
+            "where sat.store = :store and sat.employee = :member and sat.dayOfWeek = :dayOfWeek " +
             "order by sat.startTime")
     List<StoreAvailableTimeByDay> findByStoreAndMemberAndDayOfWeekOrderByStartTime(
             @Param("store") Store store,
