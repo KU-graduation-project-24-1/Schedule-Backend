@@ -8,6 +8,5 @@ import java.time.DayOfWeek;
 @Getter
 @Setter
 public class DeleteStoreAvailableTimeByDayRequestDTO {
-    private Long storeId;
     private Long storeAvailableTimeByDayId;
 }
