@@ -76,7 +76,7 @@ public class StoreScheduleController {
     /**
      * @apiNote 주 단위 근무 가능한 시간 삭제 api
      */
-    @PatchMapping("/{storeId}/fixed-schedule/delete")
+    @DeleteMapping("/{storeId}/fixed-schedule/delete")
     public BaseResponse<String> deleteFixedSchedule(@MemberId @Valid Member member, @RequestBody @Valid DeleteStoreAvailableTimeByDayRequestDTO request) {
         storeScheduleService.deleteStoreAvailableTimeByDay(member, request);
         return new BaseResponse<>(SUCCESS_DELETE_AVAILABLE_SCHEDULE.getMessage());
@@ -95,7 +95,6 @@ public class StoreScheduleController {
 
     @DeleteMapping("/{storeId}/operation-info")
     public BaseResponse<String> deleteStoreOperationInfo(
-            @PathVariable Long storeId,
             @RequestBody @Valid DeleteStoreOperationInfoRequestDTO request,
             @MemberId Member member) {
         storeScheduleService.deleteStoreOperationInfo(member, request);

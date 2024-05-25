@@ -26,7 +26,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
-import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -196,8 +195,8 @@ public class StoreScheduleService {
             throw new StoreMemberException(NOT_STORE_MEMBER);
         }
         DayOfWeek dayOfWeek = request.getDayOfWeek();
-        Time newStartTime = Time.valueOf(request.getStartTime());
-        Time newEndTime = Time.valueOf(request.getEndTime());
+        Time newStartTime = timeWithSeconds(request.getStartTime());
+        Time newEndTime = timeWithSeconds(request.getEndTime());
 
         // 기존 요일에 해당하는 데이터와 병합
         List<StoreAvailableTimeByDay> existingSchedules = storeAvailableTimeByDayRepository.findByStoreAndMemberAndDayOfWeekOrderByStartTime(store, member, dayOfWeek);
@@ -224,6 +223,10 @@ public class StoreScheduleService {
 
 
     public void deleteStoreAvailableTimeByDay(Member member, DeleteStoreAvailableTimeByDayRequestDTO request) {
+       if (request.getStoreAvailableTimeByDayId() == null) {
+            throw new IllegalArgumentException("storeAvailableTimeByDayId must not be null");
+        }
+
         Store store = storeRepository.findById(request.getStoreId())
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
         if (!storeMemberRepository.existsMember(member, store)) {
@@ -233,35 +236,7 @@ public class StoreScheduleService {
         StoreAvailableTimeByDay schedule = storeAvailableTimeByDayRepository.findById(request.getStoreAvailableTimeByDayId())
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE_MEMBER_AVAILABLE_TIME));
 
-        Time deleteStartTime = schedule.getStartTime();
-        Time deleteEndTime = schedule.getEndTime();
-
-        List<StoreAvailableTimeByDay> existingSchedules = storeAvailableTimeByDayRepository.findByStoreAndMemberAndDayOfWeekOrderByStartTime(store, member, schedule.getDayOfWeek());
-
-        for (StoreAvailableTimeByDay existingSchedule : existingSchedules) {
-            if (existingSchedule.getStartTime().before(deleteEndTime) && existingSchedule.getEndTime().after(deleteStartTime)) {
-                if (existingSchedule.getStartTime().before(deleteStartTime) && existingSchedule.getEndTime().after(deleteEndTime)) {
-                    // 기존 스케줄이 삭제할 시간 범위를 포함하는 경우, 두 개로 나눔
-                    Time originalEndTime = existingSchedule.getEndTime();
-                    existingSchedule.updateWorkTime(existingSchedule.getStartTime(), deleteStartTime);
-                    storeAvailableTimeByDayRepository.save(existingSchedule);
-
-                    StoreAvailableTimeByDay newSchedule = new StoreAvailableTimeByDay(store, member, schedule.getDayOfWeek(), deleteEndTime, originalEndTime);
-                    storeAvailableTimeByDayRepository.save(newSchedule);
-                } else if (existingSchedule.getStartTime().before(deleteStartTime)) {
-                    // 삭제 범위가 기존 스케줄 끝 부분에 걸치는 경우
-                    existingSchedule.updateWorkTime(existingSchedule.getStartTime(), deleteStartTime);
-                    storeAvailableTimeByDayRepository.save(existingSchedule);
-                } else if (existingSchedule.getEndTime().after(deleteEndTime)) {
-                    // 삭제 범위가 기존 스케줄 시작 부분에 걸치는 경우
-                    existingSchedule.updateWorkTime(deleteEndTime, existingSchedule.getEndTime());
-                    storeAvailableTimeByDayRepository.save(existingSchedule);
-                } else {
-                    // 삭제 범위가 기존 스케줄 전체를 포함하는 경우
-                    storeAvailableTimeByDayRepository.delete(existingSchedule);
-                }
-            }
-        }
+        storeAvailableTimeByDayRepository.delete(schedule);
     }
 
 
@@ -316,9 +291,9 @@ public class StoreScheduleService {
 
         // 결과 저장을 위한 배열 (각 날짜별로 시간대에 배정된 사람들의 리스트)
         List<List<List<Integer>>> schedules = new ArrayList<>();
-        for (int day = 0; day < days; day++) {
+        for (Integer integer : m) {
             List<List<Integer>> schedule = new ArrayList<>();
-            for (int i = 0; i < m.get(day); i++) {
+            for (int i = 0; i < integer; i++) {
                 schedule.add(new ArrayList<>());
             }
             schedules.add(schedule);
