@@ -221,9 +221,6 @@ public class StoreScheduleService {
 
         StoreAvailableTimeByDay schedule = storeAvailableTimeByDayRepository.findById(request.getStoreAvailableTimeByDayId())
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE_MEMBER_AVAILABLE_TIME));
-        if (schedule.getEmployee().equals(member)) {
-            throw new StoreScheduleException(NOT_MEMBER_WORKING_DATA);
-        }
 
         storeAvailableTimeByDayRepository.delete(schedule);
     }
