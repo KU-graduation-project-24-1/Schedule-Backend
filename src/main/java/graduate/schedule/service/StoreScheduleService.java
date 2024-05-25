@@ -233,25 +233,14 @@ public class StoreScheduleService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
 
-        // 사용자가 고용인인지 확인
-        boolean isEmployee = storeMemberRepository.findByStoreAndMemberGrade(store, StoreMemberGrade.BOSS)
-                .filter(storeMember -> storeMember.getMember().equals(member))
-                .isPresent();
-        if (!isEmployee) {
-            throw new MemberException(NOT_EXECUTIVE);
-        }
-
         DayOfWeek dayOfWeek = request.getDayOfWeek();
-        int requiredEmployees = request.getRequiredEmployees();
-        Time startTime = Time.valueOf(request.getStartTime() + ":00");
-        Time endTime = Time.valueOf(request.getEndTime() + ":00");
+        Time startTime = Time.valueOf(request.getStartTime());
+        Time endTime = Time.valueOf(request.getEndTime());
 
-        StoreOperationInfo operationInfo =
-                new StoreOperationInfo(store, dayOfWeek, requiredEmployees, startTime, endTime);
+        StoreOperationInfo operationInfo = new StoreOperationInfo(store, dayOfWeek, 0, startTime, endTime); // requiredEmployees를 0으로 설정
+        storeOperationInfoRepository.save(operationInfo);
 
-        StoreOperationInfo savedOperationInfo = storeOperationInfoRepository.save(operationInfo);
-
-        return new AddStoreOperationInfoResponseDTO(savedOperationInfo.getId());
+        return new AddStoreOperationInfoResponseDTO(operationInfo.getId());
     }
 
     public void deleteStoreOperationInfo(Member member, DeleteStoreOperationInfoRequestDTO request) {
@@ -270,6 +259,23 @@ public class StoreScheduleService {
 
         storeOperationInfoRepository.delete(operationInfo);
     }
+
+    public void updateRequiredEmployees(UpdateRequiredEmployeesRequestDTO request) {
+        Store store = storeRepository.findById(request.getStoreId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+
+        List<StoreOperationInfo> operationInfos = storeOperationInfoRepository.findByStoreAndDayOfWeek(store, request.getDayOfWeek());
+
+        if (operationInfos.isEmpty()) {
+            throw new StoreException(NOT_FOUND_STORE_MEMBER_AVAILABLE_TIME);
+        }
+
+        for (StoreOperationInfo info : operationInfos) {
+            info.setRequiredEmployees(request.getRequiredEmployees());
+            storeOperationInfoRepository.save(info);
+        }
+    }
+    
 
     public StoreScheduleResponseDTO generateSchedule(Long storeId, List<Integer> m, List<Integer> k, List<List<List<Integer>>> preferences) {
         Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
