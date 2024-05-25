@@ -45,8 +45,4 @@ public class StoreOperationInfo {
         this.endTime = endTime;
     }
 
-    public void updateWorkTime(Time newStartTime, Time newEndTime) {
-        this.startTime = newStartTime;
-        this.endTime = newEndTime;
-    }
 }

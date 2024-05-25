@@ -248,7 +248,8 @@ public class StoreScheduleService {
         Time startTime = Time.valueOf(request.getStartTime() + ":00");
         Time endTime = Time.valueOf(request.getEndTime() + ":00");
 
-        StoreOperationInfo operationInfo = new StoreOperationInfo(store, dayOfWeek, requiredEmployees, startTime, endTime);
+        StoreOperationInfo operationInfo =
+                new StoreOperationInfo(store, dayOfWeek, requiredEmployees, startTime, endTime);
 
         StoreOperationInfo savedOperationInfo = storeOperationInfoRepository.save(operationInfo);
 
