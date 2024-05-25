@@ -77,7 +77,7 @@ public class StoreScheduleController {
      * @apiNote 주 단위 근무 가능한 시간 삭제 api
      */
     @DeleteMapping("/{storeId}/fixed-schedule/delete")
-    public BaseResponse<String> deleteFixedSchedule(@MemberId @Valid Member member, @RequestBody @Valid DeleteStoreAvailableTimeByDayRequestDTO request) {
+    public BaseResponse<String> deleteFixedSchedule(@MemberId @Valid Member member, @PathVariable Long storeId,@RequestBody @Valid DeleteStoreAvailableTimeByDayRequestDTO request) {
         storeScheduleService.deleteStoreAvailableTimeByDay(member, request);
         return new BaseResponse<>(SUCCESS_DELETE_AVAILABLE_SCHEDULE.getMessage());
     }
