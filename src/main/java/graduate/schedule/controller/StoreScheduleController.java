@@ -5,15 +5,14 @@ import graduate.schedule.common.response.BaseResponse;
 import graduate.schedule.domain.member.Member;
 import graduate.schedule.dto.web.request.store.*;
 import graduate.schedule.dto.web.response.executive.ChangeScheduleResponseDTO;
-import graduate.schedule.dto.web.response.store.AddAvailableScheduleResponseDTO;
-import graduate.schedule.dto.web.response.store.AddAvailableTimeByDayResponseDTO;
-import graduate.schedule.dto.web.response.store.AddStoreOperationInfoResponseDTO;
-import graduate.schedule.dto.web.response.store.StoreScheduleResponseDTO;
+import graduate.schedule.dto.web.response.store.*;
 import graduate.schedule.service.StoreScheduleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.DayOfWeek;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.SUCCESS_DELETE_AVAILABLE_SCHEDULE;
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.SUCCESS_REQUEST_COVER;
@@ -108,6 +107,8 @@ public class StoreScheduleController {
         storeScheduleService.updateRequiredEmployees(request);
         return new BaseResponse<>("필요인원 설정이 변경되었습니다.");
     }
+
+
 
     @PostMapping("/{storeId}/generate-schedule")
     public BaseResponse<StoreScheduleResponseDTO> generateSchedule(@PathVariable Long storeId, @RequestBody ScheduleRequestDTO request) {

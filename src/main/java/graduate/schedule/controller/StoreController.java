@@ -127,4 +127,11 @@ public class StoreController {
         return new BaseResponse<>(response);
     }
 
+    @GetMapping("/{storeId}/operation-info/required-employees")
+    public BaseResponse<StoreRequiredEmployeesResponseDTO> getRequiredEmployees(
+            @PathVariable Long storeId,
+            @RequestParam DayOfWeek dayOfWeek) {
+        StoreRequiredEmployeesResponseDTO response = storeService.getRequiredEmployees(storeId, dayOfWeek);
+        return new BaseResponse<>(response);
+    }
 }
