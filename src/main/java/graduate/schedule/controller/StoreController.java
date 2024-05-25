@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.DayOfWeek;
 import java.util.List;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
@@ -113,6 +115,15 @@ public class StoreController {
     @GetMapping("/{storeId}/fixed-schedule")
     public BaseResponse<StoreAvailableTimeByDayResponseDTO> getStoreAvailableTimeByDay(@PathVariable Long storeId, @MemberId Member member) {
         StoreAvailableTimeByDayResponseDTO response = storeService.getStoreAvailableTimeByDay(member, storeId);
+        return new BaseResponse<>(response);
+    }
+
+    // 가게 운영시간 가져오기
+    @GetMapping("/{storeId}/operation-info")
+    public BaseResponse<List<StoreOperationInfoResponseDTO>> getStoreOperationInfoByDay(
+            @PathVariable Long storeId,
+            @RequestParam DayOfWeek dayOfWeek) {
+        List<StoreOperationInfoResponseDTO> response = storeService.getStoreOperationInfoByDay(storeId, dayOfWeek);
         return new BaseResponse<>(response);
     }
 
