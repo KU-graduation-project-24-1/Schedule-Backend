@@ -36,6 +36,13 @@ public class StoreAvailableTimeByDay {
     @Column(name = "end_time", nullable = false)
     private Time endTime;
 
+    public StoreAvailableTimeByDay(Store store, DayOfWeek dayOfWeek, Time startTime, Time endTime) {
+        this.store = store;
+        this.dayOfWeek = dayOfWeek;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
     public static StoreAvailableTimeByDay createStoreAvailableTimeByDay(Store store, Member member, DayOfWeek dayOfWeek, Time startTime, Time endTime) {
         StoreAvailableTimeByDay availableTimeByDay = new StoreAvailableTimeByDay();
         availableTimeByDay.member = member;
@@ -47,10 +54,5 @@ public class StoreAvailableTimeByDay {
         store.addMemberAvailableTimeByDay(availableTimeByDay);
 
         return availableTimeByDay;
-    }
-
-    public void updateWorkTime(Time startTime, Time endTime) {
-        this.startTime = startTime;
-        this.endTime = endTime;
     }
 }
