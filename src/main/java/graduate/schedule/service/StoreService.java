@@ -319,4 +319,15 @@ public class StoreService {
                         info.getRequiredEmployees()))
                 .toList();
     }
+
+    public StoreRequiredEmployeesResponseDTO getRequiredEmployees(Long storeId, DayOfWeek dayOfWeek) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+
+        StoreOperationInfo operationInfo = storeOperationInfoRepository.findByStoreAndDayOfWeek(store, dayOfWeek)
+                .stream().findFirst()
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE_MEMBER_AVAILABLE_TIME));
+
+        return new StoreRequiredEmployeesResponseDTO(store.getId(), operationInfo.getDayOfWeek(), operationInfo.getRequiredEmployees());
+    }
 }
