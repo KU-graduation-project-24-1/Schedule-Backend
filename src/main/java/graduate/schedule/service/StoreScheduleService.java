@@ -213,15 +213,15 @@ public class StoreScheduleService {
 
 
     public void deleteStoreAvailableTimeByDay(Member member, DeleteStoreAvailableTimeByDayRequestDTO request) {
-       if (request.getStoreAvailableTimeByDayId() == null) {
-            throw new StoreScheduleException(NOT_MEMBER_WORKING_DATA);
+        Store store = storeRepository.findById(request.getStoreId())
+                .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
+        if (!storeMemberRepository.existsMember(member, store)) {
+            throw new StoreMemberException(NOT_STORE_MEMBER);
         }
         StoreAvailableTimeByDay schedule = storeAvailableTimeByDayRepository.findById(request.getStoreAvailableTimeByDayId())
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE_MEMBER_AVAILABLE_TIME));
-
-        Store store = schedule.getStore();
-        if (!storeMemberRepository.existsMember(member, store)) {
-            throw new StoreMemberException(NOT_STORE_MEMBER);
+        if (request.getStoreAvailableTimeByDayId() == null) {
+            throw new StoreScheduleException(NOT_MEMBER_WORKING_DATA);
         }
 
         storeAvailableTimeByDayRepository.delete(schedule);
