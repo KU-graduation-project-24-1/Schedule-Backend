@@ -20,7 +20,7 @@ public class StoreAvailableTimeByDay {
 
     @ManyToOne
     @JoinColumn(name = "member_id")
-    private Member member;
+    private Member employee;
 
     @ManyToOne
     @JoinColumn(name = "store_id")
@@ -43,9 +43,9 @@ public class StoreAvailableTimeByDay {
         this.endTime = endTime;
     }
 
-    public static StoreAvailableTimeByDay createStoreAvailableTimeByDay(Store store, Member member, DayOfWeek dayOfWeek, Time startTime, Time endTime) {
+    public static StoreAvailableTimeByDay createStoreAvailableTimeByDay(Store store, Member employee, DayOfWeek dayOfWeek, Time startTime, Time endTime) {
         StoreAvailableTimeByDay availableTimeByDay = new StoreAvailableTimeByDay();
-        availableTimeByDay.member = member;
+        availableTimeByDay.employee = employee;
         availableTimeByDay.store = store;
         availableTimeByDay.dayOfWeek = dayOfWeek;
         availableTimeByDay.startTime = startTime;
@@ -55,4 +55,5 @@ public class StoreAvailableTimeByDay {
 
         return availableTimeByDay;
     }
+
 }
