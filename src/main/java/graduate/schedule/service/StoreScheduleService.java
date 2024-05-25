@@ -194,28 +194,15 @@ public class StoreScheduleService {
         if (!storeMemberRepository.existsMember(member, store)) {
             throw new StoreMemberException(NOT_STORE_MEMBER);
         }
-        DayOfWeek dayOfWeek = request.getDayOfWeek();
-        Time newStartTime = timeWithSeconds(request.getStartTime());
-        Time newEndTime = timeWithSeconds(request.getEndTime());
 
-        // 기존 요일에 해당하는 데이터와 병합
-        List<StoreAvailableTimeByDay> existingSchedules = storeAvailableTimeByDayRepository.findByStoreAndMemberAndDayOfWeekOrderByStartTime(store, member, dayOfWeek);
-
-        for (StoreAvailableTimeByDay schedule : existingSchedules) {
-            if (newStartTime.before(schedule.getEndTime()) && newEndTime.after(schedule.getStartTime())) {
-                newStartTime = new Time(Math.min(newStartTime.getTime(), schedule.getStartTime().getTime()));
-                newEndTime = new Time(Math.max(newEndTime.getTime(), schedule.getEndTime().getTime()));
-                storeAvailableTimeByDayRepository.delete(schedule);
-            }
-        }
 
         StoreAvailableTimeByDay newStoreAvailableTimeByDay =
                 StoreAvailableTimeByDay.createStoreAvailableTimeByDay(
                         store,
                         member,
-                        dayOfWeek,
-                        newStartTime,
-                        newEndTime
+                        request.getDayOfWeek(),
+                        timeWithSeconds(request.getStartTime()),
+                        timeWithSeconds(request.getEndTime())
                 );
         storeAvailableTimeByDayRepository.save(newStoreAvailableTimeByDay);
         return new AddAvailableTimeByDayResponseDTO(newStoreAvailableTimeByDay.getId());
@@ -224,7 +211,7 @@ public class StoreScheduleService {
 
     public void deleteStoreAvailableTimeByDay(Member member, DeleteStoreAvailableTimeByDayRequestDTO request) {
        if (request.getStoreAvailableTimeByDayId() == null) {
-            throw new IllegalArgumentException("storeAvailableTimeByDayId must not be null");
+            throw new StoreScheduleException(NOT_MEMBER_WORKING_DATA);
         }
 
         Store store = storeRepository.findById(request.getStoreId())
