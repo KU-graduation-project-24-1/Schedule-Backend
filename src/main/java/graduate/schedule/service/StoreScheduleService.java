@@ -187,7 +187,7 @@ public class StoreScheduleService {
         return new ChangeScheduleResponseDTO(storeSchedule);
     }
 
-    // 주 단위 고정 근무시간 수정하기
+    // 주 단위 고정 근무시간 추가하기
     public AddAvailableTimeByDayResponseDTO addStoreAvailableTimeByDay(Member member, AddStoreAvailableTimeByDayRequestDTO request) {
         Store store = storeRepository.findById(request.getStoreId())
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
@@ -195,14 +195,17 @@ public class StoreScheduleService {
             throw new StoreMemberException(NOT_STORE_MEMBER);
         }
 
+        DayOfWeek dayOfWeek = request.getDayOfWeek();
+        Time startTime = Time.valueOf(request.getStartTime() + ":00");
+        Time endTime = Time.valueOf(request.getEndTime() + ":00");
 
         StoreAvailableTimeByDay newStoreAvailableTimeByDay =
                 StoreAvailableTimeByDay.createStoreAvailableTimeByDay(
                         store,
                         member,
-                        request.getDayOfWeek(),
-                        timeWithSeconds(request.getStartTime()),
-                        timeWithSeconds(request.getEndTime())
+                        dayOfWeek,
+                        startTime,
+                        endTime
                 );
         storeAvailableTimeByDayRepository.save(newStoreAvailableTimeByDay);
         return new AddAvailableTimeByDayResponseDTO(newStoreAvailableTimeByDay.getId());
