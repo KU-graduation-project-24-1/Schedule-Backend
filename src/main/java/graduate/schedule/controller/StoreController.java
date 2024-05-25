@@ -116,4 +116,13 @@ public class StoreController {
         return new BaseResponse<>(response);
     }
 
+    // 가게 운영시간 가져오기
+    @GetMapping("/{storeId}/operation-info")
+    public BaseResponse<List<StoreOperationInfoResponseDTO>> getStoreOperationInfoByDay(
+            @PathVariable Long storeId,
+            @RequestParam DayOfWeek dayOfWeek) {
+        List<StoreOperationInfoResponseDTO> response = storeService.getStoreOperationInfoByDay(storeId, dayOfWeek);
+        return new BaseResponse<>(response);
+    }
+
 }
