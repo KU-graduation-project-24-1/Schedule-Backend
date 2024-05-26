@@ -10,4 +10,6 @@ import java.util.List;
 public interface StoreOperationInfoRepository extends JpaRepository<StoreOperationInfo, Long> {
 
     List<StoreOperationInfo> findByStoreAndDayOfWeek(Store store, DayOfWeek dayOfWeek);
+
+    List<StoreOperationInfo> findByStore(Store store);
 }
