@@ -314,6 +314,7 @@ public class StoreService {
         return operationInfos.stream()
                 .map(info -> new StoreOperationInfoResponseDTO(
                         info.getDayOfWeek(),
+                        info.getId(),
                         info.getStartTime(),
                         info.getEndTime(),
                         info.getRequiredEmployees()))
@@ -328,6 +329,6 @@ public class StoreService {
                 .stream().findFirst()
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE_MEMBER_AVAILABLE_TIME));
 
-        return new StoreRequiredEmployeesResponseDTO(store.getId(), operationInfo.getId(), operationInfo.getDayOfWeek(), operationInfo.getRequiredEmployees());
+        return new StoreRequiredEmployeesResponseDTO(store.getId(), operationInfo.getDayOfWeek(), operationInfo.getRequiredEmployees());
     }
 }
