@@ -328,6 +328,6 @@ public class StoreService {
                 .stream().findFirst()
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE_MEMBER_AVAILABLE_TIME));
 
-        return new StoreRequiredEmployeesResponseDTO(store.getId(), operationInfo.getDayOfWeek(), operationInfo.getRequiredEmployees());
+        return new StoreRequiredEmployeesResponseDTO(store.getId(), operationInfo.getId(), operationInfo.getDayOfWeek(), operationInfo.getRequiredEmployees());
     }
 }
