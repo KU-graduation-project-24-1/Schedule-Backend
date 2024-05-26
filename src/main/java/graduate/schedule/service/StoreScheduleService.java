@@ -72,12 +72,12 @@ public class StoreScheduleService {
             throw new StoreScheduleException(NOT_ADDING_SCHEDULE_TERM);
         }
 
+        Date date = storeRequest.getDate();
         Time newStartTime = Time.valueOf(storeRequest.getStartTime() + ":00");
         Time newEndTime = Time.valueOf(storeRequest.getEndTime() + ":00");
 
-        List<StoreAvailableSchedule> existingSchedules = storeAvailableScheduleRepository.findByStoreAndDate(store, storeRequest.getDate());
-
-        List<StoreAvailableSchedule> mergedSchedules = new ArrayList<>();
+        List<StoreAvailableSchedule> existingSchedules = storeAvailableScheduleRepository.findByStoreAndDate(store, date);
+        List<StoreAvailableSchedule> schedulesToDelete = new ArrayList<>();
         boolean merged = false;
 
         for (StoreAvailableSchedule schedule : existingSchedules) {
@@ -85,16 +85,17 @@ public class StoreScheduleService {
             Time existingEndTime = schedule.getEndTime();
 
             if (newEndTime.before(existingStartTime) || newStartTime.after(existingEndTime)) {
-                mergedSchedules.add(schedule);
+                continue;
             } else {
                 newStartTime = new Time(Math.min(newStartTime.getTime(), existingStartTime.getTime()));
                 newEndTime = new Time(Math.max(newEndTime.getTime(), existingEndTime.getTime()));
+                schedulesToDelete.add(schedule);
                 merged = true;
             }
         }
 
         if (merged) {
-            for (StoreAvailableSchedule schedule : mergedSchedules) {
+            for (StoreAvailableSchedule schedule : schedulesToDelete) {
                 storeAvailableScheduleRepository.delete(schedule);
             }
         }
@@ -103,7 +104,7 @@ public class StoreScheduleService {
                 StoreAvailableSchedule.createStoreAvailableSchedule(
                         store,
                         member,
-                        storeRequest.getDate(),
+                        date,
                         newStartTime,
                         newEndTime
                 );
@@ -111,6 +112,7 @@ public class StoreScheduleService {
 
         return new AddAvailableScheduleResponseDTO(newStoreAvailableSchedule.getId());
     }
+
 
 
     public void deleteAvailableScheduleInDay(Member member, DeleteAvailableScheduleRequestDTO storeRequest) {
