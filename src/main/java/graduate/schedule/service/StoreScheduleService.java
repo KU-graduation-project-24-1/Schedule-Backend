@@ -224,44 +224,18 @@ public class StoreScheduleService {
         }
 
         DayOfWeek dayOfWeek = request.getDayOfWeek();
-        Time startTime = Time.valueOf(request.getStartTime() + ":00");
-        Time endTime = Time.valueOf(request.getEndTime() + ":00");
+        Time newStartTime = Time.valueOf(request.getStartTime() + ":00");
+        Time newEndTime = Time.valueOf(request.getEndTime() + ":00");
 
         StoreAvailableTimeByDay newStoreAvailableTimeByDay =
                 StoreAvailableTimeByDay.createStoreAvailableTimeByDay(
                         store,
                         member,
                         dayOfWeek,
-                        startTime,
-                        endTime
+                        newStartTime,
+                        newEndTime
                 );
         storeAvailableTimeByDayRepository.save(newStoreAvailableTimeByDay);
-
-        // 일 단위로 설정된 스케줄과 합치는 로직
-        List<StoreAvailableSchedule> existingSchedules = storeAvailableScheduleRepository.findByStoreAndMember(store, member);
-
-        List<StoreAvailableSchedule> schedulesToDelete = new ArrayList<>();
-        boolean merged = false;
-
-        for (StoreAvailableSchedule schedule : existingSchedules) {
-            Time existingStartTime = schedule.getStartTime();
-            Time existingEndTime = schedule.getEndTime();
-
-            if (endTime.before(existingStartTime) || startTime.after(existingEndTime)) {
-                continue;
-            } else {
-                startTime = new Time(Math.min(startTime.getTime(), existingStartTime.getTime()));
-                endTime = new Time(Math.max(endTime.getTime(), existingEndTime.getTime()));
-                schedulesToDelete.add(schedule);
-                merged = true;
-            }
-        }
-
-        if (merged) {
-            for (StoreAvailableSchedule schedule : schedulesToDelete) {
-                storeAvailableScheduleRepository.delete(schedule);
-            }
-        }
 
         Date now = new Date(System.currentTimeMillis());
         YearMonth currentMonth = YearMonth.of(now.toLocalDate().getYear(), now.toLocalDate().getMonth());
@@ -271,14 +245,42 @@ public class StoreScheduleService {
         // 월의 모든 날짜를 포함하는 리스트를 생성
         List<LocalDate> datesInMonth = firstDayOfMonth.datesUntil(lastDayOfMonth.plusDays(1)).toList();
 
-        for (LocalDate localDate : datesInMonth) {
-            if (localDate.getDayOfWeek().equals(dayOfWeek)) {
-                Date date = Date.valueOf(localDate);  // LocalDate를 java.sql.Date로 변환
+        for (LocalDate date : datesInMonth) {
+            if (date.getDayOfWeek().equals(dayOfWeek)) {
+                Date sqlDate = Date.valueOf(date);  // LocalDate를 java.sql.Date로 변환
+
+                List<StoreAvailableSchedule> existingSchedules = storeAvailableScheduleRepository.findByStoreAndDate(store, sqlDate);
+                List<StoreAvailableSchedule> schedulesToDelete = new ArrayList<>();
+                boolean merged = false;
+
+                Time startTime = newStartTime;
+                Time endTime = newEndTime;
+
+                for (StoreAvailableSchedule schedule : existingSchedules) {
+                    Time existingStartTime = schedule.getStartTime();
+                    Time existingEndTime = schedule.getEndTime();
+
+                    if (endTime.before(existingStartTime) || startTime.after(existingEndTime)) {
+                        continue;
+                    } else {
+                        startTime = new Time(Math.min(startTime.getTime(), existingStartTime.getTime()));
+                        endTime = new Time(Math.max(endTime.getTime(), existingEndTime.getTime()));
+                        schedulesToDelete.add(schedule);
+                        merged = true;
+                    }
+                }
+
+                if (merged) {
+                    for (StoreAvailableSchedule schedule : schedulesToDelete) {
+                        storeAvailableScheduleRepository.delete(schedule);
+                    }
+                }
+
                 StoreAvailableSchedule newStoreAvailableSchedule =
                         StoreAvailableSchedule.createStoreAvailableSchedule(
                                 store,
                                 member,
-                                date,
+                                sqlDate,
                                 startTime,
                                 endTime
                         );
@@ -304,6 +306,7 @@ public class StoreScheduleService {
         Time deleteEndTime = schedule.getEndTime();
         DayOfWeek dayOfWeek = schedule.getDayOfWeek();
 
+        // StoreAvailableSchedule에서 겹치는 시간 삭제 및 조정
         List<StoreAvailableSchedule> existingSchedules = storeAvailableScheduleRepository.findByStoreAndMemberAndDayOfWeek(store, member, dayOfWeek.getValue());
 
         for (StoreAvailableSchedule existingSchedule : existingSchedules) {
@@ -311,12 +314,35 @@ public class StoreScheduleService {
             Time existingEndTime = existingSchedule.getEndTime();
 
             if (!deleteEndTime.before(existingStartTime) && !deleteStartTime.after(existingEndTime)) {
-                storeAvailableScheduleRepository.delete(existingSchedule);
+                if (deleteStartTime.after(existingStartTime) && deleteEndTime.before(existingEndTime)) {
+                    // 기존 스케줄이 삭제할 시간 범위를 포함하는 경우, 두 개로 나눔
+                    StoreAvailableSchedule newSchedule1 = StoreAvailableSchedule.createStoreAvailableSchedule(
+                            store, member, existingSchedule.getDate(), existingStartTime, deleteStartTime);
+                    storeAvailableScheduleRepository.save(newSchedule1);
+
+                    StoreAvailableSchedule newSchedule2 = StoreAvailableSchedule.createStoreAvailableSchedule(
+                            store, member, existingSchedule.getDate(), deleteEndTime, existingEndTime);
+                    storeAvailableScheduleRepository.save(newSchedule2);
+
+                    storeAvailableScheduleRepository.delete(existingSchedule);
+                } else if (deleteStartTime.after(existingStartTime)) {
+                    // 삭제 범위가 기존 스케줄 끝 부분에 걸치는 경우
+                    existingSchedule.updateWorkTime(existingStartTime, deleteStartTime);
+                    storeAvailableScheduleRepository.save(existingSchedule);
+                } else if (deleteEndTime.before(existingEndTime)) {
+                    // 삭제 범위가 기존 스케줄 시작 부분에 걸치는 경우
+                    existingSchedule.updateWorkTime(deleteEndTime, existingEndTime);
+                    storeAvailableScheduleRepository.save(existingSchedule);
+                } else {
+                    // 삭제 범위가 기존 스케줄 전체를 포함하는 경우
+                    storeAvailableScheduleRepository.delete(existingSchedule);
+                }
             }
         }
 
         storeAvailableTimeByDayRepository.delete(schedule);
     }
+
 
 
 
