@@ -42,4 +42,10 @@ public class StoreAvailableSchedule {
 
         return availableSchedule;
     }
+
+    public void updateWorkTime(Time newStartTime, Time newEndTime) {
+        this.startTime = newStartTime;
+        this.endTime = newEndTime;
+    }
+
 }
