@@ -50,4 +50,7 @@ public interface StoreMemberRepository extends JpaRepository<StoreMember, Long> 
             "from StoreMember sm " +
             "where sm.store=:store and sm.memberGrade!='BOSS'")
     List<Member> findEmployees(@Param("store") Store store);
+
+    @Query("SELECT m FROM Member m JOIN StoreMember sm ON m.id = sm.member.id WHERE sm.store = :store")
+    List<Member> findAllByStore(@Param("store") Store store);
 }
