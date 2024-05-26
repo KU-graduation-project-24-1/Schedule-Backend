@@ -240,7 +240,7 @@ public class StoreScheduleService {
         // 일 단위로 설정된 스케줄과 합치는 로직
         List<StoreAvailableSchedule> existingSchedules = storeAvailableScheduleRepository.findByStoreAndMember(store, member);
 
-        List<StoreAvailableSchedule> mergedSchedules = new ArrayList<>();
+        List<StoreAvailableSchedule> schedulesToDelete = new ArrayList<>();
         boolean merged = false;
 
         for (StoreAvailableSchedule schedule : existingSchedules) {
@@ -248,16 +248,17 @@ public class StoreScheduleService {
             Time existingEndTime = schedule.getEndTime();
 
             if (endTime.before(existingStartTime) || startTime.after(existingEndTime)) {
-                mergedSchedules.add(schedule);
+                continue;
             } else {
                 startTime = new Time(Math.min(startTime.getTime(), existingStartTime.getTime()));
                 endTime = new Time(Math.max(endTime.getTime(), existingEndTime.getTime()));
+                schedulesToDelete.add(schedule);
                 merged = true;
             }
         }
 
         if (merged) {
-            for (StoreAvailableSchedule schedule : mergedSchedules) {
+            for (StoreAvailableSchedule schedule : schedulesToDelete) {
                 storeAvailableScheduleRepository.delete(schedule);
             }
         }
@@ -309,26 +310,8 @@ public class StoreScheduleService {
             Time existingStartTime = existingSchedule.getStartTime();
             Time existingEndTime = existingSchedule.getEndTime();
 
-            if (deleteStartTime.before(existingEndTime) && deleteEndTime.after(existingStartTime)) {
-                if (deleteStartTime.after(existingStartTime) && deleteEndTime.before(existingEndTime)) {
-                    StoreAvailableSchedule newSchedule1 = StoreAvailableSchedule.createStoreAvailableSchedule(
-                            store, member, existingSchedule.getDate(), existingStartTime, deleteStartTime);
-                    storeAvailableScheduleRepository.save(newSchedule1);
-
-                    StoreAvailableSchedule newSchedule2 = StoreAvailableSchedule.createStoreAvailableSchedule(
-                            store, member, existingSchedule.getDate(), deleteEndTime, existingEndTime);
-                    storeAvailableScheduleRepository.save(newSchedule2);
-
-                    storeAvailableScheduleRepository.delete(existingSchedule);
-                } else if (deleteStartTime.after(existingStartTime)) {
-                    existingSchedule.updateWorkTime(existingStartTime, deleteStartTime);
-                    storeAvailableScheduleRepository.save(existingSchedule);
-                } else if (deleteEndTime.before(existingEndTime)) {
-                    existingSchedule.updateWorkTime(deleteEndTime, existingEndTime);
-                    storeAvailableScheduleRepository.save(existingSchedule);
-                } else {
-                    storeAvailableScheduleRepository.delete(existingSchedule);
-                }
+            if (!deleteEndTime.before(existingStartTime) && !deleteStartTime.after(existingEndTime)) {
+                storeAvailableScheduleRepository.delete(existingSchedule);
             }
         }
 
