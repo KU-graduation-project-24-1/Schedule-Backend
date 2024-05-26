@@ -234,8 +234,8 @@ public class StoreScheduleService {
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
 
         DayOfWeek dayOfWeek = request.getDayOfWeek();
-        Time startTime = Time.valueOf(request.getStartTime());
-        Time endTime = Time.valueOf(request.getEndTime());
+        Time startTime = Time.valueOf(request.getStartTime() + ":00");
+        Time endTime = Time.valueOf(request.getEndTime() + ":00");
 
         StoreOperationInfo operationInfo = new StoreOperationInfo(store, dayOfWeek, 0, startTime, endTime); // requiredEmployees를 0으로 설정
         storeOperationInfoRepository.save(operationInfo);
