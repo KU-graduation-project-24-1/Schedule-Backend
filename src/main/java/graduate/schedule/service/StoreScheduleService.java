@@ -10,7 +10,6 @@ import graduate.schedule.dto.web.request.store.*;
 import graduate.schedule.dto.web.response.executive.ChangeScheduleResponseDTO;
 import graduate.schedule.dto.web.response.store.AddAvailableScheduleResponseDTO;
 import graduate.schedule.dto.web.response.store.AddStoreOperationInfoResponseDTO;
-import graduate.schedule.dto.web.response.store.StoreScheduleResponseDTO;
 import graduate.schedule.dto.web.response.store.AddAvailableTimeByDayResponseDTO;
 import graduate.schedule.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -23,15 +22,16 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.*;
 import static graduate.schedule.common.response.status.BaseExceptionResponseStatus.NOT_STORE_MEMBER;
-import static graduate.schedule.utils.DateAndTimeFormatter.timeWithSeconds;
 import static graduate.schedule.utils.DateAndTimeFormatter.timeWithoutSeconds;
 
 @Slf4j
@@ -249,7 +249,7 @@ public class StoreScheduleService {
 
         for (LocalDate date : datesInMonth) {
             if (date.getDayOfWeek().equals(dayOfWeek)) {
-                Date sqlDate = Date.valueOf(date);  // LocalDate를 java.sql.Date로 변환
+                Date sqlDate = Date.valueOf(date);
 
                 List<StoreAvailableSchedule> existingSchedules = storeAvailableScheduleRepository.findByStoreAndDate(store, sqlDate);
                 List<StoreAvailableSchedule> schedulesToDelete = new ArrayList<>();
@@ -308,7 +308,6 @@ public class StoreScheduleService {
         Time deleteEndTime = schedule.getEndTime();
         DayOfWeek dayOfWeek = schedule.getDayOfWeek();
 
-        // StoreAvailableSchedule에서 겹치는 시간 삭제 및 조정
         List<StoreAvailableSchedule> existingSchedules = storeAvailableScheduleRepository.findByStoreAndMemberAndDayOfWeek(store, member, dayOfWeek.getValue());
 
         for (StoreAvailableSchedule existingSchedule : existingSchedules) {
@@ -398,92 +397,148 @@ public class StoreScheduleService {
             storeOperationInfoRepository.save(info);
         }
     }
-    
 
-    public StoreScheduleResponseDTO generateSchedule(Long storeId, List<Integer> m, List<Integer> k, List<List<List<Integer>>> preferences) {
+    @Scheduled(cron = "0 0 0 15 * ?")
+    public void generateMonthlySchedule() {
+        List<Store> stores = storeRepository.findAll();
+        for (Store store : stores) {
+            try {
+                generateSchedule(store.getId());
+                List<Member> members = storeMemberRepository.findAllByStore(store);
+                for (Member member : members) {
+                    fcmService.sendMessageTo(member.getFcmToken(), "스케줄 생성 완료", "다음 달 스케줄이 성공적으로 생성되었습니다. (스토어: " + store.getName() + ")");
+                }
+            } catch (Exception e) {
+                log.error("스케줄 생성 중 오류 발생 (스토어: " + store.getName() + ")", e);
+                List<Member> members = storeMemberRepository.findAllByStore(store);
+                for (Member member : members) {
+                    fcmService.sendMessageTo(member.getFcmToken(), "스케줄 생성 실패", "다음 달 스케줄 생성 중 오류가 발생했습니다. (스토어: " + store.getName() + ")");
+                }
+            }
+        }
+    }
+
+    public void generateSchedule(Long storeId) {
         Store store = storeRepository.findById(storeId).orElseThrow(() -> new StoreException(NOT_FOUND_STORE));
-        int N = preferences.size();
-        int days = m.size();
+        List<Member> members = storeMemberRepository.findAllByStore(store);
+        int N = members.size();
 
-        // 결과 저장을 위한 배열 (각 날짜별로 시간대에 배정된 사람들의 리스트)
-        List<List<List<Integer>>> schedules = new ArrayList<>();
-        for (Integer integer : m) {
-            List<List<Integer>> schedule = new ArrayList<>();
-            for (int i = 0; i < integer; i++) {
-                schedule.add(new ArrayList<>());
+        // 요일별 필요한 인원 수를 가져옴, 중복 키가 발생하면 첫 번째 값을 사용
+        Map<DayOfWeek, List<StoreOperationInfo>> operationInfoByDay = storeOperationInfoRepository.findByStore(store)
+                .stream()
+                .collect(Collectors.groupingBy(StoreOperationInfo::getDayOfWeek));
+
+        YearMonth nextMonth = YearMonth.now().plusMonths(1);
+        LocalDate firstDayOfNextMonth = nextMonth.atDay(1);
+        LocalDate lastDayOfNextMonth = nextMonth.atEndOfMonth();
+
+        for (LocalDate date = firstDayOfNextMonth; !date.isAfter(lastDayOfNextMonth); date = date.plusDays(1)) {
+            log.info("Processing date: {}", date);
+            DayOfWeek dayOfWeek = date.getDayOfWeek();
+            List<StoreOperationInfo> operationInfos = operationInfoByDay.getOrDefault(dayOfWeek, new ArrayList<>());
+
+            if (operationInfos.isEmpty()) {
+                log.info("No operation info for day: {}", dayOfWeek);
+                continue; // 해당 요일에 운영정보가 없는 경우 스킵
             }
-            schedules.add(schedule);
-        }
 
-        // 각 사람의 총 근무 시간을 추적하는 배열
-        int[] workHours = new int[N];
+            List<Member> availableMembers = new ArrayList<>();
+            for (Member member : members) {
+                if (isMemberAvailableOnDate(member, store, date)) {
+                    availableMembers.add(member);
+                }
+            }
 
-        // 각 날짜에 대한 스케줄링
-        for (int day = 0; day < days; day++) {
-            List<List<Integer>> schedule = schedules.get(day);
-            int totalRequired = k.get(day);
-            int numSlots = m.get(day);
+            for (StoreOperationInfo operationInfo : operationInfos) {
+                int requiredEmployees = operationInfo.getRequiredEmployees();
+                Time operationStartTime = operationInfo.getStartTime();
+                Time operationEndTime = operationInfo.getEndTime();
 
-            for (int slot = 0; slot < numSlots; slot++) {
-                int needed = totalRequired;
-
-                while (needed > 0) {
-                    int minWorkHours = Integer.MAX_VALUE;
-                    int selectedPerson = -1;
-
-                    for (int person = 0; person < N; person++) {
-                        if (preferences.get(person).get(day).contains(slot) && !schedule.get(slot).contains(person) && workHours[person] < minWorkHours) {
-                            minWorkHours = workHours[person];
-                            selectedPerson = person;
-                        }
+                List<Member> assignedMembers = new ArrayList<>();
+                for (Member member : availableMembers) {
+                    if (assignedMembers.size() < requiredEmployees && isMemberAvailableAtTime(member, store, date, operationStartTime, operationEndTime)) {
+                        assignedMembers.add(member);
                     }
+                }
 
-                    if (selectedPerson != -1) {
-                        schedule.get(slot).add(selectedPerson);
-                        workHours[selectedPerson]++;
-                        needed--;
-                    } else {
-                        break; // 더 이상 배정할 사람이 없으면 종료
-                    }
+                if (assignedMembers.size() < requiredEmployees) {
+                    log.warn("날짜: {} 시간: {} ~ {}에 필요한 인원이 부족합니다. 배정된 인원 수: {}", date, operationStartTime, operationEndTime, assignedMembers.size());
+                }
+
+                for (Member assignedMember : assignedMembers) {
+                    saveSchedule(store, assignedMember, date, operationStartTime, operationEndTime);
                 }
             }
         }
+    }
 
-        // 결과 저장
-        for (int day = 0; day < days; day++) {
-            List<List<Integer>> schedule = schedules.get(day);
-            for (int slot = 0; slot < schedule.size(); slot++) {
-                for (int employeeId : schedule.get(slot)) {
-                    Member employee = memberRepository.findById((long) employeeId).orElseThrow(() -> new StoreException(NOT_STORE_MEMBER));
+    private boolean isMemberAvailableOnDate(Member member, Store store, LocalDate date) {
+        List<StoreAvailableSchedule> schedules = storeAvailableScheduleRepository.findByStoreAndMemberAndDate(store, member, Date.valueOf(date));
+        return !schedules.isEmpty();
+    }
 
-                    // 시작 시간 설정
-                    int startSlot = slot;
-                    while (slot + 1 < schedule.size() && schedule.get(slot + 1).contains(employeeId)) {
-                        slot++;
-                    }
-                    // 종료 시간 설정
-                    int endSlot = slot + 1;
+    private boolean isMemberAvailableAtTime(Member member, Store store, LocalDate date, Time operationStartTime, Time operationEndTime) {
+        List<StoreAvailableSchedule> schedules = storeAvailableScheduleRepository.findByStoreAndMemberAndDate(store, member, Date.valueOf(date));
+        for (StoreAvailableSchedule schedule : schedules) {
+            Time availableStartTime = schedule.getStartTime();
+            Time availableEndTime = schedule.getEndTime();
+            if (!operationEndTime.before(availableStartTime) && !operationStartTime.after(availableEndTime)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-                    String startTime = String.format("%02d:%02d:00", startSlot / 2, startSlot % 2);
-                    String endTime = String.format("%02d:%02d:00", endSlot / 2, endSlot % 2);
+    private void saveSchedule(Store store, Member member, LocalDate date, Time operationStartTime, Time operationEndTime) {
+        List<StoreAvailableSchedule> availableSchedules = storeAvailableScheduleRepository.findByStoreAndMemberAndDate(store, member, Date.valueOf(date));
 
-                    StoreSchedule storeSchedule = StoreSchedule.createStoreSchedule(
-                            store,
-                            employee,
-                            new Date(System.currentTimeMillis() + day * 86400000L), // 날짜 계산 부분
-                            startTime, // 시작 시간
-                            endTime // 종료 시간
-                    );
-                    storeScheduleRepository.save(storeSchedule);
-                }
+        for (StoreAvailableSchedule availableSchedule : availableSchedules) {
+            Time availableStartTime = availableSchedule.getStartTime();
+            Time availableEndTime = availableSchedule.getEndTime();
+
+            Time startTime = maxTime(operationStartTime, availableStartTime);
+            Time endTime = minTime(operationEndTime, availableEndTime);
+
+            if (startTime.before(endTime)) {
+                mergeAndSave(store, member, date, startTime, endTime);
+            }
+        }
+    }
+
+    private Time maxTime(Time time1, Time time2) {
+        return time1.after(time2) ? time1 : time2;
+    }
+
+    private Time minTime(Time time1, Time time2) {
+        return time1.before(time2) ? time1 : time2;
+    }
+
+    private void mergeAndSave(Store store, Member member, LocalDate date, Time startTime, Time endTime) {
+        List<StoreSchedule> existingSchedules = storeScheduleRepository.findByStoreAndMemberAndDate(store, member, Date.valueOf(date));
+
+        LocalTime newStartTime = startTime.toLocalTime();
+        LocalTime newEndTime = endTime.toLocalTime();
+
+        for (StoreSchedule schedule : existingSchedules) {
+            LocalTime existingStartTime = schedule.getStartTime().toLocalTime();
+            LocalTime existingEndTime = schedule.getEndTime().toLocalTime();
+
+            if (!newEndTime.isBefore(existingStartTime) && !newStartTime.isAfter(existingEndTime)) {
+                newStartTime = newStartTime.isBefore(existingStartTime) ? newStartTime : existingStartTime;
+                newEndTime = newEndTime.isAfter(existingEndTime) ? newEndTime : existingEndTime;
+                storeScheduleRepository.delete(schedule);
             }
         }
 
-        // 결과 DTO 생성
-        StoreScheduleResponseDTO response = new StoreScheduleResponseDTO();
-        response.setDay(days);
-        response.setSchedules(schedules);
-        return response;
+        StoreSchedule newSchedule = StoreSchedule.createStoreSchedule(
+                store,
+                member,
+                Date.valueOf(date),
+                newStartTime.toString(),
+                newEndTime.toString()
+        );
+        storeScheduleRepository.save(newSchedule);
+        log.info("Saved new schedule for member {} on date {} from {} to {}", member.getId(), date, newStartTime, newEndTime);
     }
 
     /**

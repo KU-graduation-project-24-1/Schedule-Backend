@@ -35,4 +35,7 @@ public interface StoreScheduleRepository extends JpaRepository<StoreSchedule, Lo
 
     @EntityGraph(attributePaths = {"employee", "store"})
     List<StoreSchedule> findSchedulesByRequestCoverAndDate(@Param("requestCover") boolean requestCover, @Param("date") Date date);
+
+    @Query("SELECT s FROM StoreSchedule s WHERE s.store = :store AND s.employee = :member AND s.date = :date")
+    List<StoreSchedule> findByStoreAndMemberAndDate(@Param("store") Store store, @Param("member") Member member, @Param("date") Date date);
 }

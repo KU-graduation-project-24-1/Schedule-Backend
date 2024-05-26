@@ -108,11 +108,4 @@ public class StoreScheduleController {
         return new BaseResponse<>("필요인원 설정이 변경되었습니다.");
     }
 
-
-
-    @PostMapping("/{storeId}/generate-schedule")
-    public BaseResponse<StoreScheduleResponseDTO> generateSchedule(@PathVariable Long storeId, @RequestBody ScheduleRequestDTO request) {
-        StoreScheduleResponseDTO response = storeScheduleService.generateSchedule(storeId, request.getM(), request.getK(), request.getPreferences());
-        return new BaseResponse<>(response);
-    }
 }
