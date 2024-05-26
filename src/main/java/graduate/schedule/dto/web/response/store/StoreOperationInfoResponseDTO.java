@@ -12,6 +12,7 @@ import java.time.DayOfWeek;
 @AllArgsConstructor
 public class StoreOperationInfoResponseDTO {
     private DayOfWeek dayOfWeek;
+    private Long storeOperationInfoId;
     private Time startTime;
     private Time endTime;
     private int requiredEmployees;
