@@ -423,7 +423,6 @@ public class StoreScheduleService {
         List<Member> members = storeMemberRepository.findAllByStore(store);
         int N = members.size();
 
-        // 요일별 필요한 인원 수를 가져옴, 중복 키가 발생하면 첫 번째 값을 사용
         Map<DayOfWeek, List<StoreOperationInfo>> operationInfoByDay = storeOperationInfoRepository.findByStore(store)
                 .stream()
                 .collect(Collectors.groupingBy(StoreOperationInfo::getDayOfWeek));
@@ -431,6 +430,11 @@ public class StoreScheduleService {
         YearMonth nextMonth = YearMonth.now().plusMonths(1);
         LocalDate firstDayOfNextMonth = nextMonth.atDay(1);
         LocalDate lastDayOfNextMonth = nextMonth.atEndOfMonth();
+
+        Map<Member, Integer> workHours = new HashMap<>();
+        for (Member member : members) {
+            workHours.put(member, 0);
+        }
 
         for (LocalDate date = firstDayOfNextMonth; !date.isAfter(lastDayOfNextMonth); date = date.plusDays(1)) {
             log.info("Processing date: {}", date);
@@ -455,6 +459,8 @@ public class StoreScheduleService {
                 Time operationEndTime = operationInfo.getEndTime();
 
                 List<Member> assignedMembers = new ArrayList<>();
+                availableMembers.sort((m1, m2) -> Integer.compare(workHours.get(m1), workHours.get(m2)));
+
                 for (Member member : availableMembers) {
                     if (assignedMembers.size() < requiredEmployees && isMemberAvailableAtTime(member, store, date, operationStartTime, operationEndTime)) {
                         assignedMembers.add(member);
@@ -466,6 +472,7 @@ public class StoreScheduleService {
                 }
 
                 for (Member assignedMember : assignedMembers) {
+                    workHours.put(assignedMember, workHours.get(assignedMember) + calculateDuration(operationStartTime, operationEndTime));
                     saveSchedule(store, assignedMember, date, operationStartTime, operationEndTime);
                 }
             }
@@ -539,6 +546,12 @@ public class StoreScheduleService {
         );
         storeScheduleRepository.save(newSchedule);
         log.info("Saved new schedule for member {} on date {} from {} to {}", member.getId(), date, newStartTime, newEndTime);
+    }
+
+    private int calculateDuration(Time startTime, Time endTime) {
+        LocalTime start = startTime.toLocalTime();
+        LocalTime end = endTime.toLocalTime();
+        return (int) java.time.Duration.between(start, end).toMinutes();
     }
 
     /**
