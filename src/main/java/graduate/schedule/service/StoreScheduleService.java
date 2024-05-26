@@ -72,18 +72,46 @@ public class StoreScheduleService {
             throw new StoreScheduleException(NOT_ADDING_SCHEDULE_TERM);
         }
 
+        Time newStartTime = Time.valueOf(storeRequest.getStartTime() + ":00");
+        Time newEndTime = Time.valueOf(storeRequest.getEndTime() + ":00");
+
+        List<StoreAvailableSchedule> existingSchedules = storeAvailableScheduleRepository.findByStoreAndDate(store, storeRequest.getDate());
+
+        List<StoreAvailableSchedule> mergedSchedules = new ArrayList<>();
+        boolean merged = false;
+
+        for (StoreAvailableSchedule schedule : existingSchedules) {
+            Time existingStartTime = schedule.getStartTime();
+            Time existingEndTime = schedule.getEndTime();
+
+            if (newEndTime.before(existingStartTime) || newStartTime.after(existingEndTime)) {
+                mergedSchedules.add(schedule);
+            } else {
+                newStartTime = new Time(Math.min(newStartTime.getTime(), existingStartTime.getTime()));
+                newEndTime = new Time(Math.max(newEndTime.getTime(), existingEndTime.getTime()));
+                merged = true;
+            }
+        }
+
+        if (merged) {
+            for (StoreAvailableSchedule schedule : mergedSchedules) {
+                storeAvailableScheduleRepository.delete(schedule);
+            }
+        }
+
         StoreAvailableSchedule newStoreAvailableSchedule =
                 StoreAvailableSchedule.createStoreAvailableSchedule(
                         store,
                         member,
                         storeRequest.getDate(),
-                        timeWithSeconds(storeRequest.getStartTime()),
-                        timeWithSeconds(storeRequest.getEndTime())
+                        newStartTime,
+                        newEndTime
                 );
         storeAvailableScheduleRepository.save(newStoreAvailableSchedule);
-        return new AddAvailableScheduleResponseDTO(newStoreAvailableSchedule.getId());
 
+        return new AddAvailableScheduleResponseDTO(newStoreAvailableSchedule.getId());
     }
+
 
     public void deleteAvailableScheduleInDay(Member member, DeleteAvailableScheduleRequestDTO storeRequest) {
         Store store = storeRepository.findById(storeRequest.getStoreId())
@@ -208,6 +236,52 @@ public class StoreScheduleService {
                         endTime
                 );
         storeAvailableTimeByDayRepository.save(newStoreAvailableTimeByDay);
+
+        List<StoreAvailableSchedule> existingSchedules = storeAvailableScheduleRepository.findByStoreAndMember(store, member);
+
+        List<StoreAvailableSchedule> mergedSchedules = new ArrayList<>();
+        boolean merged = false;
+
+        for (StoreAvailableSchedule schedule : existingSchedules) {
+            Time existingStartTime = schedule.getStartTime();
+            Time existingEndTime = schedule.getEndTime();
+
+            if (endTime.before(existingStartTime) || startTime.after(existingEndTime)) {
+                mergedSchedules.add(schedule);
+            } else {
+                startTime = new Time(Math.min(startTime.getTime(), existingStartTime.getTime()));
+                endTime = new Time(Math.max(endTime.getTime(), existingEndTime.getTime()));
+                merged = true;
+            }
+        }
+
+        if (merged) {
+            for (StoreAvailableSchedule schedule : mergedSchedules) {
+                storeAvailableScheduleRepository.delete(schedule);
+            }
+        }
+
+        LocalDate now = LocalDate.now();
+        YearMonth currentMonth = YearMonth.of(now.getYear(), now.getMonth());
+        List<LocalDate> datesInMonth = currentMonth.atEndOfMonth().datesUntil(now.withDayOfMonth(1)).toList();
+
+        for (LocalDate date : datesInMonth) {
+            if (date.getDayOfWeek().equals(dayOfWeek)) {
+                StoreAvailableSchedule newStoreAvailableSchedule =
+                        StoreAvailableSchedule.createStoreAvailableSchedule(
+                                store,
+                                member,
+                                Date.valueOf(date),
+                                startTime,
+                                endTime
+                        );
+                storeAvailableScheduleRepository.save(newStoreAvailableSchedule);
+            }
+        }
+
+
+
+
         return new AddAvailableTimeByDayResponseDTO(newStoreAvailableTimeByDay.getId());
     }
 
@@ -222,8 +296,43 @@ public class StoreScheduleService {
         StoreAvailableTimeByDay schedule = storeAvailableTimeByDayRepository.findById(request.getStoreAvailableTimeByDayId())
                 .orElseThrow(() -> new StoreException(NOT_FOUND_STORE_MEMBER_AVAILABLE_TIME));
 
+        Time deleteStartTime = schedule.getStartTime();
+        Time deleteEndTime = schedule.getEndTime();
+        DayOfWeek dayOfWeek = schedule.getDayOfWeek();
+
+        List<StoreAvailableSchedule> existingSchedules = storeAvailableScheduleRepository.findByStoreAndMemberAndDayOfWeek(store, member, dayOfWeek.getValue());
+
+        for (StoreAvailableSchedule existingSchedule : existingSchedules) {
+            Time existingStartTime = existingSchedule.getStartTime();
+            Time existingEndTime = existingSchedule.getEndTime();
+
+            if (deleteStartTime.before(existingEndTime) && deleteEndTime.after(existingStartTime)) {
+                if (deleteStartTime.after(existingStartTime) && deleteEndTime.before(existingEndTime)) {
+                    StoreAvailableSchedule newSchedule1 = StoreAvailableSchedule.createStoreAvailableSchedule(
+                            store, member, existingSchedule.getDate(), existingStartTime, deleteStartTime);
+                    storeAvailableScheduleRepository.save(newSchedule1);
+
+                    StoreAvailableSchedule newSchedule2 = StoreAvailableSchedule.createStoreAvailableSchedule(
+                            store, member, existingSchedule.getDate(), deleteEndTime, existingEndTime);
+                    storeAvailableScheduleRepository.save(newSchedule2);
+
+                    storeAvailableScheduleRepository.delete(existingSchedule);
+                } else if (deleteStartTime.after(existingStartTime)) {
+                    existingSchedule.updateWorkTime(existingStartTime, deleteStartTime);
+                    storeAvailableScheduleRepository.save(existingSchedule);
+                } else if (deleteEndTime.before(existingEndTime)) {
+                    existingSchedule.updateWorkTime(deleteEndTime, existingEndTime);
+                    storeAvailableScheduleRepository.save(existingSchedule);
+                } else {
+                    storeAvailableScheduleRepository.delete(existingSchedule);
+                }
+            }
+        }
+
         storeAvailableTimeByDayRepository.delete(schedule);
     }
+
+
 
 
 

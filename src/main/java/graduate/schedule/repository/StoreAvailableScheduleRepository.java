@@ -36,4 +36,13 @@ public interface StoreAvailableScheduleRepository extends JpaRepository<StoreAva
     @Query("delete from StoreAvailableSchedule sas " +
             "where sas.employee=:member")
     void deleteAllByEmployee(@Param("member") Member member);
+
+    @Query("SELECT s FROM StoreAvailableSchedule s WHERE s.store = :store AND s.employee = :member")
+    List<StoreAvailableSchedule> findByStoreAndMember(@Param("store") Store store, @Param("member") Member member);
+
+    List<StoreAvailableSchedule> findByStoreAndDate(Store store, Date date);
+
+    @Query("SELECT s FROM StoreAvailableSchedule s WHERE s.store = :store AND s.employee = :member AND s.date IN (SELECT DISTINCT sa.date FROM StoreAvailableSchedule sa WHERE FUNCTION('DAYOFWEEK', sa.date) = :dayOfWeek)")
+    List<StoreAvailableSchedule> findByStoreAndMemberAndDayOfWeek(@Param("store") Store store, @Param("member") Member member, @Param("dayOfWeek") int dayOfWeek);
+
 }
