@@ -292,6 +292,9 @@ public class StoreService {
 
         List<StoreAvailableTimeByDay> schedules = storeAvailableTimeByDayRepository.findByStoreAndMember(store, member);
 
+        List<Long> availableTimeByDayId = schedules.stream()
+                .map(StoreAvailableTimeByDay::getId)
+                .toList();
         List<DayOfWeek> dayOfWeeks = schedules.stream()
                 .map(StoreAvailableTimeByDay::getDayOfWeek)
                 .toList();
@@ -302,7 +305,7 @@ public class StoreService {
                 .map(schedule -> schedule.getEndTime().toString())
                 .toList();
 
-        return new StoreAvailableTimeByDayResponseDTO(dayOfWeeks, startTimes, endTimes);
+        return new StoreAvailableTimeByDayResponseDTO(availableTimeByDayId, dayOfWeeks, startTimes, endTimes);
     }
 
     public List<StoreOperationInfoResponseDTO> getStoreOperationInfoByDay(Long storeId, DayOfWeek dayOfWeek) {
