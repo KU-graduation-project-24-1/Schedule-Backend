@@ -237,6 +237,7 @@ public class StoreScheduleService {
                 );
         storeAvailableTimeByDayRepository.save(newStoreAvailableTimeByDay);
 
+        // 일 단위로 설정된 스케줄과 합치는 로직
         List<StoreAvailableSchedule> existingSchedules = storeAvailableScheduleRepository.findByStoreAndMember(store, member);
 
         List<StoreAvailableSchedule> mergedSchedules = new ArrayList<>();
@@ -261,26 +262,28 @@ public class StoreScheduleService {
             }
         }
 
-        LocalDate now = LocalDate.now();
-        YearMonth currentMonth = YearMonth.of(now.getYear(), now.getMonth());
-        List<LocalDate> datesInMonth = currentMonth.atEndOfMonth().datesUntil(now.withDayOfMonth(1)).toList();
+        Date now = new Date(System.currentTimeMillis());
+        YearMonth currentMonth = YearMonth.of(now.toLocalDate().getYear(), now.toLocalDate().getMonth());
+        LocalDate firstDayOfMonth = currentMonth.atDay(1);
+        LocalDate lastDayOfMonth = currentMonth.atEndOfMonth();
 
-        for (LocalDate date : datesInMonth) {
-            if (date.getDayOfWeek().equals(dayOfWeek)) {
+        // 월의 모든 날짜를 포함하는 리스트를 생성
+        List<LocalDate> datesInMonth = firstDayOfMonth.datesUntil(lastDayOfMonth.plusDays(1)).toList();
+
+        for (LocalDate localDate : datesInMonth) {
+            if (localDate.getDayOfWeek().equals(dayOfWeek)) {
+                Date date = Date.valueOf(localDate);  // LocalDate를 java.sql.Date로 변환
                 StoreAvailableSchedule newStoreAvailableSchedule =
                         StoreAvailableSchedule.createStoreAvailableSchedule(
                                 store,
                                 member,
-                                Date.valueOf(date),
+                                date,
                                 startTime,
                                 endTime
                         );
                 storeAvailableScheduleRepository.save(newStoreAvailableSchedule);
             }
         }
-
-
-
 
         return new AddAvailableTimeByDayResponseDTO(newStoreAvailableTimeByDay.getId());
     }
