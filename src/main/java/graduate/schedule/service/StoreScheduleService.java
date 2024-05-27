@@ -557,7 +557,7 @@ public class StoreScheduleService {
     /**
      * 가능한 고정 시간 데이터 저장 - 매월 8일 00시
      */
-    @Scheduled(cron = "0 0 8 * * ?")
+    @Scheduled(cron = "0 55 19 * * ?")
     protected void saveAvailableSchedule() {
         log.info("saveAvailableSchedule() 실행; 가능한 고정 시간 데이터 저장");
         List<Store> allStore = storeRepository.findAll();
