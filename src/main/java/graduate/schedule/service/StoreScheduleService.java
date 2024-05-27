@@ -398,7 +398,7 @@ public class StoreScheduleService {
         }
     }
 
-    @Scheduled(cron = "0 25 20 27 * ?")
+    @Scheduled(cron = "0 38 20 27 * ?")
     public void generateMonthlySchedule() {
         List<Store> stores = storeRepository.findAll();
         for (Store store : stores) {
