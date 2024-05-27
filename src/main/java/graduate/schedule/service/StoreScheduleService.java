@@ -51,6 +51,7 @@ public class StoreScheduleService {
 
     private final String REQUEST_COVER_TITLE = "근무 가능한 시간에 대체 근무 요청이 있습니다!";
     private final String ACCEPT_COVER_TITLE = "대체 근무 요청이 수락되었습니다!";
+    private final String EMPLOYER_ACCEPTED_COVER_BODY = "의 대체 근무 요청을 고용인이 수락하여 근무 정보를 삭제합니다!";
 
     private final String BODY_START = "님이 ";
     private final String BODY_COMMA = ", ";
@@ -186,20 +187,24 @@ public class StoreScheduleService {
         Member employer = storeMemberRepository.findByStoreAndMemberGrade(storeSchedule.getStore(), StoreMemberGrade.BOSS)
                 .orElseThrow(() -> new StoreMemberException(BOSS_NOT_EXIST))
                 .getMember();
+        Member previousEmployee = storeSchedule.getEmployee();
 
         //대체 근무자와 대체 근무 요청자가 동일한 경우
-        if (substitute == storeSchedule.getEmployee()) {
+        if (substitute.equals(previousEmployee)) {
             throw new StoreScheduleException(SUBSTITUTE_SAME_AS_PREVIOUS_EMPLOYEE);
         }
 
         //대체 근무자가 고용인인 경우 해당 근무 정보 삭제
-        if (storeMember.getMember().equals(employer)) {
+        if (substitute.equals(employer)) {
             log.info("대체 근무자가 고용인으로 설정되어 근무 정보를 삭제합니다.");
+            String acceptCoverByEmployerBody = storeSchedule.getDate() + BODY_COMMA +
+                    timeWithoutSeconds(storeSchedule.getStartTime()) + BODY_WAVE + timeWithoutSeconds(storeSchedule.getEndTime()) +
+                    EMPLOYER_ACCEPTED_COVER_BODY;
+            fcmService.sendMessageTo(previousEmployee.getFcmToken(), ACCEPT_COVER_TITLE, acceptCoverByEmployerBody);
             storeScheduleRepository.delete(storeSchedule);
             return new ChangeScheduleResponseDTO();
         }
 
-        Member previousEmployee = storeSchedule.getEmployee();
         storeSchedule.setEmployee(substitute);
         storeSchedule.setRequestCover(false);
 
@@ -398,7 +403,7 @@ public class StoreScheduleService {
         }
     }
 
-    @Scheduled(cron = "0 38 20 27 * ?")
+    @Scheduled(cron = "0 0 0 15 * ?")
     public void generateMonthlySchedule() {
         List<Store> stores = storeRepository.findAll();
         for (Store store : stores) {
@@ -557,7 +562,7 @@ public class StoreScheduleService {
     /**
      * 가능한 고정 시간 데이터 저장 - 매월 8일 00시
      */
-    @Scheduled(cron = "0 23 20 27 * ?")
+    @Scheduled(cron = "0 0 0 8 * ?")
     protected void saveAvailableSchedule() {
         log.info("saveAvailableSchedule() 실행; 가능한 고정 시간 데이터 저장");
         List<Store> allStore = storeRepository.findAll();
